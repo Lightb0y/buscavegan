@@ -71,9 +71,9 @@ def _fts_query(texto: str) -> str:
     return " ".join(f"{t}*" for t in tokens)
 
 
-def buscar(texto: str, estados: list[str], categoria: str | None,
-           limite: int = PAGE_SIZE) -> list[sqlite3.Row]:
-    conn = get_conn()
+def _armar_consulta(texto: str, estados: list[str], categoria: str | None):
+    """Arma (sql_base, params, usa_fts) sin LIMIT ni SELECT, para reusar en
+    la búsqueda paginada y en el conteo total."""
     where, params = [], []
 
     if estados:
@@ -88,28 +88,51 @@ def buscar(texto: str, estados: list[str], categoria: str | None,
         # Búsqueda por código de barras: match exacto.
         where.append("p.ean = ?")
         params.append(texto)
-        sql = f"SELECT p.* FROM productos p WHERE {' AND '.join(where)}"
-    elif texto:
+        return f"FROM productos p WHERE {' AND '.join(where)}", params, False
+    if texto:
         cond = (" AND " + " AND ".join(where)) if where else ""
-        sql = ("SELECT p.* FROM productos_fts f JOIN productos p"
-               " ON p.rowid = f.rowid"
-               f" WHERE productos_fts MATCH ?{cond} ORDER BY rank")
-        params = [_fts_query(texto)] + params
-    else:
-        cond = f"WHERE {' AND '.join(where)}" if where else ""
-        sql = f"SELECT p.* FROM productos p {cond} ORDER BY p.nombre"
+        sql = (f"FROM productos_fts f JOIN productos p"
+               f" ON p.rowid = f.rowid WHERE productos_fts MATCH ?{cond}")
+        return sql, [_fts_query(texto)] + params, True
 
-    sql += f" LIMIT {int(limite)}"
+    cond = f"WHERE {' AND '.join(where)}" if where else ""
+    return f"FROM productos p {cond}", params, False
+
+
+def contar(texto: str, estados: list[str], categoria: str | None) -> int:
+    """Total de resultados que matchean, sin el LIMIT de la página."""
+    conn = get_conn()
+    sql, params, _ = _armar_consulta(texto, estados, categoria)
     try:
-        return conn.execute(sql, params).fetchall()
+        return conn.execute(f"SELECT COUNT(*) {sql}", params).fetchone()[0]
+    except sqlite3.OperationalError:
+        return 0
+
+
+def buscar(texto: str, estados: list[str], categoria: str | None,
+           limite: int = PAGE_SIZE) -> list[sqlite3.Row]:
+    conn = get_conn()
+    sql, params, usa_fts = _armar_consulta(texto, estados, categoria)
+    orden = " ORDER BY rank" if usa_fts else " ORDER BY p.nombre"
+    try:
+        return conn.execute(
+            f"SELECT p.* {sql}{orden} LIMIT {int(limite)}", params).fetchall()
     except sqlite3.OperationalError:
         # Consulta FTS inválida (comillas sueltas, etc.): caemos a LIKE.
-        like = f"%{texto}%"
-        cond = (" AND " + " AND ".join(where)) if where else ""
+        where, params2 = [], []
+        if estados:
+            where.append(f"p.estado IN ({','.join('?' * len(estados))})")
+            params2 += estados
+        if categoria and categoria != "Todas":
+            where.append("p.categoria = ?")
+            params2.append(categoria)
+        like = f"%{(texto or '').strip()}%"
+        where.append("(p.nombre LIKE ? OR p.marca LIKE ?)")
+        params2 += [like, like]
+        cond = f"WHERE {' AND '.join(where)}" if where else ""
         return conn.execute(
-            f"SELECT p.* FROM productos p WHERE (p.nombre LIKE ? OR p.marca LIKE ?)"
-            f"{cond} ORDER BY p.nombre LIMIT {int(limite)}",
-            [like, like] + params[1:] if texto else params).fetchall()
+            f"SELECT p.* FROM productos p {cond} ORDER BY p.nombre"
+            f" LIMIT {int(limite)}", params2).fetchall()
 
 
 def card(p: sqlite3.Row) -> None:
@@ -165,7 +188,7 @@ def main() -> None:
                     if st.checkbox(f"{ic} {lbl}", value=True, key=f"f_{e}")]
         categoria = st.selectbox(
             "Categoría", ["Todas"] + categorias_disponibles())
-        limite = st.slider("Resultados", 6, 96, PAGE_SIZE, step=6)
+        limite = st.slider("Resultados por página", 6, 300, PAGE_SIZE, step=6)
 
         st.divider()
         st.caption(f"**{s['total']:,}** productos argentinos".replace(",", "."))
@@ -187,7 +210,14 @@ def main() -> None:
         st.info("Sin resultados. Probá con menos filtros o menos palabras.")
         return
 
-    st.caption(f"{len(resultados)} resultado(s)")
+    total = contar(texto, elegidos, categoria)
+    if total > len(resultados):
+        faltan = total - len(resultados)
+        st.caption(f"Mostrando {len(resultados)} de **{total:,}** resultados "
+                   f"({faltan:,} más — subí «Resultados por página» en el "
+                   "filtro para verlos)".replace(",", "."))
+    else:
+        st.caption(f"{len(resultados)} resultado(s)")
     columnas = st.columns(3)
     for i, p in enumerate(resultados):
         with columnas[i % 3]:
