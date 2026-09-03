@@ -8,6 +8,7 @@ ingredientes, qué ingrediente concreto la disparó.
 """
 from __future__ import annotations
 
+import math
 import sqlite3
 
 import streamlit as st
@@ -110,13 +111,14 @@ def contar(texto: str, estados: list[str], categoria: str | None) -> int:
 
 
 def buscar(texto: str, estados: list[str], categoria: str | None,
-           limite: int = PAGE_SIZE) -> list[sqlite3.Row]:
+           limite: int = PAGE_SIZE, offset: int = 0) -> list[sqlite3.Row]:
     conn = get_conn()
     sql, params, usa_fts = _armar_consulta(texto, estados, categoria)
     orden = " ORDER BY rank" if usa_fts else " ORDER BY p.nombre"
     try:
         return conn.execute(
-            f"SELECT p.* {sql}{orden} LIMIT {int(limite)}", params).fetchall()
+            f"SELECT p.* {sql}{orden} LIMIT {int(limite)} OFFSET {int(offset)}",
+            params).fetchall()
     except sqlite3.OperationalError:
         # Consulta FTS inválida (comillas sueltas, etc.): caemos a LIKE.
         where, params2 = [], []
@@ -132,7 +134,11 @@ def buscar(texto: str, estados: list[str], categoria: str | None,
         cond = f"WHERE {' AND '.join(where)}" if where else ""
         return conn.execute(
             f"SELECT p.* FROM productos p {cond} ORDER BY p.nombre"
-            f" LIMIT {int(limite)}", params2).fetchall()
+            f" LIMIT {int(limite)} OFFSET {int(offset)}", params2).fetchall()
+
+
+def total_paginas(total: int, limite: int) -> int:
+    return max(1, math.ceil(total / limite)) if limite else 1
 
 
 def card(p: sqlite3.Row) -> None:
@@ -164,6 +170,36 @@ def card(p: sqlite3.Row) -> None:
             if p["ingredients_text"]:
                 with st.expander("Ver ingredientes"):
                     st.write(p["ingredients_text"])
+
+
+def _ir_a_pagina(nueva: int) -> None:
+    """Cambia de página y fuerza el rerun antes de que se dibuje el
+    number_input de abajo — evita el error de Streamlit por escribir en
+    session_state después de instanciar el widget que usa esa misma key."""
+    st.session_state.pagina = nueva
+    st.rerun()
+
+
+def controles_paginacion(pagina: int, n_paginas: int, key_prefix: str,
+                         con_salto: bool) -> None:
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c1:
+        if st.button("⬅ Anterior", disabled=pagina <= 1,
+                    key=f"{key_prefix}_ant", use_container_width=True):
+            _ir_a_pagina(pagina - 1)
+    with c3:
+        if st.button("Siguiente ➡", disabled=pagina >= n_paginas,
+                    key=f"{key_prefix}_sig", use_container_width=True):
+            _ir_a_pagina(pagina + 1)
+    with c2:
+        if con_salto and n_paginas > 1:
+            st.number_input(
+                "Ir a la página", min_value=1, max_value=n_paginas, step=1,
+                key="pagina", label_visibility="collapsed")
+        else:
+            st.markdown(
+                f"<div style='text-align:center;padding-top:0.4rem'>"
+                f"Página {pagina} de {n_paginas}</div>", unsafe_allow_html=True)
 
 
 def main() -> None:
@@ -204,24 +240,43 @@ def main() -> None:
         "«leche de almendras», «Arcor», «7790040...»",
         label_visibility="collapsed")
 
-    resultados = buscar(texto, elegidos, categoria, limite)
+    # Si cambió la búsqueda o algún filtro, la página vieja ya no tiene
+    # sentido (podría quedar más allá del final) — se vuelve a la 1.
+    firma = (texto, tuple(sorted(elegidos)), categoria, limite)
+    if st.session_state.get("firma_filtros") != firma:
+        st.session_state.firma_filtros = firma
+        st.session_state.pagina = 1
+    st.session_state.setdefault("pagina", 1)
 
-    if not resultados:
+    total = contar(texto, elegidos, categoria)
+    if not total:
         st.info("Sin resultados. Probá con menos filtros o menos palabras.")
         return
 
-    total = contar(texto, elegidos, categoria)
-    if total > len(resultados):
-        faltan = total - len(resultados)
-        st.caption(f"Mostrando {len(resultados)} de **{total:,}** resultados "
-                   f"({faltan:,} más — subí «Resultados por página» en el "
-                   "filtro para verlos)".replace(",", "."))
-    else:
-        st.caption(f"{len(resultados)} resultado(s)")
+    n_paginas = total_paginas(total, limite)
+    # Clamp antes de crear el number_input(key="pagina"): así el ajuste
+    # queda dentro de rango en el mismo run en el que se instancia el widget.
+    st.session_state.pagina = min(max(st.session_state.pagina, 1), n_paginas)
+    pagina = st.session_state.pagina
+    offset = (pagina - 1) * limite
+
+    resultados = buscar(texto, elegidos, categoria, limite, offset)
+
+    desde, hasta = offset + 1, offset + len(resultados)
+    st.caption(f"Mostrando {desde:,}–{hasta:,} de **{total:,}** resultados"
+              .replace(",", "."))
+
+    if n_paginas > 1:
+        controles_paginacion(pagina, n_paginas, "top", con_salto=True)
+
     columnas = st.columns(3)
     for i, p in enumerate(resultados):
         with columnas[i % 3]:
             card(p)
+
+    if n_paginas > 1:
+        st.divider()
+        controles_paginacion(pagina, n_paginas, "bottom", con_salto=False)
 
 
 if __name__ == "__main__":
