@@ -154,3 +154,32 @@ def test_commodity_de_adorno_no_alcanza(nombre):
 ])
 def test_commodity_multipalabra_y_cabeza(nombre, esperado):
     assert cr._commodity_cabeza(cr.normalize(nombre)) == esperado
+
+
+# --- nombres en inglés -----------------------------------------------------
+# Buena parte del catálogo argentino de OFF tiene el nombre en inglés, y el
+# inglés invierte el orden: "almond milk" contra "leche de almendras".
+
+@pytest.mark.parametrize("nombre,esperado", [
+    ("Whey Protein", NO_APTO),
+    ("Milk Chocolate", NO_APTO),
+    ("Tuna in oil", NO_APTO),
+    ("Honey roasted peanuts", NO_APTO),
+    ("Almond milk unsweetened", APTO),
+    ("Oat milk barista", APTO),
+    ("Coconut milk", APTO),
+    ("Vegan cheese spread", APTO),
+])
+def test_nombres_en_ingles(nombre, esperado):
+    d = cr.classify_name(nombre)
+    assert d.estado == esperado, f"{nombre} -> {d.estado} ({d.motivo})"
+
+
+@pytest.mark.parametrize("nombre", [
+    # La ventana hacia atrás vale solo en inglés: en español un vegetal previo
+    # no modifica al lácteo que viene después.
+    "Chocolate con almendras y leche",
+    "Helado de coco con leche",
+])
+def test_la_ventana_hacia_atras_no_aplica_en_espanol(nombre):
+    assert cr.classify_name(nombre).estado == NO_APTO

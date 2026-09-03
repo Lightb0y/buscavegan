@@ -10,6 +10,10 @@ La clasificación se apoya, en este orden, en:
 3. El **análisis de la lista de ingredientes** — la señal principal.
 4. Un **clasificador entrenado sobre nombres**, para lo que no publica ingredientes.
 
+Y por encima de todo eso, la **corrección humana**: lo que una persona revisa a
+mano queda guardado aparte y sobrevive a los refrescos, así que curar la base no
+es trabajo que se pierda en la próxima corrida.
+
 La especificación completa está en [SPEC.md](SPEC.md).
 
 ## Qué significa "apto" acá
@@ -44,19 +48,19 @@ Números de la última corrida completa (`python sprint0.py`):
 |---|---|
 | Productos argentinos en la base | **13.015** |
 | Con lista de ingredientes | 4.161 (32,0%) |
-| **Clasificados** | **5.202 (40,0%)** |
-| En `revisar` | 7.813 (60,0%) |
+| **Clasificados** | **6.429 (49,4%)** |
+| En `revisar` | 6.586 (50,6%) |
 
 Por fuente de la decisión:
 
 | Fuente | Productos |
 |---|---|
-| Análisis de ingredientes | 3.073 |
-| Heurística de nombre | 1.149 |
-| Clasificador automático | 702 |
+| Análisis de ingredientes | 3.288 |
+| Heurística de nombre | 2.345 |
+| Clasificador automático | 549 |
 | Declarado por el fabricante | 125 |
 | Certificación oficial de ANMAT | 97 |
-| Análisis propio de Open Food Facts | 56 |
+| Análisis propio de Open Food Facts | 25 |
 
 ## Fuentes
 
@@ -72,9 +76,10 @@ descartada está en [SPEC.md](SPEC.md) §2.3.
 
 ## Limitaciones conocidas
 
-- **El 60% del catálogo queda en `revisar`**, casi siempre porque el producto no
-  tiene ingredientes cargados en Open Food Facts. Se muestran igual: la
-  incompletitud es parte de lo que hay que comunicar, no algo a esconder.
+- **La mitad del catálogo queda en `revisar`**, casi siempre porque el producto
+  no tiene ingredientes cargados en Open Food Facts. Se muestran igual: la
+  incompletitud es parte de lo que hay que comunicar, no algo a esconder. Para
+  bajar ese número está la cola de revisión manual (ver abajo).
 - **El clasificador automático memoriza marcas.** Al entrenarse con nombres,
   aprende que ciertas marcas hacen ciertos productos; una marca que fabrica
   tanto veganos como no veganos le sale mal. También arrastra correlaciones
@@ -109,7 +114,11 @@ python classify_ml.py --entrenar --explicar --aplicar
 # 5. Ver la cobertura conseguida
 python sprint0.py
 
-# 6. Levantar la app
+# 6. Capa 4: curar a mano lo que quedó pendiente
+python revision.py --exportar               # CSV ordenado por impacto
+python revision.py --importar data/revision_pendiente.csv
+
+# 7. Levantar la app
 streamlit run app.py
 ```
 
@@ -122,7 +131,9 @@ python refresh.py --completo   # incluye el dump entero de OFF
 
 ## Frecuencia de refresco
 
-`refresh.py` está pensado para cron o un workflow programado de GitHub Actions.
+`refresh.py` está pensado para cron o un workflow programado de GitHub Actions;
+hay uno listo en [.github/workflows/refresh.yml](.github/workflows/refresh.yml),
+con refresco semanal por API y completo el día 1 de cada mes.
 Lo caro es traer datos, no clasificar: el refresco normal usa la API rápida y
 tarda un par de minutos, mientras que `--completo` baja el dump entero y
 conviene semanal o mensual. Las respuestas de OFF se cachean en SQLite con un
@@ -136,5 +147,9 @@ consultan por productos nuevos o vencidos. Todo se configura en
 python -m pytest tests -q
 ```
 
-72 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7 y los que
-verifican que la regla de seguridad no se pueda violar por ninguna capa.
+131 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
+verifican que la regla de seguridad no se pueda violar por ninguna capa, y los
+falsos positivos concretos que fueron apareciendo al revisar a mano la salida
+real del pipeline (por ejemplo "Yogurisimo Banana", que llegó a clasificarse
+como apto porque el blacklist busca palabras enteras y "yogur" no matchea
+dentro de "Yogurisimo").

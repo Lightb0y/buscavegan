@@ -27,6 +27,7 @@ import classify_rules as cr
 import config
 import db
 import ingest_anmat
+import revision
 
 SEVERIDAD = {config.APTO: 0, config.VEGETARIANO: 1, config.NO_APTO: 2}
 
@@ -147,12 +148,28 @@ def build(conn, verbose: bool = True) -> dict:
                 (f["ean"], f["nombre"], f["marca"], d.motivo, d.confianza, ahora),
             )
 
+    conn.commit()
+
+    # Capa 4: las correcciones humanas pisan todo lo automático. Van al final
+    # justo para eso, y para que curar la base no sea trabajo que se pierda en
+    # el próximo refresco.
+    corregidos = revision.aplicar(conn)
+    if corregidos:
+        estados = Counter(
+            r["estado"] for r in conn.execute("SELECT estado FROM productos"))
+        fuentes = Counter(
+            r["fuente_decision"] for r in
+            conn.execute("SELECT fuente_decision FROM productos"))
+        if verbose:
+            print(f"  {corregidos} productos con corrección humana aplicada")
+
     if db.has_fts5(conn):
         conn.execute("INSERT INTO productos_fts(productos_fts) VALUES('rebuild')")
     conn.commit()
 
     total = sum(estados.values())
-    return {"total": total, "estados": dict(estados), "fuentes": dict(fuentes)}
+    return {"total": total, "estados": dict(estados), "fuentes": dict(fuentes),
+            "correcciones": corregidos}
 
 
 def main(argv=None) -> int:

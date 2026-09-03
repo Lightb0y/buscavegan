@@ -41,7 +41,26 @@ BLACKLIST = [
     # existen, pero se anuncian: las atrapa antes la declaración explícita.
     "helado", "flan", "postre", "mousse", "budin", "bizcochuelo", "torta",
     "alfajor", "brownie", "cheesecake", "mayonesa", "crema",
+    # Buena parte del catálogo argentino de OFF tiene el nombre en inglés
+    # ("Whey Protein", "Milk Chocolate"). Sin esto se escapaban enteros: el
+    # léxico en español no los ve.
+    "whey", "milk", "cheese", "butter", "cream", "egg", "eggs", "honey",
+    "gelatin", "gelatine", "collagen", "beef", "pork", "chicken", "bacon",
+    "ham", "fish", "tuna", "shrimp", "lard", "casein", "lactose", "yogurt",
 ]
+
+# El ingles pone el modificador ANTES del sustantivo ("almond milk") y el
+# espanol despues ("leche de almendras"). Para estas keywords, entonces, hay
+# que mirar tambien hacia atras.
+#
+# La asimetria es deliberada: aplicar la ventana hacia atras en espanol seria
+# peligroso, porque "chocolate con almendras y leche" quedaria neutralizado por
+# unas almendras que no modifican a la leche.
+BLACKLIST_EN = {
+    "whey", "milk", "cheese", "butter", "cream", "egg", "eggs", "honey",
+    "gelatin", "gelatine", "collagen", "beef", "pork", "chicken", "bacon",
+    "ham", "fish", "tuna", "shrimp", "lard", "casein", "lactose", "yogurt",
+}
 
 # Subconjunto del blacklist que no es un ingrediente animal sino una
 # preparacion que suele llevarlo: cambia el texto que se le muestra al usuario.
@@ -55,11 +74,15 @@ WHITELIST = [
     "quinoa", "quinua", "castana de caju", "caju", "girasol", "sesamo",
     "mani", "garbanzo", "vegetal", "vegetales", "vegano", "vegana",
     "plant", "base de plantas", "anacardo", "avellana", "nuez", "nueces",
+    # Equivalentes en inglés, para que "almond milk" o "soy protein" se
+    # neutralicen igual que sus versiones en español.
+    "almond", "coconut", "soy", "oat", "cashew", "peanut", "hazelnut",
+    "vegan", "vegetable", "pea", "hemp",
 ]
 
 # Declaración explícita: alcanza por sí sola para marcar apto.
 VEGAN_CLAIM = [
-    "vegano", "vegana", "veganos", "veganas", "plant based",
+    "vegano", "vegana", "veganos", "veganas", "vegan", "plant based",
     "100% vegetal", "apto vegano", "base de plantas",
 ]
 
@@ -158,6 +181,10 @@ def _window_after(text: str, end: int, words: int = WINDOW_WORDS) -> str:
     return " ".join(text[end:].split()[:words])
 
 
+def _window_before(text: str, start: int, words: int = 2) -> str:
+    return " ".join(text[:start].split()[-words:])
+
+
 # Palabras de relleno que no cuentan al buscar la cabeza del nombre.
 _RELLENO = {"de", "del", "la", "el", "los", "las", "con", "sin", "y", "al",
             "en", "x", "un", "una"}
@@ -254,6 +281,8 @@ def classify_name(nombre: str, marca: str | None = None,
     for kw in BLACKLIST:
         for m in re.finditer(rf"\b{re.escape(kw)}\b", texto):
             ventana = _window_after(texto, m.end())
+            if kw in BLACKLIST_EN:
+                ventana += " " + _window_before(texto, m.start())
             modificador = next(
                 (w for w in WHITELIST if _contains(ventana, w)), None
             )
@@ -275,8 +304,11 @@ def classify_name(nombre: str, marca: str | None = None,
 
     if hits_anulados:
         kw, mod = hits_anulados[0]
+        # El orden de las palabras cambia con el idioma: "almond milk" pero
+        # "leche de almendras".
+        frase = f"{mod} {kw}" if kw in BLACKLIST_EN else f"{kw} de {mod}"
         return Decision(config.APTO, FUENTE_HEURISTICA,
-                        f'"{kw} de {mod}": versión vegetal')
+                        f'"{frase}": versión vegetal')
 
     # 3. Sustituto vegetal explícito sin ninguna keyword animal.
     m = re.search(r"\b(?:de|a base de|con)\s+([a-z]+(?: de [a-z]+)?)", texto)
