@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS productos (
     ingredients_text TEXT,
     imagen_url       TEXT,
     precio_ref       REAL,
-    actualizado      TEXT
+    actualizado      TEXT,
+    motivo           TEXT      -- explicacion legible que se muestra en la app
 );
 
 CREATE TABLE IF NOT EXISTS revision_pendiente (
@@ -67,12 +68,20 @@ def connect(path=None) -> sqlite3.Connection:
 
 def init_db(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    _migrar(conn)
     try:
         conn.executescript(FTS_SCHEMA)
     except sqlite3.OperationalError:
         # SQLite compilado sin FTS5: la app cae a LIKE. No es fatal.
         pass
     conn.commit()
+
+
+def _migrar(conn: sqlite3.Connection) -> None:
+    """Altas de columnas sobre bases ya creadas por una version anterior."""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(productos)")}
+    if "motivo" not in cols:
+        conn.execute("ALTER TABLE productos ADD COLUMN motivo TEXT")
 
 
 def has_fts5(conn: sqlite3.Connection) -> bool:
