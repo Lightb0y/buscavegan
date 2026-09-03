@@ -33,9 +33,22 @@ BLACKLIST = [
     "huevo", "huevos", "yema", "miel", "gelatina", "caseina", "caseinato",
     "lactosa", "colageno", "sebo", "carmin", "cochinilla", "e120",
     "jamon", "panceta", "tocino", "pollo", "carne", "pescado", "atun",
-    "merluza", "salmon", "camaron", "langostino", "marisco", "chorizo",
-    "salchicha",
+    "merluza", "salmon", "anchoa", "camaron", "langostino", "marisco",
+    "chorizo", "salchicha",
+    # Preparaciones que en Argentina llevan lácteo o huevo salvo que declaren
+    # lo contrario. Sin esto, "helado de banana" o "flan de vainilla" se
+    # colarían como aptos por el nombre de su fruta. Las versiones veganas
+    # existen, pero se anuncian: las atrapa antes la declaración explícita.
+    "helado", "flan", "postre", "mousse", "budin", "bizcochuelo", "torta",
+    "alfajor", "brownie", "cheesecake", "mayonesa", "crema",
 ]
+
+# Subconjunto del blacklist que no es un ingrediente animal sino una
+# preparacion que suele llevarlo: cambia el texto que se le muestra al usuario.
+PREPARACIONES_CON_LACTEO = {
+    "helado", "flan", "postre", "mousse", "budin", "bizcochuelo", "torta",
+    "alfajor", "brownie", "cheesecake", "mayonesa",
+}
 
 WHITELIST = [
     "coco", "almendra", "almendras", "soja", "soya", "avena", "arroz",
@@ -49,6 +62,50 @@ VEGAN_CLAIM = [
     "vegano", "vegana", "veganos", "veganas", "plant based",
     "100% vegetal", "apto vegano", "base de plantas",
 ]
+
+# Productos que **son** un vegetal o un mineral. Para estos el nombre no es una
+# pista sino la identidad: que una sal fina o un paquete de garbanzos tuviera
+# origen animal sería la sorpresa, no lo esperable.
+#
+# Criterio de admisión, deliberadamente angosto: solo entra lo que en góndola
+# argentina no tiene versión con derivado animal. Por eso NO están acá el
+# cappuccino (lleva leche en polvo), las pastas (pueden llevar huevo), el pan,
+# las galletitas ni el chocolate.
+COMMODITIES_VEGANAS = [
+    # minerales y agua
+    "agua", "agua mineral", "soda", "sal", "sal fina", "sal gruesa",
+    "sal marina", "bicarbonato",
+    # azúcares y harinas
+    "azucar", "harina", "semola", "polenta", "almidon", "fecula", "salvado",
+    "levadura",
+    # granos y legumbres
+    "arroz", "avena", "quinoa", "cebada", "trigo", "maiz", "garbanzo",
+    "garbanzos", "chickpeas", "lenteja", "lentejas", "poroto", "porotos",
+    "arveja", "arvejas", "soja",
+    # infusiones (el café con leche ya lo atrapa el blacklist)
+    "yerba", "yerba mate", "te", "cafe",
+    # aceites y vinagres
+    "aceite", "aceite de oliva", "aceite de girasol", "aceite de maiz",
+    "vinagre",
+    # frutas, verduras y conservas vegetales
+    "tomate", "pure de tomate", "choclo", "palmito", "aceituna", "aceitunas",
+    "espinaca", "acelga", "brocoli", "zanahoria", "papa", "papas", "batata",
+    "cebolla", "zapallo", "chaucha", "lechuga", "morron", "berenjena",
+    "zucchini", "manzana", "banana", "naranja", "mandarina", "pera", "uva",
+    "durazno", "ciruela", "higo", "datil", "pasas de uva", "limon",
+    # frutos secos y semillas
+    "mani", "almendra", "almendras", "nuez", "nueces", "castana", "caju",
+    "anacardo", "avellana", "pistacho", "semillas", "chia", "lino", "sesamo",
+    "girasol",
+    # especias y hierbas
+    "canela", "comino", "oregano", "pimienta", "pimenton", "laurel",
+    "nuez moscada", "curcuma", "jengibre", "perejil", "albahaca", "romero",
+    "tomillo", "curry", "aji molido", "clavo de olor",
+    # conservas y untables que son la fruta o la verdura procesada
+    "pure de tomate", "tomate triturado", "tomate perita", "mermelada",
+]
+
+_COMMODITIES_SIMPLES = {c for c in COMMODITIES_VEGANAS if " " not in c}
 
 CATEGORIAS_NO_APTAS = [
     "carnes", "carniceria", "fiambres", "embutidos", "lacteos", "lacteo",
@@ -99,6 +156,34 @@ def _contains(haystack: str, needle: str) -> bool:
 
 def _window_after(text: str, end: int, words: int = WINDOW_WORDS) -> str:
     return " ".join(text[end:].split()[:words])
+
+
+# Palabras de relleno que no cuentan al buscar la cabeza del nombre.
+_RELLENO = {"de", "del", "la", "el", "los", "las", "con", "sin", "y", "al",
+            "en", "x", "un", "una"}
+
+
+def _commodity_cabeza(texto: str) -> str | None:
+    """Devuelve la commodity solo si **encabeza** el nombre del producto.
+
+    La distinción importa y no es cosmética: en "Yogurisimo banana" o
+    "Galletitas de avena" la palabra vegetal es el sabor o un ingrediente
+    menor, y el producto es un lácteo o una galletita que probablemente lleve
+    manteca. Solo cuando la commodity es la cabeza del nombre ("Sal fina",
+    "Acelga congelada") el producto *es* esa commodity.
+
+    El blacklist no alcanza para atrapar esos casos porque busca palabras
+    enteras: "yogur" no matchea dentro de "Yogurisimo".
+    """
+    tokens = [t for t in texto.split() if t not in _RELLENO]
+    if not tokens:
+        return None
+
+    # Frases de varias palabras: tienen que abrir el nombre.
+    for c in COMMODITIES_VEGANAS:
+        if " " in c and texto.startswith(c):
+            return c
+    return tokens[0] if tokens[0] in _COMMODITIES_SIMPLES else None
 
 
 # --- Capa 1: Open Food Facts ----------------------------------------------
@@ -179,6 +264,11 @@ def classify_name(nombre: str, marca: str | None = None,
                     return Decision(
                         config.REVISAR, FUENTE_HEURISTICA,
                         f'"{kw}" en el nombre contradice el rubro "{categoria}"')
+                if kw in PREPARACIONES_CON_LACTEO:
+                    return Decision(
+                        config.NO_APTO, FUENTE_HEURISTICA,
+                        f'"{kw}" lleva lacteo o huevo salvo que declare lo '
+                        f'contrario')
                 return Decision(config.NO_APTO, FUENTE_HEURISTICA,
                                 f'"{kw}" es de origen animal')
             hits_anulados.append((kw, modificador))
@@ -193,6 +283,17 @@ def classify_name(nombre: str, marca: str | None = None,
     if m and any(_contains(m.group(1), w) for w in WHITELIST):
         return Decision(config.APTO, FUENTE_HEURISTICA,
                         f'Base vegetal declarada: "{m.group(1)}"')
+
+    # 4. Commodity vegetal o mineral: el producto ES el ingrediente.
+    #    Mismo principio que los rubros inequívocos de SPEC.md §4.4, aplicado a
+    #    la identidad del producto. No es "no encontré nada animal" (eso sería
+    #    `revisar`): es que la sal es un mineral y el garbanzo una legumbre.
+    #    Va después del blacklist a propósito, para que "arroz con leche" o
+    #    "café con leche" queden atrapados antes de llegar acá.
+    commodity = _commodity_cabeza(texto)
+    if commodity:
+        return Decision(config.APTO, FUENTE_HEURISTICA,
+                        f'"{commodity}" es de origen vegetal o mineral')
 
     # 4. Rubros inequívocos.
     cat_dec = _categoria_decision(categoria)

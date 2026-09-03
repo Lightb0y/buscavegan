@@ -87,3 +87,70 @@ def test_capa1_tiene_prioridad_sobre_heuristica():
     d = cr.classify("Queso vegano Marca X",
                     off_product={"ingredients_analysis_tags": ["en:non-vegan"]})
     assert d.estado == NO_APTO and d.fuente == cr.FUENTE_OFF_ANALYSIS
+
+
+# --- commodities vegetales (identidad del producto) ------------------------
+
+@pytest.mark.parametrize("nombre", [
+    "Sal Fina", "Agua Sierra de los padres 2L", "Cafe instantaneo La Morenita",
+    "Canela molida Alicante", "Chickpeas Dona Pupa", "Acelga congelada",
+    "Yerba mate Playadito", "Lentejas secas", "Pure de tomate Arcor",
+])
+def test_commodity_vegetal_es_apto(nombre):
+    d = cr.classify_name(nombre)
+    assert d.estado == APTO, f"{nombre} -> {d.estado} ({d.motivo})"
+
+
+@pytest.mark.parametrize("nombre", [
+    "Arroz con leche La Serenisima",   # la commodity va despues del blacklist
+    "Cafe con leche",
+    "Helado de banana",                # preparaciones que llevan lacteo
+    "Flan de vainilla",
+    "Alfajor de maicena",
+    "Mayonesa Hellmanns",
+    "Torta de manzana",
+    "Aceite de pescado",
+])
+def test_commodity_no_pisa_al_blacklist(nombre):
+    d = cr.classify_name(nombre)
+    assert d.estado == NO_APTO, f"{nombre} -> {d.estado} ({d.motivo})"
+
+
+@pytest.mark.parametrize("nombre", [
+    "Cappuccino La Virginia",   # lleva leche en polvo: no es commodity
+    "Fideos Matarazzo",         # las pastas pueden llevar huevo
+])
+def test_lo_dudoso_sigue_en_revisar(nombre):
+    assert cr.classify_name(nombre).estado == REVISAR
+
+
+def test_declaracion_vegana_gana_a_la_preparacion():
+    assert cr.classify_name("Helado vegano de coco").estado == APTO
+
+
+# --- la commodity tiene que encabezar el nombre, no ser el sabor -----------
+# Casos encontrados revisando a mano la salida real del pipeline: todos
+# habian quedado como `apto` cuando la commodity aparecia en cualquier parte.
+
+@pytest.mark.parametrize("nombre", [
+    "Yogurisimo Banana",             # lacteo: "yogur" no matchea en "Yogurisimo"
+    "Galletitas avena con semillas",  # la avena es un ingrediente, no el producto
+    "Spaghetti con espinaca",         # pasta: puede llevar huevo
+    "Exquisita sabor limon",          # postre en polvo, el limon es el sabor
+    "pan salvado el mejor",           # el pan puede llevar lacteo
+    "Aperitivo de Vermut con Soda",
+    "Celienergy nuez",                # "nuez" es la variedad, no el producto
+])
+def test_commodity_de_adorno_no_alcanza(nombre):
+    d = cr.classify_name(nombre)
+    assert d.estado == REVISAR, f"{nombre} -> {d.estado} ({d.motivo})"
+
+
+@pytest.mark.parametrize("nombre,esperado", [
+    ("Arroz Integral con sal", "arroz"),
+    ("Pure De Tomate Arcor", "pure de tomate"),
+    ("Yerba Mate Amanda", "yerba mate"),
+    ("Agua Villa Del Sur", "agua"),
+])
+def test_commodity_multipalabra_y_cabeza(nombre, esperado):
+    assert cr._commodity_cabeza(cr.normalize(nombre)) == esperado

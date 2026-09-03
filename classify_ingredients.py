@@ -213,7 +213,16 @@ VEGANO_EN = [
     # Los aditivos numerados de riesgo (120, 441, 471, 542, 901, 904, 920...)
     # ya estan enumerados en ANIMAL_TAGS y AMBIGUO_TAGS, asi que el resto de la
     # serie E/INS se cuenta como reconocido para no castigar la cobertura.
-    r"\be\d{3}[a-z]?\b",
+    # El espacio importa: normalize() reescribe "e330" como "e 330".
+    r"\b(?:e|ins) ?\d{3}",
+    # Clases genericas de la taxonomia de OFF. Son categorias padre, y cuando
+    # el aditivo concreto importa OFF agrega ademas su tag especifico, que ya
+    # cubren los otros lexicos. Las que si esconden un origen animal posible
+    # (oil-and-fat, gelling-agent, glazing-agent) estan en AMBIGUO_TAGS.
+    r"\bminerals?\b", r"\bvitamins?\b", r"\bdisaccharide\b",
+    r"\bmonosaccharide\b", r"\bsweetener\b", r"\banti caking agent\b",
+    r"\bthickening agent\b", r"\bfirming agent\b", r"\bcondiment\b",
+    r"\bacid\b", r"\bstarches\b", r"\bsyrups\b",
 ]
 
 VEGANO_RE += [re.compile(p) for p in VEGANO_EN]
@@ -453,6 +462,11 @@ AMBIGUO_TAGS: dict[str, str] = {
     "cholecalciferol": "colecalciferol (D3): suele venir de lanolina",
     "ferment": "fermentos de origen no declarado",
     "enzyme": "enzimas de origen no declarado",
+    # Categorias padre que abarcan tanto opciones vegetales como animales. Si
+    # el ingrediente concreto estuviera declarado, OFF traeria su tag propio.
+    "oil-and-fat": "grasa sin origen declarado (puede ser vegetal o animal)",
+    "gelling-agent": "gelificante sin especificar (puede ser gelatina)",
+    "glazing-agent": "agente de brillo sin especificar (puede ser goma laca o cera)",
 }
 
 
