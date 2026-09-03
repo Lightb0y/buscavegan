@@ -46,20 +46,27 @@ Números de la última corrida completa (`python sprint0.py`):
 
 | Métrica | Valor |
 |---|---|
-| Productos argentinos en la base | **13.015** |
-| Con lista de ingredientes | 4.161 (32,0%) |
-| **Clasificados** | **6.429 (49,4%)** |
-| En `revisar` | 6.586 (50,6%) |
+| Productos argentinos en la base | **10.395** |
+| **Clasificados** | **6.419 (61,8%)** |
+| En `revisar` | 3.976 (38,2%) |
+
+De un total de 13.015 entradas de OFF etiquetadas "Argentina", se excluyeron
+**2.620 (20,1%)** por no ser relevantes: 2.583 con el nombre en un alfabeto
+que ningún supermercado argentino usa (probable país mal cargado en origen) y
+37 con un código que no tiene longitud de EAN/UPC real. No se borran de la
+base interna — solo no llegan a la búsqueda. Ver
+[relevancia.py](relevancia.py).
 
 Por fuente de la decisión:
 
 | Fuente | Productos |
 |---|---|
-| Análisis de ingredientes | 3.288 |
-| Heurística de nombre | 2.345 |
-| Clasificador automático | 549 |
-| Declarado por el fabricante | 125 |
+| Análisis de ingredientes | 3.232 |
+| Heurística de nombre | 2.313 |
+| Clasificador automático | 529 |
+| Declarado por el fabricante | 121 |
 | Certificación oficial de ANMAT | 97 |
+| Mismo producto que otro EAN ya resuelto | 102 |
 | Análisis propio de Open Food Facts | 25 |
 
 ## Fuentes
@@ -74,12 +81,47 @@ Por fuente de la decisión:
 El detalle de cómo se llega al endpoint de ANMAT y por qué V-Label quedó
 descartada está en [SPEC.md](SPEC.md) §2.3.
 
+## Calidad de los datos: filtrado y deduplicación
+
+Dos correcciones que corren dentro de `build_db.py`, no como pasos aparte:
+
+- **Relevancia geográfica** ([relevancia.py](relevancia.py)): OFF es
+  colaborativo y el tag de país lo carga quien sube el producto, así que
+  aparecen productos que casi seguro no se venden en Argentina. La señal más
+  clara: el nombre en un alfabeto que ningún supermercado argentino usa
+  (árabe, hebreo, cirílico...). Antes de este filtro, esas entradas eran el
+  **20% del catálogo** y explicaban el **39% de todo el bucket `revisar`** —
+  no era falta de datos, era que no correspondían a este catálogo. Se
+  excluyen de la búsqueda pero no se borran de la base interna: si el
+  criterio cambia, el dato sigue disponible.
+- **Duplicados por EAN** ([build_db.\_propagar_duplicados](build_db.py)): OFF
+  no fuerza un EAN único por producto, así que el mismo producto puede
+  aparecer varias veces con códigos distintos — a veces con los ingredientes
+  cargados en una entrada y no en la otra. El caso que lo dejó en evidencia:
+  buscar "Oreo" devolvía EANs con veredictos contradictorios (`apto`,
+  `vegetariano` y `revisar` al mismo tiempo para el mismo producto). Ahora,
+  dentro de un mismo nombre + marca, todos los EANs quedan en el estado más
+  restrictivo que tenga evidencia real — con una regla explícitamente
+  asimétrica: un `apto` nunca se contagia hacia un hermano en `revisar` (eso
+  sería inventar un veredicto positivo de la nada), pero un `no_apto` o
+  `vegetariano` sí, porque ahí equivocarse para el lado cauto es el error
+  barato.
+
 ## Limitaciones conocidas
 
-- **La mitad del catálogo queda en `revisar`**, casi siempre porque el producto
-  no tiene ingredientes cargados en Open Food Facts. Se muestran igual: la
-  incompletitud es parte de lo que hay que comunicar, no algo a esconder. Para
-  bajar ese número está la cola de revisión manual (ver abajo).
+- **Sigue quedando un 38% del catálogo en `revisar`**, casi siempre porque el
+  producto no tiene ingredientes cargados en Open Food Facts. Se muestran
+  igual: la incompletitud es parte de lo que hay que comunicar, no algo a
+  esconder. Para bajar ese número está la cola de revisión manual (ver abajo).
+- **La búsqueda todavía puede mostrar varias tarjetas para el mismo producto**
+  (EANs distintos de "Oreo", por ejemplo). Desde esta corrida ya no se
+  contradicen entre sí, pero agruparlas en una sola tarjeta por producto es
+  un cambio de interfaz que todavía no se hizo.
+- El filtro de relevancia es deliberadamente conservador: solo excluye por
+  señales objetivas (alfabeto del nombre, longitud de EAN imposible), nunca
+  por una sospecha de "esto no parece argentino". Puede dejar pasar ruido más
+  sutil (ej. un producto europeo con nombre en español que nunca se
+  distribuyó acá).
 - **El clasificador automático memoriza marcas.** Al entrenarse con nombres,
   aprende que ciertas marcas hacen ciertos productos; una marca que fabrica
   tanto veganos como no veganos le sale mal. También arrastra correlaciones
@@ -147,7 +189,7 @@ consultan por productos nuevos o vencidos. Todo se configura en
 python -m pytest tests -q
 ```
 
-131 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
+169 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
 verifican que la regla de seguridad no se pueda violar por ninguna capa, y los
 falsos positivos concretos que fueron apareciendo al revisar a mano la salida
 real del pipeline (por ejemplo "Yogurisimo Banana", que llegó a clasificarse

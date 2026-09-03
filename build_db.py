@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter
+from collections import Counter, defaultdict
 
 import categorias
 import classify_ingredients as ci
@@ -27,9 +27,11 @@ import classify_rules as cr
 import config
 import db
 import ingest_anmat
+import relevancia
 import revision
 
 SEVERIDAD = {config.APTO: 0, config.VEGETARIANO: 1, config.NO_APTO: 2}
+FUENTE_DUPLICADO = "duplicado"
 
 
 def _peor(a: str, b: str) -> str:
@@ -104,6 +106,75 @@ def decidir(nombre: str, marca: str | None, categoria: str | None,
     return cr.Decision(config.REVISAR, cr.FUENTE_SIN_DATOS, motivo)
 
 
+def _propagar_duplicados(conn) -> int:
+    """Dos EANs con el mismo nombre y marca son, en la práctica, el mismo
+    producto cargado más de una vez en OFF (a veces con distinta foto, o
+    porque a uno le falta cargar los ingredientes y al otro no). Cuando eso
+    pasa, no pueden quedar en desacuerdo hacia el lado optimista: el caso que
+    lo hizo evidente fue "Oreo", con 4 EANs idénticos en nombre y marca donde
+    uno decía `apto`, otro `vegetariano` y otro `revisar`.
+
+    Se aplica la misma regla que usa `decidir()` para discrepancias dentro de
+    un solo producto: ante desacuerdo, gana el estado más restrictivo. Un
+    miembro resuelto (apto/vegetariano/no_apto) baja si algún hermano tiene
+    evidencia peor. Un miembro en `revisar` se rescata SOLO hacia una mala
+    noticia (vegetariano o no_apto) — nunca hacia `apto`: eso inventaría un
+    veredicto positivo a partir de nada más que compartir nombre con otro
+    EAN, el mismo salto que la regla de seguridad prohíbe en el resto del
+    pipeline. Si lo único que hay en el grupo es un `apto`, no se propaga
+    nada: no hay mala noticia que avisar, y la buena no se regala.
+    """
+    filas = conn.execute(
+        "SELECT ean, nombre, marca, estado, fuente_decision"
+        " FROM productos").fetchall()
+
+    grupos: dict[tuple[str, str], list] = defaultdict(list)
+    for f in filas:
+        clave = (cr.normalize(f["marca"] or ""), cr.normalize(f["nombre"]))
+        if clave[1]:  # nombre normalizado no vacío
+            grupos[clave].append(f)
+
+    actualizados = 0
+    ahora = db.now_iso()
+    for miembros in grupos.values():
+        if len(miembros) < 2:
+            continue
+
+        peor_estado, peor_ean = None, None
+        for m in miembros:
+            if m["fuente_decision"] == cr.FUENTE_SIN_DATOS:
+                continue
+            if m["estado"] == config.REVISAR:
+                continue
+            if peor_estado is None or SEVERIDAD[m["estado"]] > SEVERIDAD[peor_estado]:
+                peor_estado, peor_ean = m["estado"], m["ean"]
+        if peor_estado is None:
+            continue
+
+        for m in miembros:
+            if m["estado"] == config.REVISAR:
+                # Rescatar solo hacia mala noticia; nunca hacia `apto`.
+                necesita_bajar = peor_estado != config.APTO
+            else:
+                necesita_bajar = SEVERIDAD[m["estado"]] < SEVERIDAD[peor_estado]
+            if not necesita_bajar or m["ean"] == peor_ean:
+                continue
+            conn.execute(
+                "UPDATE productos SET estado=?, fuente_decision=?, "
+                "confianza=NULL, motivo=?, actualizado=? WHERE ean=?",
+                (peor_estado, FUENTE_DUPLICADO,
+                 f"Mismo nombre y marca que el EAN {peor_ean}, clasificado "
+                 f"como {peor_estado} con evidencia directa; ante la "
+                 f"discrepancia entre presentaciones se aplica el criterio "
+                 f"más restrictivo.", ahora, m["ean"]))
+            conn.execute("DELETE FROM revision_pendiente WHERE ean=?",
+                        (m["ean"],))
+            actualizados += 1
+
+    conn.commit()
+    return actualizados
+
+
 def build(conn, verbose: bool = True) -> dict:
     db.init_db(conn)
     anmat_idx = ingest_anmat.indexar(ingest_anmat.cargar(conn))
@@ -121,9 +192,18 @@ def build(conn, verbose: bool = True) -> dict:
 
     estados: Counter[str] = Counter()
     fuentes: Counter[str] = Counter()
+    excluidos: Counter[str] = Counter()
     ahora = db.now_iso()
 
     for f in filas:
+        motivo_excl = relevancia.motivo_exclusion(f["nombre"], f["ean"])
+        if motivo_excl:
+            # No se borra de catalogo/off_cache: solo no llega a la tabla
+            # final ni a la búsqueda. Si el criterio cambia, el dato sigue ahí.
+            clave = ("alfabeto" if "alfabeto" in motivo_excl else "ean_invalido")
+            excluidos[clave] += 1
+            continue
+
         off = json.loads(f["payload"]) if f["payload"] else {}
         categoria = categorias.normalizar(off.get("categories_tags"))
         d = decidir(f["nombre"], f["marca"], categoria, off, anmat_idx)
@@ -150,26 +230,40 @@ def build(conn, verbose: bool = True) -> dict:
 
     conn.commit()
 
+    # Dos EANs con el mismo nombre y marca no pueden quedar en desacuerdo
+    # hacia el lado optimista (ver el docstring de la función). Corre antes
+    # de la Capa 4 para que una persona revisando el CSV ya vea la base
+    # consolidada, con menos ruido.
+    duplicados = _propagar_duplicados(conn)
+    if verbose and duplicados:
+        print(f"  {duplicados} productos ajustados por coincidir en nombre y "
+              f"marca con otro EAN ya resuelto")
+
     # Capa 4: las correcciones humanas pisan todo lo automático. Van al final
     # justo para eso, y para que curar la base no sea trabajo que se pierda en
     # el próximo refresco.
     corregidos = revision.aplicar(conn)
-    if corregidos:
-        estados = Counter(
-            r["estado"] for r in conn.execute("SELECT estado FROM productos"))
-        fuentes = Counter(
-            r["fuente_decision"] for r in
-            conn.execute("SELECT fuente_decision FROM productos"))
-        if verbose:
-            print(f"  {corregidos} productos con corrección humana aplicada")
+    if verbose and corregidos:
+        print(f"  {corregidos} productos con corrección humana aplicada")
+
+    estados = Counter(
+        r["estado"] for r in conn.execute("SELECT estado FROM productos"))
+    fuentes = Counter(
+        r["fuente_decision"] for r in
+        conn.execute("SELECT fuente_decision FROM productos"))
 
     if db.has_fts5(conn):
         conn.execute("INSERT INTO productos_fts(productos_fts) VALUES('rebuild')")
     conn.commit()
 
     total = sum(estados.values())
+    if verbose and excluidos:
+        n_excl = sum(excluidos.values())
+        print(f"  {n_excl} entradas de OFF excluidas por no ser relevantes "
+              f"para Argentina ({dict(excluidos)})")
     return {"total": total, "estados": dict(estados), "fuentes": dict(fuentes),
-            "correcciones": corregidos}
+            "correcciones": corregidos, "duplicados_ajustados": duplicados,
+            "excluidos": dict(excluidos)}
 
 
 def main(argv=None) -> int:
@@ -188,6 +282,9 @@ def main(argv=None) -> int:
         return 0
 
     total = stats["total"] or 1
+    if stats["excluidos"]:
+        print(f"Excluidos por no ser relevantes para Argentina: "
+              f"{sum(stats['excluidos'].values())} {stats['excluidos']}")
     print(f"\n=== productos: {stats['total']} ===")
     print("\nPor estado:")
     for estado, n in sorted(stats["estados"].items(), key=lambda x: -x[1]):
