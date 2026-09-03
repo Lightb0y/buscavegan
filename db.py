@@ -62,6 +62,19 @@ CREATE TABLE IF NOT EXISTS vtex_catalogo (
     PRIMARY KEY (ean, cadena)
 );
 
+-- Ficha nutricional que publican las cadenas de Cencosud (Vea, Jumbo, Disco).
+-- Es la fuente de ingredientes para los productos que OFF no tiene cargados:
+-- lista real, trazas por separado y sellos de certificación (entre ellos
+-- `vegan`). Ver ingest_fichas.py.
+CREATE TABLE IF NOT EXISTS vtex_ficha (
+    ean          TEXT PRIMARY KEY,
+    cadena       TEXT NOT NULL,
+    ingredientes TEXT,
+    trazas       TEXT,
+    sellos       TEXT,
+    actualizado  TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_productos_estado ON productos(estado);
 CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria);
 CREATE INDEX IF NOT EXISTS idx_vtex_ean ON vtex_catalogo(ean);

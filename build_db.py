@@ -6,7 +6,12 @@ Orden de decisión, de más a menos confiable:
      vegano autorizado (Art. 229 CAA). Es un acto administrativo, no una
      inferencia: manda sobre todo lo demás.
   1. `off_label`     — el fabricante declaró "vegano" en el packaging.
+  1b. `sello_super`  — el supermercado publica un sello de certificación
+     vegana en la ficha del producto. Se acepta solo si los ingredientes no
+     lo contradicen (ver `decidir`).
   2. `ingredientes`  — nuestro analizador de la lista de ingredientes.
+  2b. `ingredientes_super` — lo mismo, pero sobre la lista que publica el
+     supermercado, para los miles de productos que OFF no tiene cargados.
   3. `off_analysis`  — el análisis propio de Open Food Facts.
   4. `heuristica`    — Capa 2: nombre + marca + categoría.
   5. `revisar`       — no alcanzó la evidencia.
@@ -27,21 +32,49 @@ import classify_rules as cr
 import config
 import db
 import ingest_anmat
+import ingest_vtex
 import relevancia
 import revision
 
 SEVERIDAD = {config.APTO: 0, config.VEGETARIANO: 1, config.NO_APTO: 2}
 FUENTE_DUPLICADO = "duplicado"
+FUENTE_INGREDIENTES_SUPER = "ingredientes_super"
+FUENTE_SELLO_SUPER = "sello_super"
 
 
 def _peor(a: str, b: str) -> str:
     return a if SEVERIDAD[a] >= SEVERIDAD[b] else b
 
 
+def _analisis_de_ingredientes(off: dict, ficha: dict):
+    """Devuelve (análisis, fuente) combinando las dos listas de ingredientes.
+
+    OFF y el supermercado publican la misma etiqueta leída por dos vías
+    distintas. Si las dos resuelven y no coinciden, gana la más restrictiva:
+    una discrepancia significa que a alguna de las dos se le escapó algo, y
+    ante la duda el proyecto no afirma `apto` (SPEC.md §4).
+    """
+    de_off = ci.analyze_product(off)
+    texto_super = ficha.get("ingredientes")
+    if not texto_super:
+        return de_off, ci.FUENTE_INGREDIENTES
+
+    del_super = ci.analyze(texto_super)
+    if not del_super.resuelto:
+        return de_off, ci.FUENTE_INGREDIENTES
+    if not de_off.resuelto:
+        return del_super, FUENTE_INGREDIENTES_SUPER
+    if SEVERIDAD[del_super.estado] > SEVERIDAD[de_off.estado]:
+        return del_super, FUENTE_INGREDIENTES_SUPER
+    return de_off, ci.FUENTE_INGREDIENTES
+
+
 def decidir(nombre: str, marca: str | None, categoria: str | None,
-            off: dict | None, anmat_idx: dict | None = None) -> cr.Decision:
+            off: dict | None, anmat_idx: dict | None = None,
+            ficha: dict | None = None) -> cr.Decision:
     """Aplica las capas en orden y devuelve la decisión final del producto."""
     off = off or {}
+    ficha = ficha or {}
 
     # 0. Certificación oficial de ANMAT (la evidencia más fuerte que existe).
     if anmat_idx:
@@ -57,9 +90,24 @@ def decidir(nombre: str, marca: str | None, categoria: str | None,
         return cr.Decision(config.APTO, cr.FUENTE_OFF_LABEL,
                            "Declarado vegano por el fabricante")
 
-    # 2. Ingredientes (señal principal): texto libre si lo hay, si no la
-    #    taxonomía normalizada de OFF.
-    ing = ci.analyze_product(off)
+    # 2. Ingredientes (señal principal): la lista de OFF, la del supermercado,
+    #    o la más restrictiva si las dos se pronuncian.
+    ing, fuente_ing = _analisis_de_ingredientes(off, ficha)
+
+    # 1b. Sello vegano publicado por el supermercado. Es una declaración de
+    #     certificación, no una inferencia nuestra, así que va antes que el
+    #     análisis... pero solo si la lista de ingredientes no lo desmiente.
+    #     Si se contradicen, alguien se equivocó y no es momento de afirmar
+    #     `apto`: la regla de seguridad pesa más que una etiqueta.
+    sellos = set((ficha.get("sellos") or "").split(","))
+    if "vegan" in sellos:
+        if ing.resuelto and ing.estado != config.APTO:
+            return cr.Decision(
+                config.REVISAR, FUENTE_SELLO_SUPER,
+                f"El supermercado lo certifica como vegano, pero su propia "
+                f"lista de ingredientes dice lo contrario: {ing.motivo.lower()}")
+        return cr.Decision(config.APTO, FUENTE_SELLO_SUPER,
+                           "Certificado como vegano en la ficha del supermercado")
 
     # 3. Análisis propio de OFF.
     off_dec = cr.classify_off(off if off else None)
@@ -67,7 +115,7 @@ def decidir(nombre: str, marca: str | None, categoria: str | None,
     if ing.resuelto and off_dec.resuelto:
         if ing.estado == off_dec.estado:
             return cr.Decision(
-                ing.estado, ci.FUENTE_INGREDIENTES,
+                ing.estado, fuente_ing,
                 f"{ing.motivo}. Coincide con el análisis de Open Food Facts.")
         # Discrepan. Regla general: gana el criterio más restrictivo.
         #
@@ -81,18 +129,18 @@ def decidir(nombre: str, marca: str | None, categoria: str | None,
         if (ing.estado == config.VEGETARIANO
                 and off_dec.estado == config.NO_APTO and off_sin_veg):
             return cr.Decision(
-                config.VEGETARIANO, ci.FUENTE_INGREDIENTES,
+                config.VEGETARIANO, fuente_ing,
                 f"{ing.motivo}. Open Food Facts coincide en que no es vegano, "
                 f"pero no se pronuncia sobre el estado vegetariano.")
 
         estado = _peor(ing.estado, off_dec.estado)
         return cr.Decision(
-            estado, ci.FUENTE_INGREDIENTES,
+            estado, fuente_ing,
             f"{ing.motivo}. Open Food Facts dice «{off_dec.estado}»; ante la "
             f"discrepancia se toma el criterio más restrictivo.")
 
     if ing.resuelto:
-        return cr.Decision(ing.estado, ci.FUENTE_INGREDIENTES, ing.motivo)
+        return cr.Decision(ing.estado, fuente_ing, ing.motivo)
     if off_dec.resuelto:
         return off_dec
 
@@ -187,6 +235,15 @@ def build(conn, verbose: bool = True) -> dict:
         " ON o.ean = c.ean AND o.found = 1"
     ).fetchall()
 
+    # Fichas de los supermercados: la lista de ingredientes de miles de
+    # productos que OFF no tiene cargados. Ver ingest_fichas.py.
+    fichas = {
+        r["ean"]: {"ingredientes": r["ingredientes"], "trazas": r["trazas"],
+                   "sellos": r["sellos"], "cadena": r["cadena"]}
+        for r in conn.execute(
+            "SELECT ean, cadena, ingredientes, trazas, sellos FROM vtex_ficha")
+    }
+
     conn.execute("DELETE FROM productos")
     conn.execute("DELETE FROM revision_pendiente")
 
@@ -205,8 +262,17 @@ def build(conn, verbose: bool = True) -> dict:
             continue
 
         off = json.loads(f["payload"]) if f["payload"] else {}
+        ficha = fichas.get(f["ean"], {})
         categoria = categorias.normalizar(off.get("categories_tags"))
-        d = decidir(f["nombre"], f["marca"], categoria, off, anmat_idx)
+        d = decidir(f["nombre"], f["marca"], categoria, off, anmat_idx, ficha)
+
+        # La app muestra los ingredientes: si OFF no los tiene, se guardan los
+        # del supermercado, aclarando de dónde salieron.
+        ingredientes = off.get("ingredients_text")
+        if not ingredientes and ficha.get("ingredientes"):
+            cadena = ficha.get("cadena", "")
+            etiqueta = ingest_vtex.NOMBRE_LEGIBLE.get(cadena, cadena)
+            ingredientes = f"{ficha['ingredientes']} (según la ficha de {etiqueta})"
 
         conn.execute(
             "INSERT OR REPLACE INTO productos (ean, nombre, marca, categoria,"
@@ -214,7 +280,7 @@ def build(conn, verbose: bool = True) -> dict:
             " precio_ref, actualizado, motivo)"
             " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
             (f["ean"], f["nombre"], f["marca"], categoria, d.estado, d.fuente,
-             d.confianza, off.get("ingredients_text"),
+             d.confianza, ingredientes,
              off.get("image_front_small_url"), f["precio_ref"], ahora, d.motivo),
         )
         estados[d.estado] += 1

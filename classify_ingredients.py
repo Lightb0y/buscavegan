@@ -48,7 +48,11 @@ ANIMAL: list[tuple[str, tuple[str, str]]] = [
     # Los calificadores vegetales ("leche de coco") van como lookahead: sin
     # eso, todo producto vegetal que use la palabra del análogo animal —y son
     # cada vez más— cae en un falso `vegetariano`.
-    (r"\bleche(s)?\b(?! de (coco|almendra|soja|soya|avena|arroz|mani|cacahuete|castana|caju|quinoa|nuez|nueces|anacardo|avellana|pistacho|macadamia|alpiste|girasol|sesamo|canamo|tigre|vegetal|origen vegetal))",
+    # El calificador vegetal no siempre viene pegado: "leche CONCENTRADA de
+    # coco" es igual de vegetal que "leche de coco". Se admiten hasta dos
+    # palabras en el medio, pero no más, para no absolver a "postre de coco
+    # con leche", donde la leche no está calificada por nada.
+    (r"\bleche(s)?\b(?! vegetal)(?!(?: \w+){0,2} de (coco|almendra|soja|soya|avena|arroz|mani|cacahuete|castana|caju|quinoa|nuez|nueces|anacardo|avellana|pistacho|macadamia|alpiste|girasol|sesamo|canamo|tigre|vegetal|origen vegetal))",
      (config.VEGETARIANO, "leche")),
     (r"\bleche en polvo\b", (config.VEGETARIANO, "leche en polvo")),
     (r"\b(suero|lactosuero|suero de leche)\b(?! de (soja|soya|vegetal))",
@@ -57,15 +61,15 @@ ANIMAL: list[tuple[str, tuple[str, str]]] = [
     (r"\bcase[ií]n(a|ato)?", (config.VEGETARIANO, "caseína")),
     # "láctea" en femenino ("materia grasa láctea") no matcheaba con l[aá]cteo?s?
     (r"\bl[aá]cte[oa]s?\b", (config.VEGETARIANO, "derivado lácteo")),
-    (r"\bcrema\b(?! vegetal| de (coco|soja|soya|almendra|mani|cacahuete|avellana|castana|caju|anacardo|nuez|nueces|arroz|avena|girasol|sesamo|cacao|verdura|choclo|maiz|zapallo|calabaza|espinaca|tomate|hongo|champinon|arveja|lenteja|garbanzo))",
+    (r"\bcrema\b(?! vegetal)(?!(?: \w+){0,2} de (coco|soja|soya|almendra|mani|cacahuete|avellana|castana|caju|anacardo|nuez|nueces|arroz|avena|girasol|sesamo|cacao|verdura|choclo|maiz|zapallo|calabaza|espinaca|tomate|hongo|champinon|arveja|lenteja|garbanzo))",
      (config.VEGETARIANO, "crema")),
     (r"\bnata\b(?! vegetal| de (coco|soja|almendra))", (config.VEGETARIANO, "nata")),
-    (r"\bqueso\b(?! vegano| vegetal| de (almendra|castana|caju|anacardo|soja|soya|coco|nuez|nueces))",
+    (r"\bqueso\b(?! vegano| vegetal)(?!(?: \w+){0,2} de (almendra|castana|caju|anacardo|soja|soya|coco|nuez|nueces))",
      (config.VEGETARIANO, "queso")),
     (r"\bricota\b(?! vegana| vegetal| de (almendra|soja|caju))", (config.VEGETARIANO, "ricota")),
-    (r"\byog(ur|hurt|urt)\b(?! vegano| vegetal| de (coco|soja|soya|almendra|avena|anacardo|caju|castana))",
+    (r"\byog(ur|hurt|urt)\b(?! vegano| vegetal)(?!(?: \w+){0,2} de (coco|soja|soya|almendra|avena|anacardo|caju|castana))",
      (config.VEGETARIANO, "yogur")),
-    (r"\bmante(ca|quilla)\b(?! vegetal| vegana| de (mani|cacahuete|cacao|coco|almendra|castana|caju|anacardo|nuez|nueces|avellana|pistacho|semillas|girasol|sesamo|karite|murumuru|cupuacu))",
+    (r"\bmante(ca|quilla)\b(?! vegetal| vegana)(?!(?: \w+){0,2} de (mani|cacahuete|cacao|coco|almendra|castana|caju|anacardo|nuez|nueces|avellana|pistacho|semillas|girasol|sesamo|karite|murumuru|cupuacu))",
      (config.VEGETARIANO, "manteca")),
     (r"\bgrasa but[ií]rica\b|\bbutter ?oil\b", (config.VEGETARIANO, "grasa butírica")),
     (r"\bdulce de leche\b", (config.VEGETARIANO, "dulce de leche")),

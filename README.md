@@ -47,8 +47,9 @@ Números de la última corrida completa (`python sprint0.py`):
 | Métrica | Valor |
 |---|---|
 | Productos argentinos en la base | **10.395** |
-| **Clasificados** | **6.426 (61,8%)** |
-| En `revisar` | 3.969 (38,2%) |
+| **Clasificados** | **7.216 (69,4%)** |
+| Resueltos por su **lista de ingredientes** | 4.240 (40,8%) |
+| En `revisar` | 3.179 (30,6%) |
 | Confirmados en algún supermercado | 5.581 (53,7%) |
 
 De un total de 13.015 entradas de OFF etiquetadas "Argentina", se excluyeron
@@ -62,13 +63,20 @@ Por fuente de la decisión:
 
 | Fuente | Productos |
 |---|---|
-| Análisis de ingredientes | 3.247 |
-| Heurística de nombre | 2.335 |
-| Clasificador automático | 497 |
+| Análisis de ingredientes (Open Food Facts) | 3.253 |
+| Heurística de nombre | 1.613 |
+| Análisis de ingredientes (ficha del supermercado) | 987 |
+| Sello vegano de la ficha del supermercado | 682 |
+| Clasificador automático | 347 |
 | Declarado por el fabricante | 121 |
-| Mismo producto que otro EAN ya resuelto | 106 |
+| Mismo producto que otro EAN ya resuelto | 98 |
 | Certificación oficial de ANMAT | 97 |
 | Análisis propio de Open Food Facts | 23 |
+
+La heurística de nombre pasó de resolver 2.335 productos a 1.613: **722
+veredictos que antes se adivinaban por el nombre ahora salen de la lista de
+ingredientes real**. Es el cambio que más importa, porque el nombre comercial
+omite lo que no conviene decir y la lista es la declaración legal.
 
 ## Fuentes
 
@@ -77,6 +85,7 @@ Por fuente de la decisión:
 | **Open Food Facts** | Catálogo argentino + ingredientes | ✅ Automatizada |
 | **ANMAT / INAL** | Registro oficial de atributo vegano (668 productos) | ✅ Automatizada |
 | **Carrefour / Vea / Día / Jumbo / Disco** | Confirmación de EAN real en góndola | ✅ Automatizada ([ingest_vtex.py](ingest_vtex.py)) |
+| **Vea / Jumbo / Disco** (Cencosud) | **Lista de ingredientes**, trazas y sello vegano | ✅ Automatizada ([ingest_fichas.py](ingest_fichas.py)) |
 | **SEPA / Precios Claros** | Precios de góndola | ⏸️ Portal bloquea bots; la API en vivo del gobierno está caída |
 | **Todo Vegan / V-Label** | Catálogo certificado V-Label | ❌ App-only, sin API pública |
 
@@ -100,6 +109,28 @@ por Coto, que no corre VTEX). Por eso queda como filtro opcional en la app
 
 De la última cosecha completa: **5.581 de los 10.395 productos (53,7%)**
 quedaron confirmados en al menos una de las 5 cadenas.
+
+### Ingredientes de la ficha del supermercado
+
+La confirmación de góndola resultó ser solo la mitad del hallazgo. **Vea, Jumbo
+y Disco** (las tres de Cencosud) publican en la misma API la ficha completa del
+producto, y ahí está lo que más falta hacía:
+
+- **`Ingredientes`** — la lista real del envase. Es la señal más confiable que
+  tiene el proyecto, y 6.365 de los 10.395 productos no la tenían en OFF.
+- **`Trazas`** — en un campo aparte, que es justo la distinción que importa:
+  "puede contener leche" no es lo mismo que "contiene leche".
+- **`Sellos`** — certificaciones, entre ellas un `vegan` explícito.
+
+Carrefour y Día no exponen estos campos: se verificó producto por producto.
+
+[ingest_fichas.py](ingest_fichas.py) las consulta por EAN (no hace falta
+recosechar el catálogo entero) y es reanudable: guarda también la ficha vacía,
+así una corrida cortada no vuelve a preguntar lo mismo.
+
+El sello vegano se acepta como `apto` **solo si la lista de ingredientes de esa
+misma ficha no lo contradice**. Si se contradicen, alguien se equivocó y el
+producto va a `revisar`: la regla de seguridad pesa más que una etiqueta.
 
 ## Calidad de los datos: filtrado y deduplicación
 
@@ -200,6 +231,10 @@ python ingest_anmat.py
 
 # 3. Confirmación cruzada con supermercados (opcional, tarda: ~275k productos)
 python ingest_vtex.py
+
+# 3b. Ficha con la lista de ingredientes que publican Vea, Jumbo y Disco.
+#     Es reanudable: se puede cortar y seguir después.
+python ingest_fichas.py
 
 # 4. Clasificar (Capas 0 a 2) y armar la base final con su índice de búsqueda
 python build_db.py

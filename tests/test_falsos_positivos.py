@@ -52,6 +52,23 @@ def test_cuajo_microbiano_no_es_faena():
     assert ci.analyze("Agua, cuajo, sal").estado == NO_APTO
 
 
+@pytest.mark.parametrize("texto", [
+    "agua, leche concentrada de coco, calcio, aceite vegetal, sal",
+    "crema batida de almendras, azucar, agua",
+    "manteca refinada de mani, azucar, sal",
+])
+def test_el_calificador_vegetal_puede_no_venir_pegado(texto):
+    # Apareció en la ficha real de un producto: "leche CONCENTRADA de coco".
+    # El adjetivo del medio rompía la excepción y lo marcaba como lácteo.
+    assert ci.analyze(texto).estado == APTO
+
+
+def test_pero_la_leche_sin_calificar_sigue_siendo_lactea():
+    # El límite de dos palabras existe para esto: acá el coco no califica a la
+    # leche, son dos cosas distintas del mismo postre.
+    assert ci.analyze("postre de coco con leche, azucar").estado == VEG
+
+
 def test_crema_de_leche_sigue_siendo_lactea():
     # La corrección de "crema de maní" no puede haber abierto la puerta a que
     # la crema láctea pase como vegana.

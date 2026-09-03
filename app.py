@@ -26,9 +26,13 @@ VEREDICTO = {
 }
 
 FUENTE_LEGIBLE = {
+    "certificacion_oficial": "Certificado en el registro oficial de ANMAT",
     "off_label": "Declarado vegano por el fabricante",
+    "sello_super": "Sello de certificación de la ficha del supermercado",
     "ingredientes": "Analizado desde la lista de ingredientes",
+    "ingredientes_super": "Analizado desde los ingredientes que publica el supermercado",
     "off_analysis": "Análisis de ingredientes de Open Food Facts",
+    "duplicado": "Mismo producto que otro código de barras ya resuelto",
     "heuristica": "Estimado por reglas sobre el nombre del producto",
     "ml": "Estimado por clasificador automático",
     "sin_datos": "Sin datos suficientes",

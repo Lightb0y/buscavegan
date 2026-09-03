@@ -219,6 +219,85 @@ siendo un lácteo, y después de arreglar "miel de caña" otro que verifica que
 
 El total del proyecto pasó de 184 a 255 tests.
 
+---
+
+# Segunda parte: conseguir ingredientes de verdad
+
+Corregir el léxico sirve poco si no hay lista de ingredientes que leer. Y ese
+era el problema más grande: **6.365 de los 10.395 productos no tenían
+ingredientes cargados** en Open Food Facts, así que su veredicto salía de
+adivinar por el nombre comercial — que omite justamente lo que no conviene
+decir.
+
+## Dónde aparecieron los ingredientes
+
+Al revisar qué devuelve realmente la API de los supermercados (que ya usábamos
+para confirmar qué productos están en góndola), apareció que **Vea, Jumbo y
+Disco** publican la ficha completa del producto:
+
+- **`Ingredientes`** — la lista real del envase.
+- **`Trazas`** — en un campo **aparte**. Esto es mejor que el texto libre de
+  Open Food Facts, donde hay que adivinar si "puede contener leche" es un
+  ingrediente o una advertencia de contaminación cruzada. Acá viene separado
+  de fábrica.
+- **`Sellos`** — certificaciones, y entre ellas hay un **`vegan`** explícito.
+
+Carrefour y Día no publican nada de esto: se verificó producto por producto.
+
+Se consultaron 2.568 productos (los que estaban en esas cadenas y les faltaba
+información) y **1.861 tenían la lista de ingredientes** — un 72%.
+
+## Un ejemplo de por qué el nombre no alcanza
+
+**Takis Fuego** estaba en `revisar`: Open Food Facts no tiene sus ingredientes
+y el nombre no dice nada. La ficha de Disco declara `col ins 120`, que es
+**carmín de cochinilla** — un colorante hecho de insectos. Ahora es `no apto`,
+y ningún análisis del nombre iba a descubrirlo nunca.
+
+## El sello vegano: útil, pero no se le cree solo
+
+716 productos traen el sello `vegan` del supermercado. Es una declaración de
+certificación, no una inferencia nuestra, así que pesa más que cualquier
+análisis automático.
+
+Pero se decidió **no creerle a ciegas**: el sello vale como "apto" solo si la
+lista de ingredientes de esa misma ficha no lo contradice. Si se contradicen,
+el producto va a `revisar`.
+
+La decisión se justificó sola. De 682 productos con sello, **6 quedaron
+marcados como contradictorios**, y al mirarlos:
+
+- **Lays panceta**
+- **Maní Crocante Jamón**
+- **talitas happy food jamón**
+
+El supermercado los tenía marcados como veganos. No lo son.
+
+## Qué cambió en los números
+
+| | Antes | Después |
+|---|---|---|
+| Clasificados | 6.426 (61,8%) | **7.216 (69,4%)** |
+| En `revisar` | 3.969 | **3.179** |
+| Resueltos adivinando por el nombre | 2.335 | **1.613** |
+
+- **849 productos salieron de "no sabemos"** (461 aptos, 224 vegetarianos,
+  164 no aptos).
+- **722 veredictos dejaron de ser una adivinanza por el nombre** y pasaron a
+  salir de la lista de ingredientes real.
+- **262 veredictos que el nombre había adivinado mal quedaron corregidos.**
+  Entre ellos dos falsos "apto": **Cadbury Chocolate con Almendras** (la regla
+  de nombre veía "almendras" y anulaba el "chocolate"; la lista real declara
+  leche) y **Mostacholes de Arroz sin TACC** (llevan huevo).
+
+## Un error más que encontró la ficha
+
+Los datos reales expusieron otra falla del léxico: **"leche concentrada de
+coco"** se marcaba como lácteo. La excepción de "leche de coco" exigía que el
+calificativo viniera pegado, y el adjetivo del medio la rompía. Ahora se
+admiten hasta dos palabras intermedias — pero no más, para que "postre de coco
+con leche" siga siendo un lácteo, porque ahí el coco no califica a la leche.
+
 ## Lo que sigue sin resolverse
 
 - **Los cultivos bacterianos** (lactobacillus, streptococcus) no se reconocen.
