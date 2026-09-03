@@ -35,6 +35,16 @@ BLACKLIST = [
     "jamon", "panceta", "tocino", "pollo", "carne", "pescado", "atun",
     "merluza", "salmon", "anchoa", "camaron", "langostino", "marisco",
     "chorizo", "salchicha",
+    # Cortes, embutidos y achuras de góndola argentina que caían en `revisar`
+    # solo por no estar nombrados. No cambian la seguridad (nadie los iba a
+    # ver como aptos), pero sí sacan ruido del bucket de "no sabemos".
+    "ternera", "cordero", "cabrito", "conejo", "pavo", "pato", "codorniz",
+    "morcilla", "salame", "salamin", "mortadela", "bondiola", "matambre",
+    "higado", "molleja", "chinchulin", "menudencias", "achuras", "mondongo",
+    "oleomargarina", "lisozima",
+    "mejillon", "mejillones", "ostra", "vieira", "pulpo", "calamar",
+    "crustaceo", "crustaceos", "trucha", "corvina", "lenguado", "caballa",
+    "sardina", "surimi",
     # Preparaciones que en Argentina llevan lácteo o huevo salvo que declaren
     # lo contrario. Sin esto, "helado de banana" o "flan de vainilla" se
     # colarían como aptos por el nombre de su fruta. Las versiones veganas
@@ -47,6 +57,7 @@ BLACKLIST = [
     "whey", "milk", "cheese", "butter", "cream", "egg", "eggs", "honey",
     "gelatin", "gelatine", "collagen", "beef", "pork", "chicken", "bacon",
     "ham", "fish", "tuna", "shrimp", "lard", "casein", "lactose", "yogurt",
+    "veal", "lamb", "poultry", "turkey", "buttermilk", "ghee", "milkfat",
 ]
 
 # El ingles pone el modificador ANTES del sustantivo ("almond milk") y el
@@ -60,6 +71,18 @@ BLACKLIST_EN = {
     "whey", "milk", "cheese", "butter", "cream", "egg", "eggs", "honey",
     "gelatin", "gelatine", "collagen", "beef", "pork", "chicken", "bacon",
     "ham", "fish", "tuna", "shrimp", "lard", "casein", "lactose", "yogurt",
+    "veal", "lamb", "poultry", "turkey", "buttermilk", "ghee", "milkfat",
+}
+
+# Calificadores que anulan UNA keyword puntual, y solo esa. Van aparte del
+# WHITELIST general porque no son intercambiables: "miel de caña" es melaza y
+# no tiene abeja, pero un "helado de caña" no deja de ser un helado con leche.
+WHITELIST_POR_KEYWORD = {
+    "miel": ("cana", "maple", "arce", "agave", "palma", "maiz", "abedul"),
+    "honey": ("cane", "maple", "agave"),
+    # El cremor tártaro es un subproducto del vino, no un lácteo.
+    "cream": ("tartar",),
+    "crema": ("tartaro",),
 }
 
 # Subconjunto del blacklist que no es un ingrediente animal sino una
@@ -283,8 +306,9 @@ def classify_name(nombre: str, marca: str | None = None,
             ventana = _window_after(texto, m.end())
             if kw in BLACKLIST_EN:
                 ventana += " " + _window_before(texto, m.start())
+            candidatos = WHITELIST + list(WHITELIST_POR_KEYWORD.get(kw, ()))
             modificador = next(
-                (w for w in WHITELIST if _contains(ventana, w)), None
+                (w for w in candidatos if _contains(ventana, w)), None
             )
             if modificador is None:
                 cat_dec = _categoria_decision(categoria)

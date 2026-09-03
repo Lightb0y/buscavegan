@@ -45,24 +45,35 @@ MIN_INGREDIENTES = 1
 
 ANIMAL: list[tuple[str, tuple[str, str]]] = [
     # --- lácteos ---------------------------------------------------------
-    (r"\bleche(s)?\b(?! de (coco|almendra|soja|soya|avena|arroz|mani|castana|caju|quinoa|nuez|anacardo|girasol|sesamo|vegetal))",
+    # Los calificadores vegetales ("leche de coco") van como lookahead: sin
+    # eso, todo producto vegetal que use la palabra del análogo animal —y son
+    # cada vez más— cae en un falso `vegetariano`.
+    (r"\bleche(s)?\b(?! de (coco|almendra|soja|soya|avena|arroz|mani|cacahuete|castana|caju|quinoa|nuez|nueces|anacardo|avellana|pistacho|macadamia|alpiste|girasol|sesamo|canamo|tigre|vegetal|origen vegetal))",
      (config.VEGETARIANO, "leche")),
     (r"\bleche en polvo\b", (config.VEGETARIANO, "leche en polvo")),
-    (r"\b(suero|lactosuero|suero de leche)\b", (config.VEGETARIANO, "suero lácteo")),
+    (r"\b(suero|lactosuero|suero de leche)\b(?! de (soja|soya|vegetal))",
+     (config.VEGETARIANO, "suero lácteo")),
     (r"\blactosa\b", (config.VEGETARIANO, "lactosa")),
     (r"\bcase[ií]n(a|ato)?", (config.VEGETARIANO, "caseína")),
-    (r"\bl[aá]cteo?s?\b", (config.VEGETARIANO, "derivado lácteo")),
-    (r"\bcrema\b(?! vegetal| de (coco|soja|almendra))", (config.VEGETARIANO, "crema")),
-    (r"\bnata\b", (config.VEGETARIANO, "nata")),
-    (r"\bqueso\b(?! vegano| vegetal)", (config.VEGETARIANO, "queso")),
-    (r"\bricota\b", (config.VEGETARIANO, "ricota")),
-    (r"\byog(ur|hurt|urt)\b", (config.VEGETARIANO, "yogur")),
-    (r"\bmante(ca|quilla)\b(?! de (mani|cacao|coco|almendra|castana|caju|nuez|semillas))",
+    # "láctea" en femenino ("materia grasa láctea") no matcheaba con l[aá]cteo?s?
+    (r"\bl[aá]cte[oa]s?\b", (config.VEGETARIANO, "derivado lácteo")),
+    (r"\bcrema\b(?! vegetal| de (coco|soja|soya|almendra|mani|cacahuete|avellana|castana|caju|anacardo|nuez|nueces|arroz|avena|girasol|sesamo|cacao|verdura|choclo|maiz|zapallo|calabaza|espinaca|tomate|hongo|champinon|arveja|lenteja|garbanzo))",
+     (config.VEGETARIANO, "crema")),
+    (r"\bnata\b(?! vegetal| de (coco|soja|almendra))", (config.VEGETARIANO, "nata")),
+    (r"\bqueso\b(?! vegano| vegetal| de (almendra|castana|caju|anacardo|soja|soya|coco|nuez|nueces))",
+     (config.VEGETARIANO, "queso")),
+    (r"\bricota\b(?! vegana| vegetal| de (almendra|soja|caju))", (config.VEGETARIANO, "ricota")),
+    (r"\byog(ur|hurt|urt)\b(?! vegano| vegetal| de (coco|soja|soya|almendra|avena|anacardo|caju|castana))",
+     (config.VEGETARIANO, "yogur")),
+    (r"\bmante(ca|quilla)\b(?! vegetal| vegana| de (mani|cacahuete|cacao|coco|almendra|castana|caju|anacardo|nuez|nueces|avellana|pistacho|semillas|girasol|sesamo|karite|murumuru|cupuacu))",
      (config.VEGETARIANO, "manteca")),
     (r"\bgrasa but[ií]rica\b|\bbutter ?oil\b", (config.VEGETARIANO, "grasa butírica")),
     (r"\bdulce de leche\b", (config.VEGETARIANO, "dulce de leche")),
-    (r"\bkefir\b", (config.VEGETARIANO, "kéfir")),
-    (r"\bcuajo\b", (config.NO_APTO, "cuajo (enzima animal)")),
+    (r"\bkefir\b(?! de agua| vegetal| de coco)", (config.VEGETARIANO, "kéfir")),
+    # El cuajo microbiano y el vegetal (cardo, higuera) son los que más se usan
+    # hoy en la industria: condenar "cuajo" a secas marcaba veganos como faena.
+    (r"\bcuajo\b(?! vegetal| vegetariano| microbiano| microbiologico| de cardo| de higuera)",
+     (config.NO_APTO, "cuajo (enzima animal)")),
 
     # --- huevo -----------------------------------------------------------
     (r"\bhuevo?s?\b", (config.VEGETARIANO, "huevo")),
@@ -70,29 +81,48 @@ ANIMAL: list[tuple[str, tuple[str, str]]] = [
     (r"\bovo(albumina|producto)", (config.VEGETARIANO, "derivado de huevo")),
     (r"\balb[uú]mina\b", (config.VEGETARIANO, "albúmina")),
     (r"\blecitina de huevo\b|\bins 322 de huevo\b", (config.VEGETARIANO, "lecitina de huevo")),
+    # Único conservante de uso corriente que es de origen animal: se extrae de
+    # la clara. Aparece sobre todo en quesos y en vinos.
+    (r"\blisozima\b|\bins 1105\b|\be ?1105\b", (config.VEGETARIANO, "lisozima (clara de huevo)")),
 
     # --- miel y abejas ---------------------------------------------------
-    (r"\bmiel\b", (config.VEGETARIANO, "miel")),
+    # "Miel de caña" es melaza y "miel de maple" es savia: ninguna es de abeja.
+    (r"\bmiel\b(?! de (cana|maple|arce|agave|palma|maiz|abedul|dat[ie]l|manzana|coco))",
+     (config.VEGETARIANO, "miel")),
     (r"\bjalea real\b", (config.VEGETARIANO, "jalea real")),
     (r"\bpropoleo\b", (config.VEGETARIANO, "propóleo")),
     (r"\bcera de abejas?\b|\bins 901\b|\be ?901\b", (config.VEGETARIANO, "cera de abejas")),
 
     # --- carne, pescado y faena -----------------------------------------
-    (r"\bgelatina\b(?! vegetal)|\bins 441\b|\be ?441\b", (config.NO_APTO, "gelatina")),
-    (r"\bcol[aá]geno\b", (config.NO_APTO, "colágeno")),
-    (r"\bcarne\b|\bextracto de carne\b", (config.NO_APTO, "carne")),
-    (r"\bgrasa (bovina|vacuna|porcina|animal|de cerdo|de vaca)\b",
-     (config.NO_APTO, "grasa animal")),
-    (r"\boleomargarina bovina\b", (config.NO_APTO, "oleomargarina bovina")),
-    (r"\bsebo\b", (config.NO_APTO, "sebo")),
-    (r"\bmanteca de cerdo\b", (config.NO_APTO, "manteca de cerdo")),
-    (r"\b(pollo|cerdo|vacuno|bovino|porcino|jamon|panceta|tocino|chorizo)\b",
+    (r"\bgelatina\b(?! vegetal| vegana| de (algas?|agar))|\bins 441\b|\be ?441\b",
+     (config.NO_APTO, "gelatina")),
+    (r"\bcol[aá]geno\b(?! vegetal| vegano)", (config.NO_APTO, "colágeno")),
+    (r"\bcarne\b(?! vegetal| vegana| de (soja|soya|garbanzo|arveja|trigo|lenteja|coco|seitan|hongo|champinon))|\bextracto de carne\b",
      (config.NO_APTO, "carne")),
-    (r"\b(pescado|atun|merluza|salmon|anchoa|sardina|camaron|langostino|marisco|calamar)\b",
+    (r"\bgrasa (bovina|vacuna|porcina|animal|ovina|de cerdo|de vaca|de ave|de aves|de pollo|de oveja|de cordero|de pella)\b",
+     (config.NO_APTO, "grasa animal")),
+    # CAA art. 545: la oleomargarina (óleo-oil) se define SOLO como bovina u
+    # ovina, obtenida de los primeros jugos de faena. No existe una versión
+    # vegetal del término: a secas ya es grasa animal.
+    (r"\boleomargarina\b", (config.NO_APTO, "oleomargarina (grasa bovina u ovina, CAA art. 545)")),
+    (r"\boleoestearina\b", (config.NO_APTO, "oleoestearina (grasa bovina u ovina, CAA art. 547)")),
+    (r"\bsebo\b(?! vegetal)", (config.NO_APTO, "sebo")),
+    (r"\bmanteca de cerdo\b|\bchicharron", (config.NO_APTO, "manteca de cerdo")),
+    (r"\b(pollo|cerdo|vacuno|bovino|porcino|jamon|panceta|tocino|chorizo|ternera|cordero|cabrito|conejo|pavo|pato|codorniz)\b(?! vegetal| vegano| de soja)",
+     (config.NO_APTO, "carne")),
+    (r"\bave(s)?\b(?! de corral vegana)|\bmenudencias?\b|\bvisceras?\b|\bmondongo\b|\bh[ií]gado\b",
+     (config.NO_APTO, "carne o menudencia")),
+    (r"\b(carne|grasa|caldo|extracto|sabor|higado|menudencia) de res\b|\bsabor res\b",
+     (config.NO_APTO, "carne vacuna")),
+    (r"\b(pescado|atun|merluza|salmon|anchoa|sardina|camaron|langostino|marisco|calamar|crustaceos?|molusco|mejillon|ostra|vieira|pulpo|krill|caracol|surimi)\b(?! vegetal| vegano| de soja)",
      (config.NO_APTO, "pescado o marisco")),
     (r"\baceite de pescado\b|\bomega ?3 de pescado\b", (config.NO_APTO, "aceite de pescado")),
-    (r"\bcaldo de (carne|ave|pollo|pescado)\b", (config.NO_APTO, "caldo de origen animal")),
-    (r"\bfosfato de hueso\b|\bins 542\b|\be ?542\b", (config.NO_APTO, "fosfato de hueso")),
+    (r"\bcaldo de (carne|ave|pollo|pescado|hueso)\b", (config.NO_APTO, "caldo de origen animal")),
+    (r"\bproteina animal\b|\bproteinas animales\b", (config.NO_APTO, "proteína animal")),
+    # "hueso" solo, no: "aceituna sin hueso" y "durazno sin hueso" son vegetales.
+    (r"\bfosfato de hueso\b|\bins 542\b|\be ?542\b|\b(harina|polvo|carbon|extracto|gelatina) de huesos?\b",
+     (config.NO_APTO, "derivado de hueso")),
+    (r"\bpepsina\b", (config.NO_APTO, "pepsina (estómago porcino)")),
 
     # --- insectos ---------------------------------------------------------
     (r"\bcarmin\b|\bcochinilla\b|\bins 120\b|\be ?120\b|\bacido carminico\b",
@@ -105,8 +135,23 @@ AMBIGUO: list[tuple[str, str]] = [
     (r"\bins 471\b|\be ?471\b|\bmono ?y ?diglic[eé]ridos\b|\bmonogliceridos\b",
      "INS 471 (mono y diglicéridos): puede ser de grasa animal o vegetal"),
     (r"\bins 472\b|\be ?472", "INS 472: puede derivar de grasa animal o vegetal"),
-    (r"\bins 570\b|\bacido estearico\b|\bestearato\b",
-     "ácido esteárico / estearatos: pueden ser de sebo animal"),
+    (r"\bins 570\b|\bacido (estearico|oleico|palmitico|laurico|miristico)\b|\bestearato\b",
+     "ácidos grasos / estearatos: pueden ser de sebo animal"),
+    (r"\bins 4(3[2-6]|9[1-5])\b|\bpolisorbato\b|\bmonoestearato de sorbitan\b|\bsorbitan\b",
+     "polisorbatos y ésteres de sorbitán: derivan de ácidos grasos que pueden ser animales"),
+    # CAA art. 551: la fase grasa de la margarina puede ser "grasas animales
+    # comestibles" y admite hasta 5% de grasa de leche, más leche en polvo,
+    # suero, albúmina y caseinato. Sin el calificador "vegetal" no se sabe.
+    (r"\bmargarina\b(?! vegetal| vegana)", "margarina sin aclarar: el CAA (art. 551) "
+     "permite grasa animal y hasta 5% de grasa de leche"),
+    # CAA art. 548: la hidrogenación se aplica a cualquier aceite o grasa del
+    # Código, animal o vegetal. "Grasa vegetal hidrogenada" sí queda excluida
+    # porque no matchea la frase exacta.
+    (r"\bgrasa (parcialmente )?hidrogenada\b|\baceite (parcialmente )?hidrogenado\b",
+     "grasa hidrogenada sin aclarar el origen: el CAA (art. 548) admite hidrogenar grasas animales"),
+    (r"\btransglutaminasa\b", "transglutaminasa: puede ser microbiana o de plasma animal"),
+    (r"\bnisina\b|\bins 234\b", "nisina: se cultiva habitualmente sobre un medio lácteo"),
+    (r"\blipasa\b|\bproteasa\b", "lipasas y proteasas: pueden ser de origen animal"),
     (r"\bins 631\b|\binosinato\b|\bins 627\b|\bguanilato\b",
      "inosinato/guanilato: suelen obtenerse de pescado o carne"),
     (r"\bins 920\b|\bl-?cisteina\b", "L-cisteína: puede provenir de plumas o pelo"),
@@ -120,6 +165,49 @@ AMBIGUO: list[tuple[str, str]] = [
     (r"\benzimas?\b", "enzimas de origen no declarado"),
     (r"\bazucar\b.*\brefinad", "azúcar refinada: puede filtrarse con carbón de hueso"),
 ]
+
+# Los mismos ambiguos, en inglés. Buena parte del catálogo argentino de OFF
+# trae la lista en inglés, y sin esto "natural flavouring" pasaba como
+# desconocido mientras su equivalente español ya se marcaba como ambiguo.
+# Los lookbehind son fijos y encadenados a propósito: Python no admite
+# lookbehind de ancho variable, pero sí varios seguidos.
+AMBIGUO_EN: list[tuple[str, str]] = [
+    (r"\bnatural (flavou?r|flavou?ring)s?\b|\bflavou?ring\b",
+     "aroma natural sin origen declarado"),
+    (r"(?<!soy )(?<!soya )(?<!sunflower )(?<!rapeseed )\blecithin\b",
+     "lecitina sin origen declarado (suele ser de soja, pero no está aclarado)"),
+    (r"\bmono ?and ?diglycerides\b|\bmonoglycerides\b|\bdiglycerides\b",
+     "mono y diglicéridos: pueden ser de grasa animal o vegetal"),
+    (r"\bglycerin[e]?\b|\bglycerol\b", "glicerina: puede ser animal o vegetal"),
+    (r"\bstearic acid\b|\bstearate\b", "ácido esteárico: puede ser de sebo animal"),
+    (r"\bvitamin d3?\b|\bcholecalciferol\b", "vitamina D3: suele venir de lanolina"),
+    (r"(?<!vegetable )(?<!palm )\bshortening\b",
+     "shortening sin origen declarado: puede ser grasa de cerdo"),
+    (r"\benzymes?\b", "enzimas de origen no declarado"),
+]
+AMBIGUO += AMBIGUO_EN
+
+# Animales inequívocos en inglés que el léxico español no alcanza a ver por una
+# letra: "carmin" no matchea dentro de "carmine", ni "gelatina" en "gelatin".
+ANIMAL_EN: list[tuple[str, tuple[str, str]]] = [
+    (r"\bcarmine\b|\bcochineal\b|\bcarminic acid\b",
+     (config.NO_APTO, "carmín (cochinilla)")),
+    (r"\bshellac\b", (config.NO_APTO, "goma laca")),
+    (r"\bgelatine?\b", (config.NO_APTO, "gelatina")),
+    (r"\btallow\b|\blard\b|\bsuet\b", (config.NO_APTO, "grasa animal")),
+    (r"\bwhey\b", (config.VEGETARIANO, "suero lácteo")),
+    (r"\bcasein(ate)?\b", (config.VEGETARIANO, "caseína")),
+    (r"\bmilkfat\b|\bbutterfat\b|\bbuttermilk\b|\bghee\b",
+     (config.VEGETARIANO, "derivado lácteo")),
+    (r"\blysozyme\b", (config.VEGETARIANO, "lisozima (clara de huevo)")),
+    (r"\b(veal|lamb|poultry|turkey|venison)\b", (config.NO_APTO, "carne")),
+    (r"\b(crustacean|mollusc|mussel|oyster|squid|octopus|krill)\b",
+     (config.NO_APTO, "pescado o marisco")),
+    (r"\bbone (meal|powder|char|broth)\b", (config.NO_APTO, "derivado de hueso")),
+    (r"\banimal (fat|protein)\b", (config.NO_APTO, "derivado animal")),
+    (r"\boleomargarine\b", (config.NO_APTO, "oleomargarina (grasa bovina u ovina)")),
+]
+ANIMAL += ANIMAL_EN
 
 # Reconocidos como vegetales, minerales o sintéticos: suman cobertura y permiten
 # afirmar `apto` con fundamento en vez de por ausencia de evidencia.
@@ -152,10 +240,64 @@ VEGANO = [
     r"\burucu\b", r"\bcaramelo\b", r"\bproteina (vegetal|de soja|de arveja|de trigo)\b",
     r"\bgluten\b", r"\bsorbato\b", r"\bbenzoato\b", r"\bsorbitol\b", r"\bmanitol\b",
     r"\bstevia\b", r"\bsucralosa\b", r"\baspartamo\b", r"\bacesulfamo\b",
-    r"\bsacarina\b", r"\bciclamato\b", r"\bemulsionante\b", r"\bespesante\b",
-    r"\bestabilizante\b", r"\bconservante\b", r"\bacidulante\b", r"\bantioxidante\b",
-    r"\bcolorante\b", r"\bhumectante\b", r"\bregulador de acidez\b", r"\bleudante\b",
+    r"\bsacarina\b", r"\bciclamato\b", r"\bglicosidos de esteviol\b",
+    r"\bpolidextrosa\b", r"\binulina\b", r"\bcarboximetilcelulosa\b",
+    # Aditivos sintéticos o vegetales inequívocos que aparecían como
+    # "desconocidos" y bajaban la cobertura de productos que sí son veganos.
+    r"\bvainillina\b", r"\bvanillin\b", r"\bcurcumina\b", r"\btartrazina\b",
+    r"\bamarillo (ocaso|crepusculo)\b", r"\bazul brillante\b", r"\brojo allura\b",
+    r"\bindigotina\b", r"\beritrosina\b", r"\bcaroteno", r"\bcarotene",
+    r"\bantocianina", r"\bclorofila\b", r"\bpoliglicerol\b",
+    r"\bpolirricinoleato\b", r"\bdioxido de (silicio|titanio|carbono)\b",
+    r"\bgoma gelan\b", r"\btripolifosfato\b", r"\bpirofosfato\b",
+    r"\bacido (sorbico|benzoico|acetico|adipico|fumarico|gluconico)\b",
+    r"\bsorbico\b", r"\bnitrito\b", r"\bsulfito\b", r"\bmetabisulfito\b",
+    r"\bpropionato\b", r"\bnatamicina\b", r"\bpimaricina\b",
+    # Clases de aditivo que SÍ se pueden dar por vegetales: no existe un aditivo
+    # de origen animal de uso corriente que cumpla estas funciones.
+    r"\bacidulante\b", r"\bantioxidante\b", r"\bhumectante\b",
+    r"\bregulador de acidez\b", r"\bleudante\b", r"\bedulcorante\b",
+    # NO se listan acá "colorante", "conservante", "emulsionante", "espesante",
+    # "estabilizante" ni "gelificante": nombran una función, no un origen, y en
+    # cada una hay un aditivo animal de uso corriente (carmín, lisozima, INS 471
+    # de sebo, gelatina). Quedan sin reconocer a propósito: no cuentan como
+    # evidencia vegetal, pero tampoco fuerzan `revisar`, porque el rótulo
+    # argentino casi siempre los acompaña del aditivo concreto ("conservante:
+    # sorbato de potasio"), y ese sí se reconoce y aporta cobertura.
 ]
+
+# Palabras que nombran la FUNCIÓN de un aditivo, no un ingrediente. En el rótulo
+# argentino encabezan al aditivo real ("gelificante (agar)", "conservante: INS
+# 202") y el parser las deja como un token aparte.
+#
+# No son evidencia de nada: "colorante" no dice si es cúrcuma o carmín. Por eso
+# no cuentan como reconocidas... pero tampoco pueden pesar en el denominador de
+# la cobertura, porque entonces un rótulo prolijo —que declara la clase Y el
+# aditivo— quedaría castigado por ser más explícito que uno que solo pone el
+# código. Se descartan del cálculo por completo.
+#
+# Solo aplica cuando el token es ÚNICAMENTE la palabra de clase: "conservante
+# INS 202" viene junto en un mismo token y ahí sí se reconoce por el código.
+CLASES_DE_ADITIVO = re.compile(
+    r"^(colorantes?|conservantes?|emulsionantes?|emulsificantes?|espesantes?|"
+    r"estabilizantes?|gelificantes?|acidulantes?|antioxidantes?|humectantes?|"
+    r"antihumectantes?|leudantes?|gasificantes?|edulcorantes?|espumantes?|"
+    r"secuestrantes?|antiaglutinantes?|antiespumantes?|resaltadores? del sabor|"
+    r"reguladores? de (la )?acidez|agentes? de brillo|"
+    r"colours?|colors?|preservatives?|emulsifiers?|thickeners?|stabilis?ers?|"
+    r"gelling agents?|glazing agents?|raising agents?|anti caking agents?|"
+    r"acidity regulators?|firming agents?|flavour enhancers?)$")
+
+# Los mismos, en la taxonomía de OFF. OFF emite el tag de la clase ADEMÁS del
+# tag del aditivo concreto en el 98% de los casos, así que tratarlos como
+# ambiguos mandaría a `revisar` productos que sí declaran todo.
+CLASES_TAGS = {
+    "colour", "color", "preservative", "emulsifier", "thickener", "stabiliser",
+    "stabilizer", "gelling-agent", "glazing-agent", "raising-agent",
+    "acidity-regulator", "anti-caking-agent", "firming-agent",
+    "flavour-enhancer", "antioxidant", "acidifier", "humectant", "sweetener",
+    "thickening-agent",
+}
 
 # Frases que hablan de contaminación cruzada, no de composición.
 TRAZAS_RE = re.compile(
@@ -203,26 +345,31 @@ VEGANO_EN = [
     r"\bwheat protein\b", r"\bgluten\b", r"\bsorbate\b", r"\bbenzoate\b",
     r"\bsorbitol\b", r"\bmannitol\b", r"\bstevia\b", r"\bsucralose\b",
     r"\baspartame\b", r"\bacesulfame\b", r"\bsaccharin\b", r"\bcyclamate\b",
-    r"\bemulsifier\b", r"\bthickener\b", r"\bstabiliser\b", r"\bstabilizer\b",
-    r"\bpreservative\b", r"\bacidifier\b", r"\bantioxidant\b", r"\bcolour\b",
-    r"\bcolor\b", r"\bhumectant\b", r"\braising agent\b", r"\bacidity regulator\b",
-    r"\bspice", r"\bherb", r"\bextract\b", r"\bconcentrate\b", r"\bpuree\b",
-    r"\bjuice\b", r"\bpowder\b", r"\bpaste\b", r"\bfibre\b", r"\bfiber\b",
+    r"\bacidifier\b", r"\bantioxidant\b",
+    r"\bhumectant\b", r"\braising agent\b", r"\bacidity regulator\b",
+    # Sin "emulsifier", "thickener", "stabiliser", "preservative" ni "colour",
+    # por el mismo motivo que sus equivalentes en español. Tampoco "acid",
+    # "extract", "concentrate" ni "powder": son tan genéricos que daban por
+    # vegetales a "acid whey", "poultry extract" y "bone powder".
+    r"\bspice", r"\bherb", r"\bpuree\b",
+    r"\bjuice\b", r"\bpaste\b", r"\bfibre\b", r"\bfiber\b",
     r"\bbran\b", r"\bgerm\b", r"\bsemolina\b", r"\bcereal", r"\bgrain",
     r"\blegume", r"\bmushroom", r"\balgae\b", r"\bseaweed\b", r"\bcaffeine\b",
     # Los aditivos numerados de riesgo (120, 441, 471, 542, 901, 904, 920...)
     # ya estan enumerados en ANIMAL_TAGS y AMBIGUO_TAGS, asi que el resto de la
     # serie E/INS se cuenta como reconocido para no castigar la cobertura.
     # El espacio importa: normalize() reescribe "e330" como "e 330".
-    r"\b(?:e|ins) ?\d{3}",
+    # El (?!\d) es imprescindible: sin el, "ins 1105" (lisozima, de clara de
+    # huevo) matcheaba como si fuera "ins 110" y se daba por vegano.
+    r"\b(?:e|ins) ?\d{3}(?!\d)",
     # Clases genericas de la taxonomia de OFF. Son categorias padre, y cuando
     # el aditivo concreto importa OFF agrega ademas su tag especifico, que ya
     # cubren los otros lexicos. Las que si esconden un origen animal posible
     # (oil-and-fat, gelling-agent, glazing-agent) estan en AMBIGUO_TAGS.
     r"\bminerals?\b", r"\bvitamins?\b", r"\bdisaccharide\b",
     r"\bmonosaccharide\b", r"\bsweetener\b", r"\banti caking agent\b",
-    r"\bthickening agent\b", r"\bfirming agent\b", r"\bcondiment\b",
-    r"\bacid\b", r"\bstarches\b", r"\bsyrups\b",
+    r"\bfirming agent\b", r"\bcondiment\b",
+    r"\bstarches\b", r"\bsyrups\b",
 ]
 
 VEGANO_RE += [re.compile(p) for p in VEGANO_EN]
@@ -250,8 +397,9 @@ def normalize(text: str) -> str:
     text = unicodedata.normalize("NFD", str(text))
     text = "".join(c for c in text if unicodedata.category(c) != "Mn")
     text = text.lower().replace("_", " ")
-    # "INS322" / "E-322" -> "ins 322" / "e 322"
-    text = re.sub(r"\b(ins|e)[\s.-]*(\d{3})\b", r"\1 \2", text)
+    # "INS322" / "E-322" -> "ins 322" / "e 322". Los de 4 dígitos existen
+    # (INS 1105 es la lisozima) y hay que normalizarlos completos, no truncados.
+    text = re.sub(r"\b(ins|e)[\s.-]*(\d{3,4})\b", r"\1 \2", text)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -298,10 +446,16 @@ def analyze(text: str | None) -> AnalisisIngredientes:
     detectados: list[str] = []
     ambiguos: list[str] = []
     reconocidos = 0
+    evaluados = 0
     peor = config.APTO
     motivo_peor = ""
 
     for ing in ingredientes:
+        # Las palabras de clase no son ingredientes: no suman ni restan.
+        if CLASES_DE_ADITIVO.match(ing):
+            continue
+        evaluados += 1
+
         hit = _match(ing)
         if hit:
             estado, etiqueta = hit
@@ -322,7 +476,7 @@ def analyze(text: str | None) -> AnalisisIngredientes:
         if any(rx.search(ing) for rx in VEGANO_RE):
             reconocidos += 1
 
-    cobertura = reconocidos / len(ingredientes)
+    cobertura = reconocidos / evaluados if evaluados else 0.0
     base = dict(detectados=detectados, ambiguos=ambiguos, cobertura=round(cobertura, 2),
                 n_ingredientes=len(ingredientes), trazas=trazas)
 
@@ -390,6 +544,12 @@ ANIMAL_TAGS: dict[str, tuple[str, str]] = {
     "cheese": (config.VEGETARIANO, "queso"),
     "yogurt": (config.VEGETARIANO, "yogur"),
     "milk-fat": (config.VEGETARIANO, "grasa láctea"),
+    "milkfat": (config.VEGETARIANO, "grasa láctea"),
+    "acid-whey": (config.VEGETARIANO, "suero lácteo ácido"),
+    "sweet-whey": (config.VEGETARIANO, "suero lácteo dulce"),
+    "whey-protein": (config.VEGETARIANO, "proteína de suero"),
+    "lysozyme": (config.VEGETARIANO, "lisozima (clara de huevo)"),
+    "e1105": (config.VEGETARIANO, "lisozima (INS 1105, clara de huevo)"),
     "milk-powder": (config.VEGETARIANO, "leche en polvo"),
     "milk-proteins": (config.VEGETARIANO, "proteínas lácteas"),
     "skimmed-milk": (config.VEGETARIANO, "leche descremada"),
@@ -430,6 +590,18 @@ ANIMAL_TAGS: dict[str, tuple[str, str]] = {
     "shrimp": (config.NO_APTO, "camarón"),
     "shellfish": (config.NO_APTO, "marisco"),
     "fish-oil": (config.NO_APTO, "aceite de pescado"),
+    "poultry": (config.NO_APTO, "ave de corral"),
+    "poultry-fat": (config.NO_APTO, "grasa de ave"),
+    "poultry-extract": (config.NO_APTO, "extracto de ave"),
+    "veal": (config.NO_APTO, "ternera"),
+    "crustacean": (config.NO_APTO, "crustáceo"),
+    "mollusc": (config.NO_APTO, "molusco"),
+    "animal-protein": (config.NO_APTO, "proteína animal"),
+    "beef-heart": (config.NO_APTO, "corazón vacuno"),
+    "beef-flavouring": (config.NO_APTO, "saborizante de carne vacuna"),
+    "bone": (config.NO_APTO, "hueso"),
+    "pepsin": (config.NO_APTO, "pepsina"),
+    "oleomargarine": (config.NO_APTO, "oleomargarina (grasa bovina u ovina)"),
     "carmine": (config.NO_APTO, "carmín (cochinilla)"),
     "cochineal": (config.NO_APTO, "cochinilla"),
     "e120": (config.NO_APTO, "carmín (INS 120)"),
@@ -464,9 +636,20 @@ AMBIGUO_TAGS: dict[str, str] = {
     "enzyme": "enzimas de origen no declarado",
     # Categorias padre que abarcan tanto opciones vegetales como animales. Si
     # el ingrediente concreto estuviera declarado, OFF traeria su tag propio.
+    # "oil-and-fat" sí se queda: no es una clase de aditivo sino una grasa real
+    # sin origen declarado, que es exactamente lo que hay que marcar. Las clases
+    # de aditivo (gelling-agent, colour...) se fueron a CLASES_TAGS: OFF emite
+    # el tag de la clase junto con el del aditivo concreto casi siempre, así que
+    # tratarlas como ambiguas castigaba al rótulo que declara de más.
     "oil-and-fat": "grasa sin origen declarado (puede ser vegetal o animal)",
-    "gelling-agent": "gelificante sin especificar (puede ser gelatina)",
-    "glazing-agent": "agente de brillo sin especificar (puede ser goma laca o cera)",
+    "margarine": ("margarina sin aclarar: el CAA (art. 551) permite grasa animal "
+                  "y hasta 5% de grasa de leche"),
+    "hydrogenated-fat": "grasa hidrogenada sin aclarar si el origen es vegetal o animal",
+    "transglutaminase": "transglutaminasa: puede ser microbiana o de plasma animal",
+    "nisin": "nisina: se cultiva habitualmente sobre un medio lácteo",
+    "e234": "nisina (INS 234): se cultiva habitualmente sobre un medio lácteo",
+    "lipase": "lipasa: puede ser de origen animal",
+    "protease": "proteasa: puede ser de origen animal",
 }
 
 
@@ -479,20 +662,41 @@ def tag_a_texto(tag: str) -> str:
 def _clasificar_tag(tag: str):
     """Devuelve ("animal", (estado, etiqueta)) | ("ambiguo", motivo) | None."""
     cuerpo = tag.split(":", 1)[-1].lower()
-    texto = tag_a_texto(tag)
+
+    # El match exacto va primero: los compuestos que la taxonomía ya define
+    # ("mono-and-diglycerides-of-fatty-acids") se resuelven enteros, antes de
+    # que la partición por "and" los desarme.
+    if cuerpo in ANIMAL_TAGS:
+        return ("animal", ANIMAL_TAGS[cuerpo])
+    if cuerpo in AMBIGUO_TAGS:
+        return ("ambiguo", AMBIGUO_TAGS[cuerpo])
+
+    # "x-and-y" enumera DOS ingredientes, no uno calificando al otro. Sin esto,
+    # el calificador vegetal de "vegetable-oil-and-lard" absolvía también a la
+    # grasa de cerdo, que es justo lo que había que detectar.
+    if "-and-" in cuerpo:
+        peor = None
+        for parte in cuerpo.split("-and-"):
+            res = _clasificar_tag(tag.split(":", 1)[0] + ":" + parte)
+            if res is None:
+                continue
+            if res[0] == "animal":
+                if peor is None or peor[0] != "animal" or (
+                        SEVERIDAD[res[1][0]] > SEVERIDAD[peor[1][0]]):
+                    peor = res
+            elif peor is None:
+                peor = res
+        if peor is not None:
+            return peor
 
     # Un calificador vegetal dentro del mismo tag lo resuelve: "coconut-milk",
     # "leche-de-almendras" o "vegetable-fat" no son de origen animal.
     if any(c in cuerpo for c in CALIFICADORES_VEGETALES):
         return None
 
-    if cuerpo in ANIMAL_TAGS:
-        return ("animal", ANIMAL_TAGS[cuerpo])
-    if cuerpo in AMBIGUO_TAGS:
-        return ("ambiguo", AMBIGUO_TAGS[cuerpo])
-
     # Cola larga (sobre todo tags "es:" que la taxonomía no normalizó): se
     # reusa el léxico de texto libre, que ya sabe leer español.
+    texto = tag_a_texto(tag)
     hit = _match(texto)
     if hit:
         return ("animal", hit)
@@ -514,10 +718,15 @@ def analyze_tags(tags: list[str] | None) -> AnalisisIngredientes:
     detectados: list[str] = []
     ambiguos: list[str] = []
     reconocidos = 0
+    evaluados = 0
     peor = config.APTO
     motivo_peor = ""
 
     for tag in tags:
+        if tag.split(":", 1)[-1].lower() in CLASES_TAGS:
+            continue
+        evaluados += 1
+
         res = _clasificar_tag(tag)
         if res is None:
             texto = tag_a_texto(tag)
@@ -536,7 +745,7 @@ def analyze_tags(tags: list[str] | None) -> AnalisisIngredientes:
         elif valor not in ambiguos:
             ambiguos.append(valor)
 
-    cobertura = reconocidos / len(tags)
+    cobertura = reconocidos / evaluados if evaluados else 0.0
     base = dict(detectados=detectados, ambiguos=ambiguos,
                 cobertura=round(cobertura, 2), n_ingredientes=len(tags))
 

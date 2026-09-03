@@ -47,8 +47,9 @@ Números de la última corrida completa (`python sprint0.py`):
 | Métrica | Valor |
 |---|---|
 | Productos argentinos en la base | **10.395** |
-| **Clasificados** | **6.419 (61,8%)** |
-| En `revisar` | 3.976 (38,2%) |
+| **Clasificados** | **6.426 (61,8%)** |
+| En `revisar` | 3.969 (38,2%) |
+| Confirmados en algún supermercado | 5.581 (53,7%) |
 
 De un total de 13.015 entradas de OFF etiquetadas "Argentina", se excluyeron
 **2.620 (20,1%)** por no ser relevantes: 2.583 con el nombre en un alfabeto
@@ -61,13 +62,13 @@ Por fuente de la decisión:
 
 | Fuente | Productos |
 |---|---|
-| Análisis de ingredientes | 3.232 |
-| Heurística de nombre | 2.313 |
-| Clasificador automático | 529 |
+| Análisis de ingredientes | 3.247 |
+| Heurística de nombre | 2.335 |
+| Clasificador automático | 497 |
 | Declarado por el fabricante | 121 |
+| Mismo producto que otro EAN ya resuelto | 106 |
 | Certificación oficial de ANMAT | 97 |
-| Mismo producto que otro EAN ya resuelto | 102 |
-| Análisis propio de Open Food Facts | 25 |
+| Análisis propio de Open Food Facts | 23 |
 
 ## Fuentes
 
@@ -125,6 +126,37 @@ Dos correcciones que corren dentro de `build_db.py`, no como pasos aparte:
   sería inventar un veredicto positivo de la nada), pero un `no_apto` o
   `vegetariano` sí, porque ahí equivocarse para el lado cauto es el error
   barato.
+
+## Auditoría del léxico contra las fuentes oficiales
+
+El léxico de ingredientes se auditó cruzándolo contra dos fuentes que mandan
+sobre nuestra opinión: la **taxonomía oficial de Open Food Facts** (de donde
+salen los ingredientes) y el **Código Alimentario Argentino**. Aparecieron 22
+errores reales, corregidos y fijados con tests en
+[tests/test_falsos_positivos.py](tests/test_falsos_positivos.py). El detalle
+en lenguaje llano está en [CORRECCIONES.md](CORRECCIONES.md).
+
+Los tres hallazgos que más movieron la aguja:
+
+- **Oleomargarina.** El CAA (art. 545) la define *únicamente* como bovina u
+  ovina: es una fracción de la grasa de faena y no existe versión vegetal del
+  término. Nosotros solo detectábamos "oleomargarina **bovina**", así que la
+  palabra a secas pasaba de largo: **24 productos se estaban mostrando como
+  aptos veganos** cuando no lo son.
+- **Margarina y grasa hidrogenada.** El CAA (arts. 551 y 548) permite que
+  ambas lleven grasa animal — la margarina admite además hasta 5% de grasa de
+  leche, leche en polvo, suero y caseinato. Sin el calificativo "vegetal" no
+  se puede afirmar nada: pasaron a `revisar`.
+- **Lisozima (INS 1105).** Es el único conservante de uso corriente de origen
+  animal (se extrae de la clara de huevo). Además, el código de 4 dígitos se
+  truncaba a 3 y matcheaba como si fuera "INS 110", con lo cual se contaba
+  como aditivo vegano reconocido.
+
+Sobre la pregunta de si las fuentes resuelven el caso de la oleomargarina a
+secas: **no**. La taxonomía de OFF tiene una sola entrada, `oleomargarina
+bovina` (marcada `vegan:no`), y no define nada para el término sin
+calificativo; `en:margarine` directamente no tiene propiedad `vegan`. Es decir
+que OFF no se pronuncia y el criterio hay que ponerlo desde el CAA.
 
 ## Limitaciones conocidas
 
@@ -211,9 +243,13 @@ consultan por productos nuevos o vencidos. Todo se configura en
 python -m pytest tests -q
 ```
 
-184 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
+255 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
 verifican que la regla de seguridad no se pueda violar por ninguna capa, y los
 falsos positivos concretos que fueron apareciendo al revisar a mano la salida
 real del pipeline (por ejemplo "Yogurisimo Banana", que llegó a clasificarse
 como apto porque el blacklist busca palabras enteras y "yogur" no matchea
 dentro de "Yogurisimo").
+
+Los 71 de [tests/test_falsos_positivos.py](tests/test_falsos_positivos.py) son
+todos errores reales que el clasificador cometía, no casos hipotéticos: cada uno
+se verificó contra la base antes de escribir la corrección.
