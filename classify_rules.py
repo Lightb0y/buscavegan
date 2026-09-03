@@ -1,0 +1,213 @@
+"""Capas 1 y 2 de clasificación: match directo en OFF y heurística de nombre.
+
+Capa 1 usa las señales de Open Food Facts (declaración del fabricante y análisis
+de ingredientes). Capa 2 resuelve lo que Capa 1 dejó sin estado, mirando el
+nombre comercial y la categoría de SEPA.
+
+Regla de seguridad transversal (SPEC.md §4): ante ambigüedad se devuelve
+`revisar`, nunca `apto`.
+
+Límite conocido de la Capa 2: el patrón "<producto> de <vegetal>" se toma como
+apto (ej. "milanesa de soja"), y eso puede errar cuando el producto lleva otro
+ingrediente animal que el nombre no menciona ("helado de almendras" con leche).
+Es el precio de los casos obligatorios de SPEC.md §7; cuando OFF tiene el
+producto, la Capa 1 manda y esta heurística ni se ejecuta.
+"""
+from __future__ import annotations
+
+import re
+import unicodedata
+from dataclasses import dataclass
+
+import config
+
+# --- vocabulario -----------------------------------------------------------
+
+# Las frases de varias palabras van primero: se buscan todas, pero leerlas en
+# este orden hace más claro el motivo que se le muestra al usuario.
+BLACKLIST = [
+    "crema de leche", "clara de huevo", "suero de leche", "extracto de carne",
+    "caldo de carne", "caldo de ave", "manteca de cerdo", "grasa vacuna",
+    "grasa porcina", "dulce de leche",
+    "leche", "manteca", "mantequilla", "nata", "queso", "yogur", "yoghurt",
+    "huevo", "huevos", "yema", "miel", "gelatina", "caseina", "caseinato",
+    "lactosa", "colageno", "sebo", "carmin", "cochinilla", "e120",
+    "jamon", "panceta", "tocino", "pollo", "carne", "pescado", "atun",
+    "merluza", "salmon", "camaron", "langostino", "marisco", "chorizo",
+    "salchicha",
+]
+
+WHITELIST = [
+    "coco", "almendra", "almendras", "soja", "soya", "avena", "arroz",
+    "quinoa", "quinua", "castana de caju", "caju", "girasol", "sesamo",
+    "mani", "garbanzo", "vegetal", "vegetales", "vegano", "vegana",
+    "plant", "base de plantas", "anacardo", "avellana", "nuez", "nueces",
+]
+
+# Declaración explícita: alcanza por sí sola para marcar apto.
+VEGAN_CLAIM = [
+    "vegano", "vegana", "veganos", "veganas", "plant based",
+    "100% vegetal", "apto vegano", "base de plantas",
+]
+
+CATEGORIAS_NO_APTAS = [
+    "carnes", "carniceria", "fiambres", "embutidos", "lacteos", "lacteo",
+    "huevos", "pescaderia", "pescados y mariscos", "quesos",
+]
+CATEGORIAS_APTAS = [
+    "legumbres secas", "frutas y verduras frescas", "frutas y verduras",
+    "verduleria", "harinas",
+]
+# "Arroz y pastas secas" queda afuera a propósito: las pastas pueden llevar
+# huevo, así que caen en `revisar` en vez de `apto`.
+
+WINDOW_WORDS = 3  # ventana posterior donde un modificador vegetal anula el match
+
+FUENTE_OFF_LABEL = "off_label"
+FUENTE_OFF_ANALYSIS = "off_analysis"
+FUENTE_HEURISTICA = "heuristica"
+FUENTE_SIN_DATOS = "sin_datos"
+
+
+@dataclass
+class Decision:
+    estado: str
+    fuente: str
+    motivo: str
+    confianza: float | None = None
+
+    @property
+    def resuelto(self) -> bool:
+        return self.estado != config.REVISAR
+
+
+# --- normalización ---------------------------------------------------------
+
+def normalize(text: str | None) -> str:
+    """Minúsculas, sin tildes y con espacios colapsados."""
+    if not text:
+        return ""
+    text = unicodedata.normalize("NFD", str(text))
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+    text = text.lower().replace("-", " ")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _contains(haystack: str, needle: str) -> bool:
+    return re.search(rf"\b{re.escape(needle)}\b", haystack) is not None
+
+
+def _window_after(text: str, end: int, words: int = WINDOW_WORDS) -> str:
+    return " ".join(text[end:].split()[:words])
+
+
+# --- Capa 1: Open Food Facts ----------------------------------------------
+
+def classify_off(product: dict | None) -> Decision:
+    """Capa 1. `product` es el payload cacheado de OFF (o None si no matcheó)."""
+    if not product:
+        return Decision(config.REVISAR, FUENTE_SIN_DATOS,
+                        "El producto no está en Open Food Facts")
+
+    labels = set(product.get("labels_tags") or [])
+    analysis = set(product.get("ingredients_analysis_tags") or [])
+
+    # La declaración del fabricante es la señal de mayor confianza.
+    if "en:vegan" in labels:
+        return Decision(config.APTO, FUENTE_OFF_LABEL,
+                        "Declarado vegano por el fabricante")
+    if "en:non-vegan" in analysis:
+        if "en:vegetarian" in analysis:
+            return Decision(config.VEGETARIANO, FUENTE_OFF_ANALYSIS,
+                            "Análisis de ingredientes: vegetariano, no vegano")
+        return Decision(config.NO_APTO, FUENTE_OFF_ANALYSIS,
+                        "Análisis de ingredientes (Open Food Facts): no vegano")
+    if "en:non-vegetarian" in analysis:
+        return Decision(config.NO_APTO, FUENTE_OFF_ANALYSIS,
+                        "Análisis de ingredientes: contiene ingredientes animales")
+    if "en:vegan" in analysis:
+        return Decision(config.APTO, FUENTE_OFF_ANALYSIS,
+                        "Confirmado por análisis de ingredientes (Open Food Facts)")
+    if "en:vegetarian" in analysis:
+        return Decision(config.VEGETARIANO, FUENTE_OFF_ANALYSIS,
+                        "Análisis de ingredientes: vegetariano")
+    # maybe-* y *-status-unknown no resuelven: pasa a Capa 2.
+    return Decision(config.REVISAR, FUENTE_SIN_DATOS,
+                    "Open Food Facts no pudo determinar el estado")
+
+
+# --- Capa 2: heurística ----------------------------------------------------
+
+def _categoria_decision(categoria: str | None) -> Decision | None:
+    cat = normalize(categoria)
+    if not cat:
+        return None
+    for c in CATEGORIAS_NO_APTAS:
+        if c in cat:
+            return Decision(config.NO_APTO, FUENTE_HEURISTICA,
+                            f"Rubro de origen animal: {categoria}")
+    for c in CATEGORIAS_APTAS:
+        if c in cat:
+            return Decision(config.APTO, FUENTE_HEURISTICA,
+                            f"Rubro de origen vegetal: {categoria}")
+    return None
+
+
+def classify_name(nombre: str, marca: str | None = None,
+                  categoria: str | None = None) -> Decision:
+    """Capa 2. Heurística sobre nombre + marca + categoría."""
+    texto = normalize(f"{nombre} {marca or ''}")
+
+    # 1. Declaración explícita en el nombre: manda sobre todo lo demás.
+    for claim in VEGAN_CLAIM:
+        if _contains(texto, claim):
+            return Decision(config.APTO, FUENTE_HEURISTICA,
+                            f'El nombre declara "{claim}"')
+
+    # 2. Keywords no veganas, con la ventana que las puede anular.
+    hits_anulados: list[tuple[str, str]] = []
+    for kw in BLACKLIST:
+        for m in re.finditer(rf"\b{re.escape(kw)}\b", texto):
+            ventana = _window_after(texto, m.end())
+            modificador = next(
+                (w for w in WHITELIST if _contains(ventana, w)), None
+            )
+            if modificador is None:
+                cat_dec = _categoria_decision(categoria)
+                if cat_dec and cat_dec.estado == config.APTO:
+                    # Nombre y rubro se contradicen: no arriesgamos un apto.
+                    return Decision(
+                        config.REVISAR, FUENTE_HEURISTICA,
+                        f'"{kw}" en el nombre contradice el rubro "{categoria}"')
+                return Decision(config.NO_APTO, FUENTE_HEURISTICA,
+                                f'"{kw}" es de origen animal')
+            hits_anulados.append((kw, modificador))
+
+    if hits_anulados:
+        kw, mod = hits_anulados[0]
+        return Decision(config.APTO, FUENTE_HEURISTICA,
+                        f'"{kw} de {mod}": versión vegetal')
+
+    # 3. Sustituto vegetal explícito sin ninguna keyword animal.
+    m = re.search(r"\b(?:de|a base de|con)\s+([a-z]+(?: de [a-z]+)?)", texto)
+    if m and any(_contains(m.group(1), w) for w in WHITELIST):
+        return Decision(config.APTO, FUENTE_HEURISTICA,
+                        f'Base vegetal declarada: "{m.group(1)}"')
+
+    # 4. Rubros inequívocos.
+    cat_dec = _categoria_decision(categoria)
+    if cat_dec:
+        return cat_dec
+
+    # 5. Sin señal: que decida la Capa 3, y si no, revisión humana.
+    return Decision(config.REVISAR, FUENTE_SIN_DATOS,
+                    "Sin datos suficientes para clasificar por nombre")
+
+
+def classify(nombre: str, marca: str | None = None, categoria: str | None = None,
+             off_product: dict | None = None) -> Decision:
+    """Capa 1 y, si no resuelve, Capa 2."""
+    decision = classify_off(off_product)
+    if decision.resuelto:
+        return decision
+    return classify_name(nombre, marca, categoria)
