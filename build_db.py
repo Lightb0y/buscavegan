@@ -246,6 +246,23 @@ def build(conn, verbose: bool = True) -> dict:
     if verbose and corregidos:
         print(f"  {corregidos} productos con corrección humana aplicada")
 
+    # Confirmación cruzada contra el catálogo de supermercados (VTEX): no
+    # cambia ningún estado, solo agrega una señal de "esto se vende hoy en
+    # tal cadena" para mostrar en la app. Ver ingest_vtex.py.
+    conn.execute("""
+        UPDATE productos SET cadenas_confirmadas = (
+            SELECT GROUP_CONCAT(DISTINCT cadena)
+            FROM vtex_catalogo v WHERE v.ean = productos.ean
+        )
+    """)
+    conn.commit()
+    confirmados = conn.execute(
+        "SELECT COUNT(*) FROM productos WHERE cadenas_confirmadas IS NOT NULL"
+    ).fetchone()[0]
+    if verbose and confirmados:
+        print(f"  {confirmados} productos confirmados en al menos una cadena "
+              f"de supermercado")
+
     estados = Counter(
         r["estado"] for r in conn.execute("SELECT estado FROM productos"))
     fuentes = Counter(
@@ -263,7 +280,7 @@ def build(conn, verbose: bool = True) -> dict:
               f"para Argentina ({dict(excluidos)})")
     return {"total": total, "estados": dict(estados), "fuentes": dict(fuentes),
             "correcciones": corregidos, "duplicados_ajustados": duplicados,
-            "excluidos": dict(excluidos)}
+            "excluidos": dict(excluidos), "confirmados_supermercado": confirmados}
 
 
 def main(argv=None) -> int:

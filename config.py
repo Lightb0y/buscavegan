@@ -69,6 +69,15 @@ OFF_TIMEOUT = _env_float("OFF_TIMEOUT", 15.0)
 # TTL del cache: pasado ese plazo el EAN se vuelve a consultar.
 OFF_CACHE_TTL_DAYS = _env_int("OFF_CACHE_TTL_DAYS", 60)
 
+# --- Cadenas de supermercado (VTEX) -----------------------------------------
+# Confirmación cruzada: ¿este EAN se vende hoy en una cadena grande argentina?
+# No hace falta credencial ni User-Agent especial, pero se mantiene el mismo
+# por prolijidad. Sin rate limit publicado; el sleep es por cortesía.
+VTEX_SLEEP_SECONDS = _env_float("VTEX_SLEEP_SECONDS", 0.2)
+VTEX_TIMEOUT = _env_float("VTEX_TIMEOUT", 20.0)
+VTEX_PAGE_SIZE = 50       # tope real de la API por consulta
+VTEX_VENTANA_MAXIMA = 2500  # tope real de resultados totales por consulta
+
 # --- Sprint 0 --------------------------------------------------------------
 SAMPLE_SIZE = _env_int("BUSCAVEGAN_SAMPLE_SIZE", 500)
 MATCH_RATE_ML_OK = 0.25   # por encima: el training set alcanza para Capa 3

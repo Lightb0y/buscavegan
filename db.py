@@ -49,8 +49,22 @@ CREATE TABLE IF NOT EXISTS revision_pendiente (
     creado    TEXT
 );
 
+-- Catálogo público de cadenas de supermercado (VTEX): confirma qué EAN se
+-- vende realmente en Argentina, más allá de lo que diga OFF.
+CREATE TABLE IF NOT EXISTS vtex_catalogo (
+    ean         TEXT NOT NULL,
+    cadena      TEXT NOT NULL,
+    nombre      TEXT,
+    marca       TEXT,
+    categoria   TEXT,
+    precio      REAL,
+    actualizado TEXT,
+    PRIMARY KEY (ean, cadena)
+);
+
 CREATE INDEX IF NOT EXISTS idx_productos_estado ON productos(estado);
 CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria);
+CREATE INDEX IF NOT EXISTS idx_vtex_ean ON vtex_catalogo(ean);
 """
 
 FTS_SCHEMA = """
@@ -82,6 +96,8 @@ def _migrar(conn: sqlite3.Connection) -> None:
     cols = {r[1] for r in conn.execute("PRAGMA table_info(productos)")}
     if "motivo" not in cols:
         conn.execute("ALTER TABLE productos ADD COLUMN motivo TEXT")
+    if "cadenas_confirmadas" not in cols:
+        conn.execute("ALTER TABLE productos ADD COLUMN cadenas_confirmadas TEXT")
 
 
 def has_fts5(conn: sqlite3.Connection) -> bool:

@@ -75,11 +75,27 @@ Por fuente de la decisión:
 |---|---|---|
 | **Open Food Facts** | Catálogo argentino + ingredientes | ✅ Automatizada |
 | **ANMAT / INAL** | Registro oficial de atributo vegano (668 productos) | ✅ Automatizada |
-| **SEPA / Precios Claros** | Precios de góndola | ⏸️ Sin ingredientes; el portal bloquea bots |
+| **Carrefour / Vea / Día / Jumbo / Disco** | Confirmación de EAN real en góndola | ✅ Automatizada ([ingest_vtex.py](ingest_vtex.py)) |
+| **SEPA / Precios Claros** | Precios de góndola | ⏸️ Portal bloquea bots; la API en vivo del gobierno está caída |
 | **Todo Vegan / V-Label** | Catálogo certificado V-Label | ❌ App-only, sin API pública |
 
 El detalle de cómo se llega al endpoint de ANMAT y por qué V-Label quedó
 descartada está en [SPEC.md](SPEC.md) §2.3.
+
+### Confirmación cruzada con supermercados
+
+Carrefour, Vea, Día, Jumbo y Disco corren todos sobre VTEX, una plataforma de
+e-commerce que expone su catálogo por una API pública y sin autenticación (la
+misma que usa su propio sitio). [ingest_vtex.py](ingest_vtex.py) recorre el
+árbol de categorías de alimentos de cada cadena y guarda qué EAN están
+realmente en góndola hoy, con marca, categoría y precio.
+
+Esto **no cambia ningún veredicto**: es una señal aparte, mostrada en la app
+como "🛒 Confirmado en: Carrefour, Vea". Confirmar presencia es evidencia
+fuerte de que el producto existe; su ausencia en estas 5 cadenas **no**
+implica que no se venda en Argentina (hay miles de comercios más, empezando
+por Coto, que no corre VTEX). Por eso queda como filtro opcional en la app
+("Solo confirmados en supermercados conocidos"), no como exclusión automática.
 
 ## Calidad de los datos: filtrado y deduplicación
 
@@ -147,20 +163,23 @@ python ingest_off_ar.py
 # 2. Registro oficial de ANMAT (Capa 0)
 python ingest_anmat.py
 
-# 3. Clasificar (Capas 0 a 2) y armar la base final con su índice de búsqueda
+# 3. Confirmación cruzada con supermercados (opcional, tarda: ~275k productos)
+python ingest_vtex.py
+
+# 4. Clasificar (Capas 0 a 2) y armar la base final con su índice de búsqueda
 python build_db.py
 
-# 4. Capa 3: entrenar el clasificador, auditarlo y aplicarlo
+# 5. Capa 3: entrenar el clasificador, auditarlo y aplicarlo
 python classify_ml.py --entrenar --explicar --aplicar
 
-# 5. Ver la cobertura conseguida
+# 6. Ver la cobertura conseguida
 python sprint0.py
 
-# 6. Capa 4: curar a mano lo que quedó pendiente
+# 7. Capa 4: curar a mano lo que quedó pendiente
 python revision.py --exportar               # CSV ordenado por impacto
 python revision.py --importar data/revision_pendiente.csv
 
-# 7. Levantar la app
+# 8. Levantar la app
 streamlit run app.py
 ```
 
@@ -189,7 +208,7 @@ consultan por productos nuevos o vencidos. Todo se configura en
 python -m pytest tests -q
 ```
 
-169 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
+184 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
 verifican que la regla de seguridad no se pueda violar por ninguna capa, y los
 falsos positivos concretos que fueron apareciendo al revisar a mano la salida
 real del pipeline (por ejemplo "Yogurisimo Banana", que llegó a clasificarse

@@ -16,6 +16,7 @@ import streamlit as st
 import categorias
 import config
 import db
+from ingest_vtex import NOMBRE_LEGIBLE as CADENA_LEGIBLE
 
 VEREDICTO = {
     config.APTO: ("✅", "Apto vegano", "#1a7f37"),
@@ -54,7 +55,11 @@ def stats() -> dict:
     ingr = conn.execute(
         "SELECT COUNT(*) FROM productos WHERE fuente_decision='ingredientes'"
     ).fetchone()[0]
-    return {"total": total, "por_estado": por_estado, "por_ingredientes": ingr}
+    confirmados = conn.execute(
+        "SELECT COUNT(*) FROM productos WHERE cadenas_confirmadas IS NOT NULL"
+    ).fetchone()[0]
+    return {"total": total, "por_estado": por_estado, "por_ingredientes": ingr,
+            "confirmados": confirmados}
 
 
 @st.cache_data(ttl=300)
@@ -72,7 +77,8 @@ def _fts_query(texto: str) -> str:
     return " ".join(f"{t}*" for t in tokens)
 
 
-def _armar_consulta(texto: str, estados: list[str], categoria: str | None):
+def _armar_consulta(texto: str, estados: list[str], categoria: str | None,
+                    solo_confirmados: bool = False):
     """Arma (sql_base, params, usa_fts) sin LIMIT ni SELECT, para reusar en
     la búsqueda paginada y en el conteo total."""
     where, params = [], []
@@ -83,6 +89,8 @@ def _armar_consulta(texto: str, estados: list[str], categoria: str | None):
     if categoria and categoria != "Todas":
         where.append("p.categoria = ?")
         params.append(categoria)
+    if solo_confirmados:
+        where.append("p.cadenas_confirmadas IS NOT NULL")
 
     texto = (texto or "").strip()
     if texto.isdigit() and len(texto) >= 8:
@@ -100,10 +108,11 @@ def _armar_consulta(texto: str, estados: list[str], categoria: str | None):
     return f"FROM productos p {cond}", params, False
 
 
-def contar(texto: str, estados: list[str], categoria: str | None) -> int:
+def contar(texto: str, estados: list[str], categoria: str | None,
+          solo_confirmados: bool = False) -> int:
     """Total de resultados que matchean, sin el LIMIT de la página."""
     conn = get_conn()
-    sql, params, _ = _armar_consulta(texto, estados, categoria)
+    sql, params, _ = _armar_consulta(texto, estados, categoria, solo_confirmados)
     try:
         return conn.execute(f"SELECT COUNT(*) {sql}", params).fetchone()[0]
     except sqlite3.OperationalError:
@@ -111,9 +120,11 @@ def contar(texto: str, estados: list[str], categoria: str | None) -> int:
 
 
 def buscar(texto: str, estados: list[str], categoria: str | None,
-           limite: int = PAGE_SIZE, offset: int = 0) -> list[sqlite3.Row]:
+           limite: int = PAGE_SIZE, offset: int = 0,
+           solo_confirmados: bool = False) -> list[sqlite3.Row]:
     conn = get_conn()
-    sql, params, usa_fts = _armar_consulta(texto, estados, categoria)
+    sql, params, usa_fts = _armar_consulta(texto, estados, categoria,
+                                           solo_confirmados)
     orden = " ORDER BY rank" if usa_fts else " ORDER BY p.nombre"
     try:
         return conn.execute(
@@ -128,6 +139,8 @@ def buscar(texto: str, estados: list[str], categoria: str | None,
         if categoria and categoria != "Todas":
             where.append("p.categoria = ?")
             params2.append(categoria)
+        if solo_confirmados:
+            where.append("p.cadenas_confirmadas IS NOT NULL")
         like = f"%{(texto or '').strip()}%"
         where.append("(p.nombre LIKE ? OR p.marca LIKE ?)")
         params2 += [like, like]
@@ -166,6 +179,12 @@ def card(p: sqlite3.Row) -> None:
 
             if p["motivo"]:
                 st.caption(f"↳ {p['motivo']}")
+
+            if p["cadenas_confirmadas"]:
+                cadenas = ", ".join(
+                    CADENA_LEGIBLE.get(c, c)
+                    for c in p["cadenas_confirmadas"].split(","))
+                st.caption(f"🛒 Confirmado en: {cadenas}")
 
             if p["ingredients_text"]:
                 with st.expander("Ver ingredientes"):
@@ -224,12 +243,19 @@ def main() -> None:
                     if st.checkbox(f"{ic} {lbl}", value=True, key=f"f_{e}")]
         categoria = st.selectbox(
             "Categoría", ["Todas"] + categorias_disponibles())
+        solo_confirmados = st.checkbox(
+            "🛒 Solo confirmados en supermercados conocidos", value=False,
+            help="Carrefour, Vea, Día, Jumbo o Disco. Que no aparezca acá no "
+                 "significa que no exista: solo que no se pudo confirmar en "
+                 "estas 5 cadenas.")
         limite = st.slider("Resultados por página", 6, 300, PAGE_SIZE, step=6)
 
         st.divider()
         st.caption(f"**{s['total']:,}** productos argentinos".replace(",", "."))
         st.caption(f"**{s['por_ingredientes']:,}** clasificados por su lista "
                    "de ingredientes".replace(",", "."))
+        st.caption(f"**{s['confirmados']:,}** confirmados en algún "
+                   "supermercado conocido".replace(",", "."))
         st.divider()
         st.caption("«Apto» = **vegano** (sin ingredientes de origen animal). "
                    "No significa *cruelty-free*: el testeo en animales no está "
@@ -242,13 +268,13 @@ def main() -> None:
 
     # Si cambió la búsqueda o algún filtro, la página vieja ya no tiene
     # sentido (podría quedar más allá del final) — se vuelve a la 1.
-    firma = (texto, tuple(sorted(elegidos)), categoria, limite)
+    firma = (texto, tuple(sorted(elegidos)), categoria, limite, solo_confirmados)
     if st.session_state.get("firma_filtros") != firma:
         st.session_state.firma_filtros = firma
         st.session_state.pagina = 1
     st.session_state.setdefault("pagina", 1)
 
-    total = contar(texto, elegidos, categoria)
+    total = contar(texto, elegidos, categoria, solo_confirmados)
     if not total:
         st.info("Sin resultados. Probá con menos filtros o menos palabras.")
         return
@@ -260,7 +286,8 @@ def main() -> None:
     pagina = st.session_state.pagina
     offset = (pagina - 1) * limite
 
-    resultados = buscar(texto, elegidos, categoria, limite, offset)
+    resultados = buscar(texto, elegidos, categoria, limite, offset,
+                        solo_confirmados)
 
     desde, hasta = offset + 1, offset + len(resultados)
     st.caption(f"Mostrando {desde:,}–{hasta:,} de **{total:,}** resultados"
