@@ -6,6 +6,9 @@ venv/
 .pytest_cache/
 data/*.db
 data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+data/*.log
 data/raw/
 data/*.csv
 data/*.zip

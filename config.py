@@ -48,13 +48,21 @@ OFF_FIELDS = [
     "product_name",
     "brands",
     "ingredients_text",
+    # `ingredients_tags` es la version normalizada por la taxonomia de OFF
+    # (en:milk, en:gelatin...). Es el unico dato de ingredientes que expone la
+    # API nueva, y al venir sin idioma ni erratas clasifica mejor que el texto.
+    "ingredients_tags",
     "ingredients_analysis_tags",
     "labels_tags",
     "categories_tags",
     "image_front_small_url",
 ]
-# Rate limit: OFF responde 503 al excederse. Un request por segundo es conservador.
+# Rate limit: OFF responde 503 al excederse. Los limites publicados son
+# 100 req/min para lookup por producto y solo 10 req/min para busqueda, asi
+# que la paginacion del catalogo necesita un ritmo mucho mas lento.
 OFF_SLEEP_SECONDS = _env_float("OFF_SLEEP_SECONDS", 1.0)
+OFF_SEARCH_SLEEP_SECONDS = _env_float("OFF_SEARCH_SLEEP_SECONDS", 7.0)
+OFF_SEARCH_RETRY_WAIT = _env_float("OFF_SEARCH_RETRY_WAIT", 30.0)
 OFF_MAX_RETRIES = _env_int("OFF_MAX_RETRIES", 4)
 OFF_BACKOFF_BASE = _env_float("OFF_BACKOFF_BASE", 2.0)
 OFF_TIMEOUT = _env_float("OFF_TIMEOUT", 15.0)
