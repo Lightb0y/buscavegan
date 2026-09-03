@@ -23,8 +23,8 @@ Fuentes cruzadas:
 |---|---|
 | Cobertura geográfica | Catálogo nacional completo |
 | Actualización | Refresco periódico (pipeline reproducible) |
-| Fuente de catálogo | SEPA |
-| Fuente de clasificación | Open Food Facts API v2 |
+| Fuente de catálogo | Open Food Facts (AR) — SEPA queda para precios |
+| Fuente de clasificación | Ingredientes (OFF) + certificación ANMAT |
 | Clave de cruce | EAN (`producto_id` en SEPA == `code` en OFF) |
 | Regla de seguridad | Ante duda → `revisar`, nunca `apto` |
 
@@ -48,6 +48,36 @@ Fuentes cruzadas:
 - Campos: `code`, `ingredients_analysis_tags`, `labels_tags`, `ingredients_text`,
   `categories_tags`, `product_name`, `brands`, `image_front_small_url`.
 
+## 2.3 Certificación oficial argentina (Capa 0) — investigado
+
+Dos fuentes candidatas de certificación local, con conclusiones distintas.
+
+### ANMAT / INAL — registro de productos con atributo vegano ✅ VIABLE
+
+- Página: `argentina.gob.ar/anmat/regulados/alimentos/atributo-vegano/productos-con-atributo-vegano`
+- Son los productos que obtuvieron el atributo "vegano" por trámite regulatorio
+  (Art. 229 del Código Alimentario Argentino). Es un **acto administrativo**, no
+  una inferencia sobre ingredientes: la evidencia más fuerte disponible.
+- **Endpoint JSON:** sí. La `<table>` viene vacía en el HTML y la puebla por
+  JavaScript el componente `ponchoTable` del tema de gob.ar, que lee una
+  **planilla de Google pública**. El id está en el script de la propia página:
+  `1djonldqe0ayRxGel2OjnoEHy3MrIKEMzIkmmjM7rZqc`, hoja `29 productos atributo vegano`.
+  Se consulta con el API `gviz`:
+  `https://docs.google.com/spreadsheets/d/{id}/gviz/tq?tqx=out:json&sheet={hoja}`
+- **Campos:** `razón social`, `marca`, `identificación del producto`, `RNPA`.
+- **Bulk:** sí, la planilla entera en un request. **668 productos, 122 marcas.**
+- **Falta el EAN** → el cruce con el catálogo es por marca + nombre.
+
+### Todo Vegan / V-Label ❌ NO VIABLE COMO FUENTE AUTOMATIZADA
+
+- `todovegan.com.ar` no resuelve por DNS. La app de V-Label LATAM es
+  **app-only**, sin web equivalente ni export público.
+- `v-label.com` es un WordPress de marketing: su `wp-json` está abierto pero
+  **no expone ningún post type de productos** (solo `post`, `page`, `popup`,
+  `contact`...). No hay catálogo consultable ni endpoint de búsqueda.
+- **Conclusión:** queda como fuente de **verificación manual / spot-check**, no
+  como input del pipeline — igual que AptoVegan, descartada antes por lo mismo.
+
 ---
 
 ## 3. Sprint 0 (obligatorio)
@@ -60,6 +90,28 @@ Medir el **match rate** OFF sobre una muestra de ~500 EANs antes de construir la
 ---
 
 ## 4. Pipeline de clasificación (4 capas)
+
+## 4.0 Capa 0 — Certificación oficial (antes que todo el resto)
+
+Cruce del catálogo contra el registro de ANMAT. Sin EAN, el match es por
+**marca + nombre** y es deliberadamente estricto:
+
+1. La marca normalizada tiene que coincidir (la de OFF puede traer varias
+   separadas por coma: se corta **antes** de normalizar, porque la
+   normalización borra la puntuación).
+2. Los tokens significativos del nombre deben solaparse ≥ 60%, medido contra el
+   conjunto más chico: el nombre de ANMAT es descriptivo y largo
+   ("Medallones a base de choclo, quinoa y calabaza"), el de OFF suele ser corto.
+
+Con match → `apto`, `fuente_decision = certificacion_oficial`, por encima de
+`off_label` y de `off_analysis`. Sin match → sigue a la Capa 1.
+
+Un match flojo marcaría "apto" un producto que nadie certificó, que es
+exactamente el error que prohíbe la regla de seguridad: por eso los tests de
+esta capa apuntan sobre todo a lo que **no** debe matchear.
+
+**Cobertura esperada: baja** (certificación voluntaria y reciente). Es un
+enriquecimiento, no una dependencia: no bloquea al resto del pipeline.
 
 ### Capa 1 — Match directo por EAN
 - `labels_tags` contiene `en:vegan` → **apto** (`off_label`, confianza máxima)
@@ -127,7 +179,7 @@ classify_ml.py  build_db.py  refresh.py  app.py  tests/  data/
 
 ### Esquema `productos`
 `ean` PK, `nombre`, `marca`, `categoria`, `estado`, `fuente_decision`, `confianza`,
-`ingredients_text`, `imagen_url`, `precio_ref`, `actualizado`. Más FTS5 sobre (nombre, marca).
+`ingredients_text`, `imagen_url`, `precio_ref`, `actualizado`, `motivo`. Más FTS5 sobre (nombre, marca).
 
 ---
 
