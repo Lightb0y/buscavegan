@@ -192,29 +192,39 @@ def card(p: sqlite3.Row) -> None:
 
 
 def _ir_a_pagina(nueva: int) -> None:
-    """Cambia de página y fuerza el rerun antes de que se dibuje el
-    number_input de abajo — evita el error de Streamlit por escribir en
-    session_state después de instanciar el widget que usa esa misma key."""
+    """Cambia de página. Se usa como `on_click` de los botones: Streamlit
+    corre los callbacks de `on_click`/`on_change` ANTES de instanciar ningún
+    widget del rerun siguiente, así que escribir en session_state acá adentro
+    nunca choca con un widget ya creado — a diferencia de hacerlo en medio del
+    cuerpo del script, donde el number_input de la página ya pudo haber
+    reclamado esa key más arriba en el mismo run."""
     st.session_state.pagina = nueva
-    st.rerun()
+    st.session_state.pagina_salto = nueva
+
+
+def _saltar_a_pagina() -> None:
+    """on_change del number_input: sincroniza el número tipeado hacia la
+    página lógica que usan las cards y el resto de los controles."""
+    st.session_state.pagina = st.session_state.pagina_salto
 
 
 def controles_paginacion(pagina: int, n_paginas: int, key_prefix: str,
                          con_salto: bool) -> None:
     c1, c2, c3 = st.columns([1, 2, 1])
     with c1:
-        if st.button("⬅ Anterior", disabled=pagina <= 1,
-                    key=f"{key_prefix}_ant", use_container_width=True):
-            _ir_a_pagina(pagina - 1)
+        st.button("⬅ Anterior", disabled=pagina <= 1,
+                 key=f"{key_prefix}_ant", use_container_width=True,
+                 on_click=_ir_a_pagina, args=(pagina - 1,))
     with c3:
-        if st.button("Siguiente ➡", disabled=pagina >= n_paginas,
-                    key=f"{key_prefix}_sig", use_container_width=True):
-            _ir_a_pagina(pagina + 1)
+        st.button("Siguiente ➡", disabled=pagina >= n_paginas,
+                 key=f"{key_prefix}_sig", use_container_width=True,
+                 on_click=_ir_a_pagina, args=(pagina + 1,))
     with c2:
         if con_salto and n_paginas > 1:
             st.number_input(
                 "Ir a la página", min_value=1, max_value=n_paginas, step=1,
-                key="pagina", label_visibility="collapsed")
+                key="pagina_salto", label_visibility="collapsed",
+                on_change=_saltar_a_pagina)
         else:
             st.markdown(
                 f"<div style='text-align:center;padding-top:0.4rem'>"
@@ -280,10 +290,12 @@ def main() -> None:
         return
 
     n_paginas = total_paginas(total, limite)
-    # Clamp antes de crear el number_input(key="pagina"): así el ajuste
-    # queda dentro de rango en el mismo run en el que se instancia el widget.
-    st.session_state.pagina = min(max(st.session_state.pagina, 1), n_paginas)
-    pagina = st.session_state.pagina
+    # Clamp y sincronizado con la key del number_input, ambos antes de crear
+    # ningún widget de paginación en este run — todavía es seguro escribir
+    # session_state acá.
+    pagina = min(max(st.session_state.pagina, 1), n_paginas)
+    st.session_state.pagina = pagina
+    st.session_state.pagina_salto = pagina
     offset = (pagina - 1) * limite
 
     resultados = buscar(texto, elegidos, categoria, limite, offset,

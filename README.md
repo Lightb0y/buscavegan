@@ -97,6 +97,9 @@ implica que no se venda en Argentina (hay miles de comercios más, empezando
 por Coto, que no corre VTEX). Por eso queda como filtro opcional en la app
 ("Solo confirmados en supermercados conocidos"), no como exclusión automática.
 
+De la última cosecha completa: **5.581 de los 10.395 productos (53,7%)**
+quedaron confirmados en al menos una de las 5 cadenas.
+
 ## Calidad de los datos: filtrado y deduplicación
 
 Dos correcciones que corren dentro de `build_db.py`, no como pasos aparte:
