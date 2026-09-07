@@ -177,6 +177,60 @@ def test_una_lista_de_puras_clases_no_alcanza_para_afirmar_nada():
     assert ci.analyze("colorante, conservante, estabilizante").estado == REVISAR
 
 
+# --- Abreviaturas de clase de las fichas de supermercado ------------------
+# Las fichas de Cencosud escriben "col ins 120" y a veces "col 120", comiéndose
+# el "INS". Sin normalizar la segunda forma, el carmín pasaba desapercibido:
+# es una falla de seguridad, no solo de cobertura.
+
+def test_carmin_abreviado_sin_ins_se_detecta_igual():
+    assert ci.analyze("harina de maiz, sal, col ins 120").estado == NO_APTO
+    assert ci.analyze("harina de maiz, sal, col 120").estado == NO_APTO
+
+
+def test_gelatina_abreviada_sin_ins_se_detecta_igual():
+    assert ci.analyze("agua, azucar, est 441").estado == NO_APTO
+
+
+def test_abreviatura_de_clase_sola_no_cuenta_como_ingrediente():
+    con = ci.analyze("harina de maiz, aceite de girasol, sal, aro, col")
+    sin = ci.analyze("harina de maiz, aceite de girasol, sal")
+    assert con.cobertura == sin.cobertura
+    assert con.estado == APTO
+
+
+def test_la_abreviatura_no_convierte_un_aditivo_en_vegano():
+    # "ant 300" es ácido ascórbico y sí es vegano, pero el reconocimiento tiene
+    # que venir del código, no de la abreviatura: si el código es de un aditivo
+    # animal, manda el aditivo.
+    assert ci.analyze("agua, sal, ant 300, harina").estado == APTO
+    assert ci.analyze("agua, sal, col 904, harina").estado == NO_APTO
+
+
+# --- Ruido del rótulo que no es un ingrediente ----------------------------
+
+@pytest.mark.parametrize("basura", [
+    "informacion nutricional",
+    "grasas totales",
+    "sus valores diarios pueden ser mayores o menores",
+    "contiene fenilalanina",
+    "tel",
+    "www",
+    "3 mg/kg",
+    "ingredientes",
+    "segun la ficha de disco",
+])
+def test_el_ruido_del_rotulo_no_pesa_en_la_cobertura(basura):
+    limpio = ci.analyze("harina de trigo, aceite de girasol, sal, azucar")
+    sucio = ci.analyze(f"harina de trigo, aceite de girasol, sal, azucar, {basura}")
+    assert sucio.cobertura == limpio.cobertura
+    assert sucio.estado == APTO
+
+
+def test_el_ruido_no_tapa_un_ingrediente_animal():
+    r = ci.analyze("harina, sal, informacion nutricional, gelatina, tel, www")
+    assert r.estado == NO_APTO
+
+
 # --- Listas en inglés -----------------------------------------------------
 # Buena parte del catálogo argentino de OFF trae los ingredientes en inglés y
 # el léxico español no los ve por una letra ("carmin" no matchea en "carmine").

@@ -255,8 +255,15 @@ VEGANO = [
     r"\bpolirricinoleato\b", r"\bdioxido de (silicio|titanio|carbono)\b",
     r"\bgoma gelan\b", r"\btripolifosfato\b", r"\bpirofosfato\b",
     r"\bacido (sorbico|benzoico|acetico|adipico|fumarico|gluconico)\b",
-    r"\bsorbico\b", r"\bnitrito\b", r"\bsulfito\b", r"\bmetabisulfito\b",
+    r"\bsorbico\b", r"\bnitrito\b", r"\bsulfito", r"\bmetabisulfito\b",
     r"\bpropionato\b", r"\bnatamicina\b", r"\bpimaricina\b",
+    # Vitaminas y aminoácidos que aparecen abreviados o sueltos en el rótulo.
+    r"\bb ?(1|2|3|6|9|12)\b", r"\bbiotina\b", r"\btaurina\b",
+    r"\bfenilalanina\b", r"\bacido folico\b", r"\bfolato\b",
+    r"\bjmaf\b", r"\bjarabe de maiz de alta fructosa\b",
+    r"\bacucar\b", r"\bazucares\b", r"\bmalbec\b", r"\bvino (tinto|blanco)\b",
+    r"\bmosto\b", r"\balmidon modificado\b", r"\bharina integral\b",
+    r"\bsemola\b", r"\bpolenta\b", r"\bsalvado\b", r"\bgermen\b",
     # Clases de aditivo que SÍ se pueden dar por vegetales: no existe un aditivo
     # de origen animal de uso corriente que cumpla estas funciones.
     r"\bacidulante\b", r"\bantioxidante\b", r"\bhumectante\b",
@@ -288,9 +295,30 @@ CLASES_DE_ADITIVO = re.compile(
     r"antihumectantes?|leudantes?|gasificantes?|edulcorantes?|espumantes?|"
     r"secuestrantes?|antiaglutinantes?|antiespumantes?|resaltadores? del sabor|"
     r"reguladores? de (la )?acidez|agentes? de brillo|"
+    # Las fichas de Cencosud abrevian la clase: "aro" (aromatizante), "col"
+    # (colorante), "aci" (acidulante), "exa" (exaltador del sabor)...
+    r"aro|col|aci|acreg|ant|cons|emu|esp|est|edu|hum|leu|gas|sec|reg|anah|"
+    r"exa|flo|sab|vd|"
     r"colours?|colors?|preservatives?|emulsifiers?|thickeners?|stabilis?ers?|"
     r"gelling agents?|glazing agents?|raising agents?|anti caking agents?|"
     r"acidity regulators?|firming agents?|flavour enhancers?)$")
+
+# Texto que se cuela en el campo de ingredientes pero no es un ingrediente: el
+# encabezado, la tabla nutricional, el teléfono del fabricante, la web, los
+# "mg/kg" del enriquecimiento por ley. Se descartan del cálculo igual que las
+# clases de aditivo: no dicen nada del origen y castigar la cobertura por
+# ellos es castigar al rótulo que transcribió de más.
+RUIDO_DE_ROTULO = re.compile(
+    r"^(ingredientes?|informacion nutricional|tabla nutricional|"
+    r"valor(es)? diario(s)?( de referencia)?|grasas? (totales|saturadas|trans)|"
+    r"hidratos de carbono|fibra alimentaria|sodio|proteinas|porcion|"
+    r"cantidad por porcion|no aporta cantidades significativas de[\w\s,]*|"
+    r"sus valores diarios pueden ser (mayores|menores)[\w\s,]*|"
+    r"contiene fenilalanina|industria argentina|elaborado por[\w\s.]*|"
+    r"tel|telefono|www|com|ar|net|org|http\S*|"
+    r"segun la ficha de [\w\s]+|"
+    r"\d+([.,]\d+)? ?(mg|g|kg|ml|l|ui|kcal|mcg|ug)(/(kg|g|l|ml|porcion))?|"
+    r"[\d\s.,%]+)$")
 
 # Los mismos, en la taxonomía de OFF. OFF emite el tag de la clase ADEMÁS del
 # tag del aditivo concreto en el 98% de los casos, así que tratarlos como
@@ -404,6 +432,15 @@ def normalize(text: str) -> str:
     # "INS322" / "E-322" -> "ins 322" / "e 322". Los de 4 dígitos existen
     # (INS 1105 es la lisozima) y hay que normalizarlos completos, no truncados.
     text = re.sub(r"\b(ins|e)[\s.-]*(\d{3,4})\b", r"\1 \2", text)
+    # Las fichas de los supermercados abrevian la clase y a veces se comen el
+    # "INS": escriben "col 120" en vez de "colorante INS 120". Sin esto, el
+    # carmín (INS 120) pasaba desapercibido — es una falla de seguridad, no
+    # solo de cobertura. Se reescribe a la forma canónica para que los léxicos
+    # de siempre lo vean.
+    text = re.sub(
+        r"\b(aro|col|aci|acreg|ant|cons|emu|esp|est|edu|hum|leu|gas|sec|reg|"
+        r"anah|exa|flo|sab)[\s.-]+(?!ins\b)(\d{3,4})\b",
+        r"\1 ins \2", text)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -455,8 +492,9 @@ def analyze(text: str | None) -> AnalisisIngredientes:
     motivo_peor = ""
 
     for ing in ingredientes:
-        # Las palabras de clase no son ingredientes: no suman ni restan.
-        if CLASES_DE_ADITIVO.match(ing):
+        # Ni las palabras de clase ni el ruido del rótulo son ingredientes:
+        # no suman ni restan.
+        if CLASES_DE_ADITIVO.match(ing) or RUIDO_DE_ROTULO.match(ing):
             continue
         evaluados += 1
 

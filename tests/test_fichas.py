@@ -145,9 +145,14 @@ def test_build_guarda_los_ingredientes_del_super_para_mostrarlos(tmp_path):
         " WHERE ean='7790000000017'").fetchone()
     assert fila["estado"] == APTO
     assert fila["fuente_decision"] == build_db.FUENTE_INGREDIENTES_SUPER
-    # Se guardan para que la app los muestre, aclarando de dónde salieron.
+    # Se guardan para que la app los muestre...
     assert "harina de maiz" in fila["ingredients_text"]
-    assert "Disco" in fila["ingredients_text"]
+    # ...pero SIN pegarles la procedencia: el campo se vuelve a analizar en
+    # otras capas y un "(según la ficha de Disco)" al final se leía como un
+    # ingrediente más, bajando la cobertura. El origen lo informa la app
+    # desde `fuente_decision`.
+    assert "Disco" not in fila["ingredients_text"]
+    assert "ficha" not in fila["ingredients_text"]
     conn.close()
 
 

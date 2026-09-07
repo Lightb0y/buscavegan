@@ -32,7 +32,6 @@ import classify_rules as cr
 import config
 import db
 import ingest_anmat
-import ingest_vtex
 import relevancia
 import revision
 
@@ -267,12 +266,11 @@ def build(conn, verbose: bool = True) -> dict:
         d = decidir(f["nombre"], f["marca"], categoria, off, anmat_idx, ficha)
 
         # La app muestra los ingredientes: si OFF no los tiene, se guardan los
-        # del supermercado, aclarando de dónde salieron.
-        ingredientes = off.get("ingredients_text")
-        if not ingredientes and ficha.get("ingredientes"):
-            cadena = ficha.get("cadena", "")
-            etiqueta = ingest_vtex.NOMBRE_LEGIBLE.get(cadena, cadena)
-            ingredientes = f"{ficha['ingredientes']} (según la ficha de {etiqueta})"
+        # del supermercado. La procedencia NO se mete acá adentro: el campo se
+        # vuelve a analizar en otras capas, y un "(según la ficha de Disco)"
+        # pegado al final se leía como un ingrediente más y bajaba la
+        # cobertura. La app ya informa el origen desde `fuente_decision`.
+        ingredientes = off.get("ingredients_text") or ficha.get("ingredientes")
 
         conn.execute(
             "INSERT OR REPLACE INTO productos (ean, nombre, marca, categoria,"
