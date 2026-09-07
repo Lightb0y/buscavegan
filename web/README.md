@@ -81,11 +81,25 @@ npx impeccable@latest install --yes --project --providers=claude-code
 
 Vercel, conectado al repo. Cada push a `main` redeploya.
 
-> **Root Directory = `web`** es obligatorio, en *Settings → Build and
-> Deployment → Root Directory*. Sin eso Vercel construye desde la raíz del
-> repo, encuentra `app.py` (la app interna de Streamlit) y falla con
-> `Found app.py but it does not export a top-level "app"...`, porque cree que
-> el proyecto es una función serverless de Python.
+El [`vercel.json`](../vercel.json) de la raíz hace que **no haga falta tocar
+nada en el dashboard**: declara `framework: null` (si no, Vercel ve `app.py` en
+la raíz y cree que el proyecto es una función serverless de Python), y apunta
+el build a `web/` con salida en `web/out`.
+
+Si en Vercel se configura *Settings → General → Root Directory* = `web`, ese
+archivo pasa a ignorarse y Vercel detecta Next.js por su cuenta. Las dos vías
+funcionan; con `vercel.json` la configuración vive en el repo, que es lo que
+conviene porque el deploy semanal lo dispara un workflow y no una persona.
+
+### Antes de commitear un cambio en `package.json`
+
+Correr `npm install` para regenerar `package-lock.json`. Vercel y el CI usan
+`npm ci`, que **falla** si los dos archivos no están sincronizados:
+
+```
+npm error `npm ci` can only install packages when your package.json and
+npm error package-lock.json are in sync.
+```
 
 El workflow `refresh.yml` corre el pipeline una vez por semana y, si los tests
 pasan, commitea `web/data/` — con lo cual Vercel redeploya solo. Nadie tiene
