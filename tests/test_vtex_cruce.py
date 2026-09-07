@@ -28,6 +28,12 @@ def test_cruce_marca_las_cadenas_confirmadas(tmp_path):
         {"ean": "1111111111111", "nombre": "Aceite de girasol", "marca": "X"},
         {"ean": "2222222222222", "nombre": "Producto sin confirmar", "marca": "Y"},
     ])
+    # El de control necesita alguna señal propia: sin nada, la purga de fichas
+    # fantasma se lo lleva y no habría fila que comprobar.
+    conn.execute(
+        "INSERT INTO vtex_ficha (ean, cadena, ingredientes, trazas, sellos,"
+        " actualizado) VALUES ('2222222222222','disco','agua, sal, azucar',"
+        " NULL, NULL, '2026-01-01')")
     conn.execute(
         "INSERT INTO vtex_catalogo (ean, cadena, nombre, actualizado)"
         " VALUES ('1111111111111','carrefour','Aceite de girasol', '2026-01-01')")

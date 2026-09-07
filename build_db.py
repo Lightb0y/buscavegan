@@ -153,6 +153,37 @@ def decidir(nombre: str, marca: str | None, categoria: str | None,
     return cr.Decision(config.REVISAR, cr.FUENTE_SIN_DATOS, motivo)
 
 
+def _purgar_fichas_fantasma(conn) -> int:
+    """Saca de la búsqueda las entradas de OFF de las que no sabemos nada.
+
+    No se borran de `catalogo` ni de `off_cache` —igual que el filtro de
+    relevancia—: si mañana OFF las completa, vuelven solas en el próximo
+    refresco. Ver `relevancia.es_ficha_fantasma` para el criterio y por qué es
+    tan estrecho.
+    """
+    filas = conn.execute("""
+        SELECT p.ean, p.ingredients_text, p.cadenas_confirmadas,
+               p.fuente_decision, o.payload
+        FROM productos p LEFT JOIN off_cache o ON o.ean = p.ean AND o.found = 1
+    """).fetchall()
+
+    fantasmas = []
+    for f in filas:
+        cats = []
+        if f["payload"]:
+            cats = json.loads(f["payload"]).get("categories_tags") or []
+        if relevancia.es_ficha_fantasma(cats, f["ingredients_text"],
+                                        f["cadenas_confirmadas"],
+                                        f["fuente_decision"]):
+            fantasmas.append((f["ean"],))
+
+    if fantasmas:
+        conn.executemany("DELETE FROM productos WHERE ean = ?", fantasmas)
+        conn.executemany("DELETE FROM revision_pendiente WHERE ean = ?", fantasmas)
+        conn.commit()
+    return len(fantasmas)
+
+
 def _propagar_duplicados(conn) -> int:
     """Dos EANs con el mismo nombre y marca son, en la práctica, el mismo
     producto cargado más de una vez en OFF (a veces con distinta foto, o
@@ -326,6 +357,14 @@ def build(conn, verbose: bool = True) -> dict:
     if verbose and confirmados:
         print(f"  {confirmados} productos confirmados en al menos una cadena "
               f"de supermercado")
+
+    # Fichas fantasma: entradas de OFF sin ninguna señal aprovechable. Va acá,
+    # al final, porque el criterio necesita saber si el producto está en alguna
+    # góndola real, y eso recién se sabe después del cruce de arriba.
+    fantasmas = _purgar_fichas_fantasma(conn)
+    if verbose and fantasmas:
+        print(f"  {fantasmas} fichas fantasma excluidas (sin categoría, sin "
+              f"ingredientes, sin góndola y sin veredicto fundado)")
 
     estados = Counter(
         r["estado"] for r in conn.execute("SELECT estado FROM productos"))

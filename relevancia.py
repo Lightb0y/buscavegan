@@ -67,3 +67,47 @@ def motivo_exclusion(nombre: str | None, ean: str | None) -> str | None:
 
 def es_relevante(nombre: str | None, ean: str | None) -> bool:
     return motivo_exclusion(nombre, ean) is None
+
+
+# --- Fichas fantasma -------------------------------------------------------
+# Open Food Facts se llena escaneando códigos de barras: alguien apunta el
+# teléfono a un producto y queda creada una entrada con un nombre y poco más.
+# Muchas nunca se completan, y como el pool de códigos lo comparte con Open
+# Beauty Facts, terminan colándose shampoos, cremas y hasta medicamentos en un
+# catálogo de alimentos.
+#
+# Medido sobre el catálogo real: el 80% de lo que quedaba en `revisar` no tenía
+# ni siquiera categoría, y solo el 35% tenía código de barras argentino (contra
+# el 79% de los productos que sí se pudieron clasificar).
+#
+# El criterio para descartarlas es deliberadamente estrecho: hacen falta las
+# CUATRO condiciones. Con que el producto tenga una sola señal —una categoría,
+# una lista de ingredientes, presencia en una góndola real o un veredicto
+# fundado— se queda. Cortar solo por "no tiene categoría" se llevaba puestos
+# 1.608 productos bien clasificados, entre ellos 457 con sello vegano
+# certificado: sería tirar evidencia por falta de una etiqueta.
+
+# Fuentes que constituyen evidencia real, no una inferencia sobre el nombre.
+FUENTES_CON_EVIDENCIA = frozenset({
+    "certificacion_oficial", "off_label", "sello_super",
+    "ingredientes", "ingredientes_super", "off_analysis",
+})
+
+
+def es_ficha_fantasma(categorias_off, ingredientes: str | None,
+                      cadenas_confirmadas: str | None,
+                      fuente_decision: str | None) -> bool:
+    """True si de este producto no sabemos absolutamente nada.
+
+    No es "no pudimos clasificarlo" —eso es `revisar` y se muestra igual—,
+    es "no hay ninguna evidencia de que sea un alimento que se venda acá".
+    """
+    if categorias_off:
+        return False
+    if (ingredientes or "").strip():
+        return False
+    if cadenas_confirmadas:
+        return False
+    if fuente_decision in FUENTES_CON_EVIDENCIA:
+        return False
+    return True

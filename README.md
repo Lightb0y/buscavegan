@@ -46,37 +46,38 @@ Números de la última corrida completa (`python sprint0.py`):
 
 | Métrica | Valor |
 |---|---|
-| Productos argentinos en la base | **10.395** |
-| **Clasificados** | **7.216 (69,4%)** |
-| Resueltos por su **lista de ingredientes** | 4.240 (40,8%) |
-| En `revisar` | 3.179 (30,6%) |
-| Confirmados en algún supermercado | 5.581 (53,7%) |
+| Productos argentinos en la base | **7.397** |
+| **Clasificados** | **6.221 (84,1%)** |
+| Resueltos con **evidencia real**, no inferida del nombre | 5.231 (70,7%) |
+| En `revisar` | 1.176 (15,9%) |
+| Confirmados en algún supermercado | 5.581 |
 
 De un total de 13.015 entradas de OFF etiquetadas "Argentina", se excluyeron
-**2.620 (20,1%)** por no ser relevantes: 2.583 con el nombre en un alfabeto
-que ningún supermercado argentino usa (probable país mal cargado en origen) y
-37 con un código que no tiene longitud de EAN/UPC real. No se borran de la
-base interna — solo no llegan a la búsqueda. Ver
+**5.618 (43,2%)** por no ser aprovechables: 2.583 con el nombre en un alfabeto
+que ningún supermercado argentino usa, 37 con un código que no tiene longitud
+de EAN/UPC real, y **2.998 fichas fantasma** (ver abajo). Ninguna se borra de
+la base interna — solo no llegan a la búsqueda. Ver
 [relevancia.py](relevancia.py).
 
 Por fuente de la decisión:
 
 | Fuente | Productos |
 |---|---|
-| Análisis de ingredientes (Open Food Facts) | 3.253 |
-| Heurística de nombre | 1.613 |
-| Análisis de ingredientes (ficha del supermercado) | 987 |
+| Análisis de ingredientes (Open Food Facts) | 3.301 |
+| Análisis de ingredientes (ficha del supermercado) | 1.007 |
+| Heurística de nombre | 770 |
 | Sello vegano de la ficha del supermercado | 682 |
-| Clasificador automático | 347 |
+| Clasificador automático | 144 |
 | Declarado por el fabricante | 121 |
-| Mismo producto que otro EAN ya resuelto | 98 |
 | Certificación oficial de ANMAT | 97 |
+| Mismo producto que otro EAN ya resuelto | 81 |
 | Análisis propio de Open Food Facts | 23 |
 
-La heurística de nombre pasó de resolver 2.335 productos a 1.613: **722
-veredictos que antes se adivinaban por el nombre ahora salen de la lista de
-ingredientes real**. Es el cambio que más importa, porque el nombre comercial
-omite lo que no conviene decir y la lista es la declaración legal.
+El **70,7% del catálogo se resuelve con evidencia real** —certificación,
+declaración del fabricante o lista de ingredientes—, y solo el 10,4% se apoya
+en adivinar por el nombre comercial. Es la métrica que más importa: el nombre
+omite lo que no conviene decir, la lista de ingredientes es la declaración
+legal.
 
 ## Fuentes
 
@@ -107,8 +108,8 @@ implica que no se venda en Argentina (hay miles de comercios más, empezando
 por Coto, que no corre VTEX). Por eso queda como filtro opcional en la app
 ("Solo confirmados en supermercados conocidos"), no como exclusión automática.
 
-De la última cosecha completa: **5.581 de los 10.395 productos (53,7%)**
-quedaron confirmados en al menos una de las 5 cadenas.
+De la última cosecha completa, **5.581 productos** quedaron confirmados en
+al menos una de las 5 cadenas.
 
 ### Ingredientes de la ficha del supermercado
 
@@ -117,7 +118,7 @@ y Disco** (las tres de Cencosud) publican en la misma API la ficha completa del
 producto, y ahí está lo que más falta hacía:
 
 - **`Ingredientes`** — la lista real del envase. Es la señal más confiable que
-  tiene el proyecto, y 6.365 de los 10.395 productos no la tenían en OFF.
+  tiene el proyecto, y dos tercios del catálogo no la tenían en OFF.
 - **`Trazas`** — en un campo aparte, que es justo la distinción que importa:
   "puede contener leche" no es lo mismo que "contiene leche".
 - **`Sellos`** — certificaciones, entre ellas un `vegan` explícito.
@@ -134,7 +135,25 @@ producto va a `revisar`: la regla de seguridad pesa más que una etiqueta.
 
 ## Calidad de los datos: filtrado y deduplicación
 
-Dos correcciones que corren dentro de `build_db.py`, no como pasos aparte:
+Tres correcciones que corren dentro de `build_db.py`, no como pasos aparte:
+
+- **Fichas fantasma** ([relevancia.es_ficha_fantasma](relevancia.py)): Open
+  Food Facts se llena escaneando códigos de barras, y muchas entradas quedan
+  con un nombre y nada más. Como comparte el pool de códigos con Open Beauty
+  Facts, terminaban colándose shampoos, cremas, cigarrillos y hasta un
+  medicamento cardíaco en un catálogo de alimentos. Medido: el **80% de lo que
+  quedaba en `revisar` no tenía ni siquiera categoría**, y de ese grupo solo el
+  35% tenía código de barras argentino (contra el 79% de los productos que sí
+  se podían clasificar).
+
+  El criterio para descartarlas exige las **cuatro** condiciones a la vez: sin
+  categoría, sin ingredientes, sin presencia en ninguna góndola real y sin
+  veredicto fundado. Con que el producto tenga **una sola** señal, se queda.
+  La versión ingenua —cortar solo por "no tiene categoría"— se llevaba puestos
+  1.608 productos bien clasificados, entre ellos 457 con sello vegano
+  certificado: sería tirar evidencia por falta de una etiqueta. Con el criterio
+  estrecho se excluyen 2.998 productos y **no se pierde ninguno con evidencia
+  real**.
 
 - **Relevancia geográfica** ([relevancia.py](relevancia.py)): OFF es
   colaborativo y el tag de país lo carga quien sube el producto, así que
@@ -191,10 +210,12 @@ que OFF no se pronuncia y el criterio hay que ponerlo desde el CAA.
 
 ## Limitaciones conocidas
 
-- **Sigue quedando un 38% del catálogo en `revisar`**, casi siempre porque el
-  producto no tiene ingredientes cargados en Open Food Facts. Se muestran
-  igual: la incompletitud es parte de lo que hay que comunicar, no algo a
-  esconder. Para bajar ese número está la cola de revisión manual (ver abajo).
+- **Queda un 16% del catálogo en `revisar`**, y buena parte ya no se arregla
+  con más datos: de los que sí tienen ingredientes cargados, la mitad está ahí
+  por un ingrediente genuinamente ambiguo (lecitina, INS 471, margarina,
+  vitamina D3), donde afirmar `apto` violaría la regla de seguridad. Se
+  muestran igual: la incompletitud es parte de lo que hay que comunicar, no
+  algo a esconder. Para el resto está la cola de revisión manual (ver abajo).
 - **La búsqueda todavía puede mostrar varias tarjetas para el mismo producto**
   (EANs distintos de "Oreo", por ejemplo). Desde esta corrida ya no se
   contradicen entre sí, pero agruparlas en una sola tarjeta por producto es
@@ -278,13 +299,15 @@ consultan por productos nuevos o vencidos. Todo se configura en
 python -m pytest tests -q
 ```
 
-255 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
+302 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
 verifican que la regla de seguridad no se pueda violar por ninguna capa, y los
 falsos positivos concretos que fueron apareciendo al revisar a mano la salida
 real del pipeline (por ejemplo "Yogurisimo Banana", que llegó a clasificarse
 como apto porque el blacklist busca palabras enteras y "yogur" no matchea
 dentro de "Yogurisimo").
 
-Los 71 de [tests/test_falsos_positivos.py](tests/test_falsos_positivos.py) son
+Los de [tests/test_falsos_positivos.py](tests/test_falsos_positivos.py) son
 todos errores reales que el clasificador cometía, no casos hipotéticos: cada uno
-se verificó contra la base antes de escribir la corrección.
+se verificó contra la base antes de escribir la corrección. Los de
+[tests/test_fantasmas.py](tests/test_fantasmas.py) verifican sobre todo lo que
+el filtro NO debe excluir, que es donde está el riesgo.
