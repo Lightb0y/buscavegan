@@ -7,14 +7,20 @@ Orden de decisión, de más a menos confiable:
      inferencia: manda sobre todo lo demás.
   1. `off_label`     — el fabricante declaró "vegano" en el packaging.
   1b. `sello_super`  — el supermercado publica un sello de certificación
-     vegana en la ficha del producto. Se acepta solo si los ingredientes no
-     lo contradicen (ver `decidir`).
+     vegana en la ficha del producto.
   2. `ingredientes`  — nuestro analizador de la lista de ingredientes.
   2b. `ingredientes_super` — lo mismo, pero sobre la lista que publica el
      supermercado, para los miles de productos que OFF no tiene cargados.
   3. `off_analysis`  — el análisis propio de Open Food Facts.
   4. `heuristica`    — Capa 2: nombre + marca + categoría.
   5. `revisar`       — no alcanzó la evidencia.
+
+Las capas 0, 1 y 1b son certificaciones, y las tres se aceptan **solo si la
+lista de ingredientes no las contradice** (ver `_certificado`). Una
+certificación es el acto de un tercero y por eso gana sobre nuestras
+inferencias, pero cuando el rótulo del propio producto dice lo contrario
+alguien se equivocó, y el proyecto no afirma `apto` con dos fuentes peleadas:
+va a `revisar`.
 
 Cuando 2 y 3 se pronuncian y **no coinciden**, gana el veredicto más
 conservador (el peor estado), nunca el más favorable: la regla de seguridad de
@@ -68,6 +74,31 @@ def _analisis_de_ingredientes(off: dict, ficha: dict):
     return de_off, ci.FUENTE_INGREDIENTES
 
 
+def _certificado(ing: ci.AnalisisIngredientes, fuente: str, quien: str,
+                 motivo_ok: str) -> cr.Decision:
+    """`apto` por certificación, salvo que los ingredientes la desmientan.
+
+    Una certificación es el acto de un tercero —ANMAT, el fabricante, la
+    cadena—, no una inferencia nuestra, y por eso manda sobre el resto de las
+    capas. Pero si la lista de ingredientes del propio producto dice lo
+    contrario, alguien se equivocó: el certificado, la transcripción del
+    rótulo, o el cruce que unió al producto con el certificado. Sea cual sea,
+    no es momento de afirmar `apto` (SPEC.md §4): va a `revisar` con la
+    contradicción escrita en el motivo, para que se resuelva a mano.
+
+    El caso que lo motivó: ANMAT certificó el "producto dietético a base de
+    coco sabor dulce de leche" de Doña Magdalena, y el cruce por nombre lo
+    pegó al dulce de leche de la misma marca, que empieza con "leche
+    parcialmente descremada" y aclara "CONTIENE LECHE".
+    """
+    if ing.resuelto and ing.estado != config.APTO:
+        return cr.Decision(
+            config.REVISAR, fuente,
+            f"{quien}, pero su propia lista de ingredientes dice lo "
+            f"contrario: {ing.motivo.lower()}")
+    return cr.Decision(config.APTO, fuente, motivo_ok)
+
+
 def decidir(nombre: str, marca: str | None, categoria: str | None,
             off: dict | None, anmat_idx: dict | None = None,
             ficha: dict | None = None) -> cr.Decision:
@@ -75,39 +106,38 @@ def decidir(nombre: str, marca: str | None, categoria: str | None,
     off = off or {}
     ficha = ficha or {}
 
+    # Los ingredientes se analizan antes que nada aunque no sean la primera
+    # capa: las tres capas de certificación los necesitan para detectar que
+    # el rótulo contradice al certificado (ver `_certificado`).
+    ing, fuente_ing = _analisis_de_ingredientes(off, ficha)
+
     # 0. Certificación oficial de ANMAT (la evidencia más fuerte que existe).
     if anmat_idx:
         oficial = ingest_anmat.match_anmat(nombre, marca, anmat_idx)
         if oficial:
-            return cr.Decision(
-                config.APTO, ingest_anmat.FUENTE_CERTIFICACION,
+            return _certificado(
+                ing, ingest_anmat.FUENTE_CERTIFICACION,
+                f"ANMAT lo registra con atributo vegano "
+                f"(RNPA {oficial['rnpa']})",
                 f"Registro oficial de ANMAT con atributo vegano "
                 f"(RNPA {oficial['rnpa']})")
 
     # 1. Declaración del fabricante.
     if "en:vegan" in (off.get("labels_tags") or []):
-        return cr.Decision(config.APTO, cr.FUENTE_OFF_LABEL,
-                           "Declarado vegano por el fabricante")
+        return _certificado(
+            ing, cr.FUENTE_OFF_LABEL,
+            "El fabricante lo declara vegano",
+            "Declarado vegano por el fabricante")
 
-    # 2. Ingredientes (señal principal): la lista de OFF, la del supermercado,
-    #    o la más restrictiva si las dos se pronuncian.
-    ing, fuente_ing = _analisis_de_ingredientes(off, ficha)
-
-    # 1b. Sello vegano publicado por el supermercado. Es una declaración de
-    #     certificación, no una inferencia nuestra, así que va antes que el
-    #     análisis... pero solo si la lista de ingredientes no lo desmiente.
-    #     Si se contradicen, alguien se equivocó y no es momento de afirmar
-    #     `apto`: la regla de seguridad pesa más que una etiqueta.
+    # 1b. Sello vegano publicado por el supermercado.
     sellos = set((ficha.get("sellos") or "").split(","))
     if "vegan" in sellos:
-        if ing.resuelto and ing.estado != config.APTO:
-            return cr.Decision(
-                config.REVISAR, FUENTE_SELLO_SUPER,
-                f"El supermercado lo certifica como vegano, pero su propia "
-                f"lista de ingredientes dice lo contrario: {ing.motivo.lower()}")
-        return cr.Decision(config.APTO, FUENTE_SELLO_SUPER,
-                           "Certificado como vegano en la ficha del supermercado")
+        return _certificado(
+            ing, FUENTE_SELLO_SUPER,
+            "El supermercado lo certifica como vegano",
+            "Certificado como vegano en la ficha del supermercado")
 
+    # 2. Ingredientes (señal principal): `ing`, ya calculado arriba.
     # 3. Análisis propio de OFF.
     off_dec = cr.classify_off(off if off else None)
 

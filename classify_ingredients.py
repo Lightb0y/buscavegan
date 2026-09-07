@@ -295,6 +295,10 @@ CLASES_DE_ADITIVO = re.compile(
     r"antihumectantes?|leudantes?|gasificantes?|edulcorantes?|espumantes?|"
     r"secuestrantes?|antiaglutinantes?|antiespumantes?|resaltadores? del sabor|"
     r"reguladores? de (la )?acidez|agentes? de brillo|"
+    # Las de sabor van acá y no sueltas: sin esto "SABORIZANTE: miel" quedaba
+    # partido por el `:` y "miel" perdía el contexto que decía que era sabor.
+    # "saborizante natural" sigue siendo ambiguo: no es la clase a secas.
+    r"aromatizantes?|saborizantes?|esencias?|"
     # Las fichas de Cencosud abrevian la clase: "aro" (aromatizante), "col"
     # (colorante), "aci" (acidulante), "exa" (exaltador del sabor)...
     r"aro|col|aci|acreg|ant|cons|emu|esp|est|edu|hum|leu|gas|sec|reg|anah|"
@@ -319,6 +323,33 @@ RUIDO_DE_ROTULO = re.compile(
     r"segun la ficha de [\w\s]+|"
     r"\d+([.,]\d+)? ?(mg|g|kg|ml|l|ui|kcal|mcg|ug)(/(kg|g|l|ml|porcion))?|"
     r"[\d\s.,%]+)$")
+
+# Un nombre de sabor no es un ingrediente. "Esencia artificial de dulce de
+# leche", "ARO sabor dulce de leche" o "salsa (dulce de leche a base de
+# plantas)" nombran lo que el producto imita, no lo que lleva adentro:
+# leerlos como lácteo marcaba `vegetariano` a productos que estaban
+# certificados como veganos (el alfajor vegano de Havanna, los helados de
+# NotCo, la pasta de maní de Entrenuts).
+#
+# Se separan dos casos porque no dan la misma garantía:
+#
+#   - ORIGEN_DECLARADO_VEGETAL: el rotulo afirma que no hay materia prima
+#     animal ("esencia ARTIFICIAL de manteca", "dulce de leche A BASE DE
+#     PLANTAS"). Se descarta el match.
+#   - NOMBRE_DE_SABOR a secas: un aromatizante natural sí puede extraerse del
+#     animal. No alcanza para afirmar que lo contiene, pero tampoco para
+#     descartarlo: queda como ambiguo, que resuelve en `revisar`.
+#
+# Solo aplica a los derivados (`vegetariano`). La carne queda afuera a
+# propósito: "sabor res" ya está tipificado como no apto y ahí el proyecto
+# prefiere pasarse de cauto.
+NOMBRE_DE_SABOR = re.compile(
+    r"\b(sabor(es)?|saborizante(s)?|aromatizante(s)?|aroma(s)?|esencia(s)?|"
+    r"aro)\b")
+ORIGEN_DECLARADO_VEGETAL = re.compile(
+    r"\bartificial(es)?\b|\bsintetic[oa]s?\b|\bidentic[oa]s? al natural\b|"
+    r"\ba base de (planta|vegetal)|\bde origen vegetal\b|\bplant based\b|"
+    r"\bvegan[oa]s?\b")
 
 # Los mismos, en la taxonomía de OFF. OFF emite el tag de la clase ADEMÁS del
 # tag del aditivo concreto en el 98% de los casos, así que tratarlos como
@@ -476,6 +507,18 @@ def _match(ingrediente: str) -> tuple[str, str] | None:
     return None
 
 
+def _bajo_nombre_de_sabor(ingrediente: str) -> bool:
+    """True si el término animal aparece DESPUÉS del marcador de sabor.
+
+    La posición es lo que distingue los dos usos de la misma palabra:
+    "esencia de dulce de leche" nombra un sabor, pero "leche sabor vainilla"
+    es leche de verdad, saborizada. Se comprueba que lo que va hasta el
+    marcador —incluido— no tenga ya un termino animal propio.
+    """
+    m = NOMBRE_DE_SABOR.search(ingrediente)
+    return bool(m) and _match(ingrediente[:m.end()]) is None
+
+
 def analyze(text: str | None) -> AnalisisIngredientes:
     """Clasifica un producto a partir de su lista de ingredientes."""
     ingredientes, trazas = parse_ingredients(text or "")
@@ -491,14 +534,36 @@ def analyze(text: str | None) -> AnalisisIngredientes:
     peor = config.APTO
     motivo_peor = ""
 
+    sabor_abierto = False
     for ing in ingredientes:
         # Ni las palabras de clase ni el ruido del rótulo son ingredientes:
         # no suman ni restan.
         if CLASES_DE_ADITIVO.match(ing) or RUIDO_DE_ROTULO.match(ing):
+            # "SABORIZANTE: miel" llega partido en dos por el `:`, y el token
+            # que queda ("miel") pierde el contexto que decía que era un
+            # sabor. Recordar que la clase abierta era de sabor deja que el
+            # token siguiente —su identidad— se lea como tal.
+            sabor_abierto = bool(NOMBRE_DE_SABOR.match(ing))
             continue
+        bajo_sabor, sabor_abierto = sabor_abierto, False
         evaluados += 1
 
         hit = _match(ing)
+
+        # Un derivado lácteo/de huevo/de abeja nombrado como sabor no es
+        # materia prima del producto (ver NOMBRE_DE_SABOR).
+        if hit and hit[0] == config.VEGETARIANO:
+            if ORIGEN_DECLARADO_VEGETAL.search(ing):
+                # El propio rótulo declara que no es de origen animal.
+                reconocidos += 1
+                continue
+            if _bajo_nombre_de_sabor(ing) or bajo_sabor:
+                amb = f"«{ing}» nombra un sabor sin declarar su origen"
+                if amb not in ambiguos:
+                    ambiguos.append(amb)
+                reconocidos += 1
+                continue
+
         if hit:
             estado, etiqueta = hit
             if etiqueta not in detectados:
@@ -741,6 +806,16 @@ def _clasificar_tag(tag: str):
     texto = tag_a_texto(tag)
     hit = _match(texto)
     if hit:
+        # Mismo criterio que en texto libre: un derivado animal nombrado como
+        # sabor no es materia prima. OFF arma tags "es:" con la frase entera
+        # del rótulo, así que acá llegan enteros los casos que importan
+        # ("es:esencia-artificial-de-dulce-de-leche").
+        if hit[0] == config.VEGETARIANO:
+            if ORIGEN_DECLARADO_VEGETAL.search(texto):
+                return None
+            if _bajo_nombre_de_sabor(texto):
+                return ("ambiguo",
+                        f"«{texto}» nombra un sabor sin declarar su origen")
         return ("animal", hit)
     amb = next((msg for rx, msg in AMBIGUO_RE if rx.search(texto)), None)
     if amb:
@@ -814,6 +889,37 @@ def analyze_tags(tags: list[str] | None) -> AnalisisIngredientes:
         f"declarados (se reconoció el {cobertura:.0%})", **base)
 
 
+def _tags_de_trazas(tags: list[str], texto: str | None) -> set[str]:
+    """Tags que OFF sacó de la frase de trazas del rótulo, no de la lista.
+
+    OFF vuelca "PUEDE CONTENER HUEVO" dentro de `ingredients_tags` como si
+    fuera un ingrediente más. La ruta de texto ya aparta esas frases
+    (`TRAZAS_RE`) porque hablan de contaminación cruzada y no de composición;
+    la de tags no las distinguía, y un "puede contener derivados de leche"
+    alcanzaba para marcar `vegetariano` a un producto que no lleva leche.
+
+    La comparación va contra la etiqueta en español que devuelve la
+    clasificación, no contra el tag: el tag puede venir en inglés ("en:egg")
+    y el rótulo está en español. Y se exige que la etiqueta NO aparezca
+    también fuera de la frase de trazas, para no absolver a un producto que
+    lleva leche y además avisa que puede contener leche.
+    """
+    norm = normalize(texto or "")
+    frases = " ".join(m.group(0) for m in TRAZAS_RE.finditer(norm))
+    if not frases:
+        return set()
+    sin_trazas = TRAZAS_RE.sub(" ", norm)
+    fuera = set()
+    for t in tags or []:
+        res = _clasificar_tag(t)
+        if not res or res[0] != "animal":
+            continue
+        etiqueta = normalize(res[1][1])
+        if etiqueta in frases and etiqueta not in sin_trazas:
+            fuera.add(t)
+    return fuera
+
+
 def analyze_product(off: dict | None) -> AnalisisIngredientes:
     """Analiza un producto de OFF con la mejor señal de ingredientes que tenga.
 
@@ -824,8 +930,11 @@ def analyze_product(off: dict | None) -> AnalisisIngredientes:
     las dos se le escapó algo.
     """
     off = off or {}
-    por_texto = analyze(off.get("ingredients_text"))
-    por_tags = analyze_tags(off.get("ingredients_tags"))
+    tags = off.get("ingredients_tags") or []
+    texto = off.get("ingredients_text")
+    por_texto = analyze(texto)
+    trazas = _tags_de_trazas(tags, texto)
+    por_tags = analyze_tags([t for t in tags if t not in trazas])
 
     if por_texto.resuelto and por_tags.resuelto:
         if SEVERIDAD[por_texto.estado] >= SEVERIDAD[por_tags.estado]:

@@ -339,3 +339,107 @@ def test_el_calificador_puntual_no_se_filtra_a_otras_keywords():
 def test_cortes_y_embutidos_argentinos_que_faltaban(nombre):
     # Antes caían en `revisar` solo por no estar nombrados en el léxico.
     assert cr.classify_name(nombre).estado == NO_APTO
+
+
+# --- Nombres de sabor: dicen a qué sabe, no de qué está hecho --------------
+# Un aromatizante nombra el sabor que imita. Leerlo como materia prima marcaba
+# `vegetariano` a productos que estaban certificados como veganos.
+
+@pytest.mark.parametrize("texto,esperado", [
+    # Declarado artificial: por definición no hay materia prima animal.
+    ("Harina de arroz, azucar, margarina vegetal, "
+     "AROMATIZANTE (esencia artificial de dulce de leche)", APTO),
+    ("Harina de trigo, aceite de girasol, azucar, sal, "
+     "AROMATIZANTE (esencia artificial de manteca)", APTO),
+    # Declarado vegetal: lo dice el propio rótulo.
+    ("Agua, azucar, salsa (dulce de leche a base de plantas), dextrosa, "
+     "proteina vegetal", APTO),
+    # "Sabor X" a secas: un aromatizante natural SÍ puede salir del animal.
+    # No se afirma que lo contiene, pero tampoco que no: queda para revisar.
+    ("Mani tostado, proteina de arveja, sal, aro sabor dulce de leche", REVISAR),
+])
+def test_el_sabor_no_es_un_ingrediente(texto, esperado):
+    assert ci.analyze(texto).estado == esperado
+
+
+@pytest.mark.parametrize("texto", [
+    "Leche sabor vainilla, azucar, estabilizante",
+    "Yogur sabor frutilla, azucar, cultivos lacticos",
+    "Crema sabor chocolate, azucar, estabilizante",
+])
+def test_el_lacteo_saborizado_sigue_siendo_lacteo(texto):
+    # La posición es lo que distingue los dos usos: en "esencia de dulce de
+    # leche" el lácteo va DESPUÉS del marcador y es el sabor; en "leche sabor
+    # vainilla" va antes y es leche de verdad.
+    assert ci.analyze(texto).estado == VEG
+
+
+def test_la_carne_no_entra_en_la_excepcion_de_sabor():
+    # "Sabor res" ya estaba tipificado como no apto y ahí el proyecto prefiere
+    # pasarse de cauto: la regla nueva solo toca lácteos, huevo y miel.
+    assert ci.analyze("Agua, sal, sabor res, harina, aceite").estado == NO_APTO
+
+
+def test_el_sabor_tampoco_es_ingrediente_en_la_ruta_de_tags():
+    # OFF arma tags "es:" con la frase entera del rótulo. La ruta de tags es
+    # un código aparte del de texto libre y tenía el mismo agujero: el alfajor
+    # vegano de Havanna quedaba `vegetariano` por este tag.
+    assert ci._clasificar_tag("es:esencia-artificial-de-dulce-de-leche") is None
+    assert ci.analyze_tags(
+        ["en:water", "en:sugar", "es:esencia-artificial-de-dulce-de-leche"]
+    ).estado != VEG
+
+
+def test_la_ruta_de_tags_sigue_viendo_el_lacteo_real():
+    assert ci._clasificar_tag("en:whole-milk")[1][0] == VEG
+    # El lácteo va ANTES del marcador: es leche de verdad, saborizada.
+    assert ci._clasificar_tag("es:leche-sabor-vainilla")[1][0] == VEG
+
+
+def test_la_clase_de_sabor_alcanza_al_token_que_le_sigue():
+    # "SABORIZANTE: miel" llega partido en dos por el `:` y "miel" queda
+    # solo. Sin heredar el contexto, un té de sabor miel —vegano y
+    # certificado— quedaba marcado como que lleva miel.
+    assert ci.analyze(
+        "Trocitos de manzana, hibisco, saborizante: frambuesa, "
+        "saborizante: miel, limon").estado == REVISAR
+    # La herencia va a `revisar`, nunca a `apto`: si lo que sigue a la clase
+    # resulta ser materia prima de verdad, el producto se revisa a mano.
+    assert ci.analyze(
+        "Harina, azucar, aromatizante, leche entera en polvo").estado == REVISAR
+
+
+def test_solo_hereda_la_clase_de_sabor():
+    # Un conservante no vuelve sabor a lo que le sigue.
+    assert ci.analyze(
+        "Agua, azucar, conservante: sorbato de potasio, "
+        "leche descremada").estado == VEG
+    # Y el lácteo que va ANTES de la clase no se toca.
+    assert ci.analyze(
+        "Leche entera en polvo, azucar, aromatizante: vainilla").estado == VEG
+
+
+def test_saborizante_natural_sigue_siendo_ambiguo():
+    # Agregar la clase a secas a CLASES_DE_ADITIVO no debe absolver a
+    # "saborizante natural", que sí puede salir de un animal.
+    assert ci.analyze("Agua, harina, saborizante natural, sal").estado == REVISAR
+
+
+# --- Trazas: contaminación cruzada, no composición -------------------------
+
+def test_las_trazas_no_cuentan_como_ingrediente_en_la_ruta_de_tags():
+    # OFF vuelca "PUEDE CONTENER HUEVO" dentro de `ingredients_tags`. La ruta
+    # de texto ya las apartaba; la de tags las contaba como ingrediente y
+    # marcaba `vegetariano` a productos que no llevan nada animal.
+    off = {"ingredients_text": "Arroz, lentejas deshidratadas, zanahoria. "
+                               "PUEDE CONTENER AVENA, SOJA, HUEVO Y ALMENDRAS.",
+           "ingredients_tags": ["en:rice", "en:lentils", "en:carrot", "en:egg"]}
+    assert ci.analyze_product(off).estado == APTO
+
+
+def test_la_traza_no_absuelve_al_ingrediente_real():
+    # Si el lácteo está además en la lista, el aviso de trazas no lo tapa.
+    off = {"ingredients_text": "Leche entera en polvo, azucar. "
+                               "PUEDE CONTENER LECHE Y MANI.",
+           "ingredients_tags": ["en:whole-milk", "en:sugar"]}
+    assert ci.analyze_product(off).estado == VEG

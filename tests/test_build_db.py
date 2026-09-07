@@ -23,6 +23,7 @@ ANMAT_IDX = ingest_anmat.indexar([{
     "marca": "Felices Las Vacas", "producto": "Queso untable sabor natural",
     "rnpa": "02-123456", "marca_norm": "felices las vacas",
     "producto_tokens": ingest_anmat.tokens("Queso untable sabor natural"),
+    "sabor_tokens": ingest_anmat.tokens_de_sabor("Queso untable sabor natural"),
 }])
 
 
@@ -100,3 +101,55 @@ def test_ninguna_combinacion_sin_datos_llega_a_apto():
                 {"ingredients_analysis_tags": ["en:vegan-status-unknown"]}):
         d = build_db.decidir("Producto Sin Pistas 123", "Marca Xyz", None, off)
         assert d.estado != APTO, f"{off} -> {d.estado}"
+
+
+# --- Una certificación no gana contra el rótulo del propio producto --------
+# Las tres capas de certificación (ANMAT, fabricante, supermercado) valen
+# porque son actos de un tercero. Pero si la lista de ingredientes las
+# desmiente, alguien se equivocó y el proyecto no afirma `apto`.
+
+def test_certificacion_de_anmat_no_gana_a_los_ingredientes():
+    # El caso Doña Magdalena, con el cruce forzado: aunque ANMAT matchee, un
+    # producto que declara leche no puede quedar `apto`.
+    d = build_db.decidir(
+        "Queso untable sabor natural", "Felices Las Vacas", None,
+        {"ingredients_text": "Leche parcialmente descremada, sorbitol, sal"},
+        ANMAT_IDX)
+    assert d.estado == REVISAR
+    assert d.fuente == ingest_anmat.FUENTE_CERTIFICACION
+    assert "leche" in d.motivo.lower()
+
+
+def test_label_del_fabricante_no_gana_a_los_ingredientes():
+    d = build_db.decidir(
+        "Postre Xyz", "Marca", None,
+        {"labels_tags": ["en:vegan"],
+         "ingredients_text": "Agua, azucar, leche entera en polvo"})
+    assert d.estado == REVISAR
+    assert d.fuente == cr.FUENTE_OFF_LABEL
+
+
+def test_sello_del_super_no_gana_a_los_ingredientes():
+    d = build_db.decidir(
+        "Postre Xyz", "Marca", None, {},
+        ficha={"sellos": "vegan", "ingredientes": "Agua, azucar, miel"})
+    assert d.estado == REVISAR
+    assert d.fuente == build_db.FUENTE_SELLO_SUPER
+
+
+def test_la_certificacion_sigue_ganando_cuando_nadie_la_contradice():
+    # El punto de la Capa 0 no cambia: el nombre dice "queso" y OFF lo llama
+    # no vegano, pero los ingredientes no desmienten nada.
+    d = build_db.decidir(
+        "Queso untable sabor natural", "Felices Las Vacas", None,
+        {"ingredients_text": "Agua, castanas de caju, sal",
+         "ingredients_analysis_tags": ["en:non-vegan"]},
+        ANMAT_IDX)
+    assert d.estado == APTO and d.fuente == ingest_anmat.FUENTE_CERTIFICACION
+
+
+def test_un_producto_sin_ingredientes_no_pierde_la_certificacion():
+    # `revisar` de los ingredientes no es una contradicción: es no saber.
+    d = build_db.decidir("Queso untable sabor natural", "Felices Las Vacas",
+                         None, {}, ANMAT_IDX)
+    assert d.estado == APTO and d.fuente == ingest_anmat.FUENTE_CERTIFICACION

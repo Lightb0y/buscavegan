@@ -2,22 +2,22 @@
   "actualizado": "2026-09-07",
   "total": 7397,
   "por_estado": {
-    "apto": 2743,
-    "vegetariano": 1715,
-    "no_apto": 1763,
-    "revisar": 1176
+    "apto": 2777,
+    "vegetariano": 1624,
+    "no_apto": 1777,
+    "revisar": 1219
   },
   "por_fuente": {
-    "ingredientes": 3301,
-    "sin_datos": 1171,
-    "ingredientes_super": 1007,
-    "heuristica": 770,
+    "ingredientes": 3251,
+    "sin_datos": 1210,
+    "ingredientes_super": 999,
+    "heuristica": 792,
     "sello_super": 682,
-    "ml": 144,
+    "ml": 146,
     "off_label": 121,
-    "certificacion_oficial": 97,
-    "duplicado": 81,
-    "off_analysis": 23
+    "certificacion_oficial": 92,
+    "duplicado": 79,
+    "off_analysis": 25
   },
   "categorias": [
     {
@@ -131,7 +131,7 @@
       "total": 87
     }
   ],
-  "con_evidencia": 5312,
+  "con_evidencia": 5249,
   "con_ingredientes": 5728,
   "confirmados": 5581,
   "fuente_legible": {

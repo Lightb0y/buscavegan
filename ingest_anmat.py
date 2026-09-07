@@ -119,6 +119,40 @@ def guardar(conn, filas: list[dict]) -> int:
     return len(filas)
 
 
+# Donde termina la cláusula de sabor: la puntuación que abre la frase
+# siguiente, o la conjunción que la encadena. Acotarla importa: los nombres de
+# ANMAT son "descripción técnica, sabor X - Nombre Comercial", así que cortar
+# desde el primer "sabor" hasta el final se comería el nombre comercial, que
+# es justo por donde matchean varios productos ("Veggie snacks", "Rallado Veg").
+CORTE_DE_CLAUSULA = re.compile(
+    r"[,.;:()/\-–—]"
+    r"|\b(con|para|libre|sin|adicionad|fortificad|recubiert|relleno)\b",
+    re.IGNORECASE)
+
+
+def tokens_de_sabor(producto: str | None) -> set[str]:
+    """Tokens de las cláusulas «sabor X»: nombran lo que el producto imita.
+
+    Un producto certificado "a base de coco **sabor dulce de leche**" no lleva
+    leche: `dulce` y `leche` describen a qué sabe, no de qué está hecho. Si
+    esos tokens pueden sostener un cruce por sí solos, el registro termina
+    certificando el producto equivocado — que es exactamente lo que pasó con
+    el dulce de leche de Doña Magdalena, donde `{dulce, leche}` alcanzaba el
+    0.67 de solapamiento contra un postre de coco.
+
+    `match_anmat` los sigue contando para el score, pero exige que el cruce se
+    apoye además en al menos un token de la composición.
+    """
+    if not producto:
+        return set()
+    out: set[str] = set()
+    for m in re.finditer(r"\bsabor(?:es)?\b\s*(?:a\s+)?", producto, re.IGNORECASE):
+        resto = producto[m.end():]
+        corte = CORTE_DE_CLAUSULA.search(resto)
+        out |= tokens(resto[:corte.start()] if corte else resto)
+    return out
+
+
 def cargar(conn) -> list[dict]:
     """Lee el registro ya guardado, listo para matchear."""
     try:
@@ -129,7 +163,10 @@ def cargar(conn) -> list[dict]:
         return []
     return [{"marca": f["marca"], "producto": f["producto"], "rnpa": f["rnpa"],
              "marca_norm": f["marca_norm"],
-             "producto_tokens": tokens(f["producto_norm"])} for f in filas]
+             "producto_tokens": tokens(f["producto_norm"]),
+             # Sobre el nombre crudo, no el normalizado: `normalizar()` borra
+             # la puntuación, que es lo que delimita la cláusula de sabor.
+             "sabor_tokens": tokens_de_sabor(f["producto"])} for f in filas]
 
 
 def indexar(registros: list[dict]) -> dict[str, list[dict]]:
@@ -141,7 +178,9 @@ def indexar(registros: list[dict]) -> dict[str, list[dict]]:
     return idx
 
 
-# Solapamiento mínimo de tokens del nombre para aceptar el cruce.
+# Solapamiento mínimo de tokens del nombre para aceptar el cruce. No alcanza
+# por sí solo: `match_anmat` exige además que los tokens compartidos no sean
+# todos de la cláusula de sabor.
 UMBRAL_SOLAPAMIENTO = 0.6
 
 
@@ -177,6 +216,12 @@ def match_anmat(nombre: str, marca: str | None,
         if not tp:
             continue
         comunes = tn & tp
+        # El cruce tiene que apoyarse en la composición, no solo en el sabor:
+        # "sabor dulce de leche" describe a qué sabe un postre de coco, no de
+        # qué está hecho, y sin esto alcanzaba para certificar como vegano al
+        # dulce de leche con leche de la misma marca (ver `tokens_de_sabor`).
+        if not (comunes - f.get("sabor_tokens", set())):
+            continue
         # Se mide contra el conjunto más chico: el nombre de ANMAT es
         # descriptivo y largo ("Medallones a base de choclo, quinoa y
         # calabaza"), el de OFF suele ser corto.

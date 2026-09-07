@@ -15,15 +15,26 @@ import ingest_anmat  # noqa: E402
 
 # --- Capa 0: cruce con el registro de ANMAT --------------------------------
 
+def _registro(marca: str, producto: str, rnpa: str) -> dict:
+    """Arma una fila como la deja `cargar()`, con los tokens ya calculados."""
+    return {"marca": marca, "producto": producto, "rnpa": rnpa,
+            "marca_norm": ingest_anmat.normalizar(marca),
+            "producto_tokens": ingest_anmat.tokens(producto),
+            "sabor_tokens": ingest_anmat.tokens_de_sabor(producto)}
+
+
 REGISTRO = [
-    {"marca": "Bien Plantados", "producto": "Medallones a base de choclo, "
-     "quinoa y calabaza - Libre de Gluten / Andino", "rnpa": "02-729883",
-     "marca_norm": "bien plantados",
-     "producto_tokens": ingest_anmat.tokens(
-         "Medallones a base de choclo, quinoa y calabaza - Libre de Gluten / Andino")},
-    {"marca": "Felices Las Vacas", "producto": "Queso untable sabor natural",
-     "rnpa": "02-123456", "marca_norm": "felices las vacas",
-     "producto_tokens": ingest_anmat.tokens("Queso untable sabor natural")},
+    _registro("Bien Plantados", "Medallones a base de choclo, quinoa y "
+              "calabaza - Libre de Gluten / Andino", "02-729883"),
+    _registro("Felices Las Vacas", "Queso untable sabor natural", "02-123456"),
+    # El caso Doña Magdalena: La Retama certificó el postre de coco, y la
+    # misma marca vende un dulce de leche con leche de verdad.
+    _registro("Dona Magdalena", "Producto dietético a base de coco sabor "
+              "dulce de leche - Libre de Gluten", "02-714087"),
+    # El nombre comercial va DESPUÉS de la cláusula de sabor: acotarla mal
+    # dejaría a este producto sin los tokens por los que realmente matchea.
+    _registro("Granix", "Alimento texturizado a base de harina de maíz y de "
+              "avena, sabor barbacoa - Veggie snacks con zapallo", "02-999111"),
 ]
 INDICE = ingest_anmat.indexar(REGISTRO)
 
@@ -62,3 +73,40 @@ def test_match_anmat_con_marca_multiple_de_off():
     m = ingest_anmat.match_anmat("Queso untable sabor natural",
                                  "Felices Las Vacas, Vegan Line", INDICE)
     assert m is not None
+
+
+# --- la cláusula de sabor no puede sostener un cruce sola -------------------
+
+def test_tokens_de_sabor_acota_la_clausula():
+    # Corta en el guión: el nombre comercial que viene después es identidad,
+    # no sabor, y varios productos matchean justamente por ahí.
+    assert ingest_anmat.tokens_de_sabor(
+        "Alimento texturizado, sabor barbacoa - Veggie snacks con zapallo"
+    ) == {"barbacoa"}
+
+
+def test_tokens_de_sabor_toma_la_frase_entera():
+    assert ingest_anmat.tokens_de_sabor(
+        "Producto dietético a base de coco sabor dulce de leche - Libre de "
+        "Gluten") == {"dulce", "leche"}
+
+
+def test_no_cruza_cuando_lo_unico_en_comun_es_el_sabor():
+    # El bug de Doña Magdalena: {dulce, leche} daba 0.67 de solapamiento
+    # contra "a base de coco sabor dulce de leche" y certificaba como vegano
+    # un dulce de leche que arranca con "leche parcialmente descremada".
+    assert ingest_anmat.match_anmat(
+        "Dulce de Leche Sin Azucar", "Dona Magdalena", INDICE) is None
+
+
+def test_sigue_cruzando_por_el_nombre_comercial_posterior_al_sabor():
+    m = ingest_anmat.match_anmat("veggie snacks", "Granix", INDICE)
+    assert m and m["rnpa"] == "02-999111"
+
+
+def test_el_sabor_suma_al_score_si_hay_composicion_en_comun():
+    # "queso" y "untable" son composición; que además coincida el sabor no
+    # molesta. Lo que se prohíbe es que el sabor sea lo ÚNICO compartido.
+    m = ingest_anmat.match_anmat(
+        "Queso untable sabor natural", "Felices Las Vacas", INDICE)
+    assert m and m["rnpa"] == "02-123456"

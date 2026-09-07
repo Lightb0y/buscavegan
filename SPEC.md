@@ -102,6 +102,13 @@ Cruce del catálogo contra el registro de ANMAT. Sin EAN, el match es por
 2. Los tokens significativos del nombre deben solaparse ≥ 60%, medido contra el
    conjunto más chico: el nombre de ANMAT es descriptivo y largo
    ("Medallones a base de choclo, quinoa y calabaza"), el de OFF suele ser corto.
+3. El cruce tiene que apoyarse en al menos un token de la **composición**: los
+   que vienen de la cláusula «sabor X» no cuentan solos. "Producto dietético a
+   base de coco **sabor dulce de leche**" describe a qué sabe, no de qué está
+   hecho, y sin esta regla `{dulce, leche}` alcanzaba el 0.67 y certificaba
+   como vegano al dulce de leche —con leche— de la misma marca. La cláusula se
+   corta en la puntuación o en la conjunción siguiente, porque el nombre
+   comercial suele ir *después* del sabor ("…sabor barbacoa - Veggie snacks").
 
 Con match → `apto`, `fuente_decision = certificacion_oficial`, por encima de
 `off_label` y de `off_analysis`. Sin match → sigue a la Capa 1.
@@ -109,6 +116,15 @@ Con match → `apto`, `fuente_decision = certificacion_oficial`, por encima de
 Un match flojo marcaría "apto" un producto que nadie certificó, que es
 exactamente el error que prohíbe la regla de seguridad: por eso los tests de
 esta capa apuntan sobre todo a lo que **no** debe matchear.
+
+**Ninguna certificación se acepta contra el rótulo del propio producto.** Vale
+para las tres (ANMAT, `off_label` y `sello_super`): si la lista de ingredientes
+las contradice, el veredicto es `revisar`, no `apto`. Una certificación es el
+acto de un tercero y por eso gana sobre nuestras inferencias, pero cuando el
+rótulo dice lo contrario alguien se equivocó —el certificado, la transcripción,
+o el cruce que los unió— y el proyecto no afirma `apto` con dos fuentes
+peleadas. Un `revisar` de los ingredientes no cuenta como contradicción: es no
+saber, y ahí la certificación sigue mandando.
 
 **Cobertura esperada: baja** (certificación voluntaria y reciente). Es un
 enriquecimiento, no una dependencia: no bloquea al resto del pipeline.
@@ -119,6 +135,29 @@ enriquecimiento, no una dependencia: no bloquea al resto del pipeline.
 - contiene `en:non-vegan` → **no_apto**
 - `en:vegetarian` (sin vegan) → **vegetariano**
 - unknown / maybe / sin match → Capa 2
+
+#### Un nombre de sabor no es un ingrediente
+
+Transversal a todo el análisis de ingredientes: "esencia artificial de dulce de
+leche", "SABORIZANTE: miel" o "salsa (dulce de leche a base de plantas)"
+nombran lo que el producto imita, no lo que lleva. Se separan tres casos:
+
+- Declarado **artificial**, **idéntico al natural** o **vegetal** → se descarta
+  el término animal: el rótulo afirma que no hay materia prima animal.
+- «Sabor X» a secas → **ambiguo** (resuelve en `revisar`): un aromatizante
+  natural sí puede extraerse del animal. No se afirma que lo contiene, pero
+  tampoco que no.
+- El término animal **antes** del marcador ("leche sabor vainilla") → intacto:
+  eso es leche de verdad, saborizada. La posición es lo que distingue los dos
+  usos de la misma palabra.
+
+Solo aplica a los derivados (`vegetariano`). La carne queda afuera a propósito:
+"sabor res" ya está tipificado como no apto y ahí se prefiere pasarse de cauto.
+
+Las **trazas** siguen la misma lógica en las dos rutas: "puede contener leche"
+habla de contaminación cruzada, no de composición. La ruta de texto ya las
+apartaba; la de tags las contaba como ingrediente, porque OFF vuelca la frase
+dentro de `ingredients_tags`.
 
 ### Capa 2 — Heurística nombre + categoría
 Blacklist de keywords no-veganas, whitelist de modificadores vegetales que anulan el match
