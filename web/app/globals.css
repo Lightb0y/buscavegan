@@ -1,0 +1,969 @@
+/* =========================================================================
+   buscavegan — sistema visual
+
+   Tesis: esto es una obra de consulta, no una landing. Se parece más a un
+   resultado de laboratorio que a una app: papel tibio, tinta casi negra, y
+   una sola familia de colores saturados —la del veredicto— que no se usa
+   para NADA más. Si el verde apareciera en un botón o en un link, dejaría de
+   significar "apto" y el dato que la persona vino a buscar perdería su señal.
+   ========================================================================= */
+
+:root {
+  color-scheme: light dark;
+
+  /* --- superficie ------------------------------------------------------ */
+  --papel: #fdfbf7;
+  --papel-hundido: #f5f1e8;
+  --papel-elevado: #ffffff;
+  --tinta: #1a1814;
+  --tinta-media: #5c5648;
+  --tinta-tenue: #857e6d;
+  --linea: #e2dccd;
+  --linea-fuerte: #cdc5b0;
+
+  /* --- veredictos ------------------------------------------------------
+     Cada uno lleva símbolo y palabra además del color: un 8% de los varones
+     no distingue rojo de verde, y acá el color es el dato. */
+  --v-apto-tinta: #1c6437;
+  --v-apto-fondo: #e6f1e8;
+  --v-apto-linea: #a9cfb6;
+
+  --v-vegetariano-tinta: #8a5300;
+  --v-vegetariano-fondo: #fbeed8;
+  --v-vegetariano-linea: #e6cd9c;
+
+  --v-no-apto-tinta: #a32820;
+  --v-no-apto-fondo: #fbe9e7;
+  --v-no-apto-linea: #eec0ba;
+
+  --v-revisar-tinta: #47525f;
+  --v-revisar-fondo: #edeff2;
+  --v-revisar-linea: #cfd5dd;
+
+  /* --- foco ------------------------------------------------------------ */
+  --foco: #1b57c4;
+
+  /* --- ritmo -----------------------------------------------------------
+     Escala de 4px. Los nombres dicen para qué sirven, no cuánto miden. */
+  --e1: 0.25rem;
+  --e2: 0.5rem;
+  --e3: 0.75rem;
+  --e4: 1rem;
+  --e5: 1.5rem;
+  --e6: 2rem;
+  --e7: 3rem;
+  --e8: 4.5rem;
+
+  --radio: 10px;
+  --radio-chico: 6px;
+  --ancho: 68rem;
+
+  --sombra: 0 1px 2px rgb(26 24 20 / 6%), 0 4px 14px -6px rgb(26 24 20 / 10%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --papel: #15140f;
+    --papel-hundido: #1d1b15;
+    --papel-elevado: #221f18;
+    --tinta: #f2eee4;
+    --tinta-media: #b3ac9b;
+    --tinta-tenue: #8e8776;
+    --linea: #343026;
+    --linea-fuerte: #4a4536;
+
+    --v-apto-tinta: #8fd6a5;
+    --v-apto-fondo: #16281c;
+    --v-apto-linea: #2f5a3c;
+
+    --v-vegetariano-tinta: #edc178;
+    --v-vegetariano-fondo: #2b2113;
+    --v-vegetariano-linea: #5d4826;
+
+    --v-no-apto-tinta: #f0a49a;
+    --v-no-apto-fondo: #2c1815;
+    --v-no-apto-linea: #63332c;
+
+    --v-revisar-tinta: #b3bdca;
+    --v-revisar-fondo: #1e2126;
+    --v-revisar-linea: #3b424c;
+
+    --foco: #8fb2ff;
+    --sombra: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px -6px rgb(0 0 0 / 50%);
+  }
+}
+
+/* =========================================================================
+   base
+   ========================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente-texto), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  /* Números de ancho fijo: los EAN y los precios se leen en columna. */
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem);
+}
+h2 {
+  font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.75rem);
+}
+h3 {
+  font-size: 1.1rem;
+}
+
+p {
+  margin: 0 0 var(--e4);
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--linea-fuerte);
+  text-underline-offset: 0.2em;
+}
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Foco visible siempre, y del mismo modo en todos lados. Nunca se quita. */
+:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+  border-radius: var(--radio-chico);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+code,
+.ean {
+  font-family: var(--fuente-mono), ui-monospace, monospace;
+  font-size: 0.875em;
+  letter-spacing: -0.01em;
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Saltar al contenido: primero en el orden de tabulación, invisible hasta
+   que recibe foco. */
+.saltar {
+  position: absolute;
+  left: var(--e4);
+  top: -100%;
+  z-index: 50;
+  background: var(--papel-elevado);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-chico);
+  padding: var(--e2) var(--e4);
+  transition: top 120ms ease;
+}
+.saltar:focus {
+  top: var(--e4);
+}
+
+/* =========================================================================
+   estructura
+   ========================================================================= */
+
+.contenedor {
+  width: 100%;
+  max-width: var(--ancho);
+  margin-inline: auto;
+  padding-inline: var(--e4);
+}
+
+.sitio {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sitio > main {
+  flex: 1;
+}
+
+.encabezado {
+  border-bottom: 1px solid var(--linea);
+  background: var(--papel);
+}
+
+.encabezado__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e4);
+  min-height: 3.75rem;
+  flex-wrap: wrap;
+}
+
+.marca {
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4ch;
+}
+
+.marca__brote {
+  color: var(--v-apto-tinta);
+}
+
+.navegacion {
+  display: flex;
+  gap: var(--e5);
+  font-size: 0.9375rem;
+}
+
+.navegacion a {
+  color: var(--tinta-media);
+  text-decoration: none;
+  padding-block: var(--e1);
+}
+.navegacion a:hover,
+.navegacion a[aria-current='page'] {
+  color: var(--tinta);
+  box-shadow: inset 0 -2px 0 var(--tinta);
+}
+
+.pie {
+  border-top: 1px solid var(--linea);
+  margin-top: var(--e8);
+  padding-block: var(--e6);
+  color: var(--tinta-media);
+  font-size: 0.875rem;
+}
+
+.pie__grilla {
+  display: grid;
+  gap: var(--e5);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.pie p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================================
+   veredicto — el elemento con más carga de significado del sitio
+   ========================================================================= */
+
+.v {
+  --tinta-v: var(--v-revisar-tinta);
+  --fondo-v: var(--v-revisar-fondo);
+  --linea-v: var(--v-revisar-linea);
+}
+.v--apto {
+  --tinta-v: var(--v-apto-tinta);
+  --fondo-v: var(--v-apto-fondo);
+  --linea-v: var(--v-apto-linea);
+}
+.v--vegetariano {
+  --tinta-v: var(--v-vegetariano-tinta);
+  --fondo-v: var(--v-vegetariano-fondo);
+  --linea-v: var(--v-vegetariano-linea);
+}
+.v--no-apto {
+  --tinta-v: var(--v-no-apto-tinta);
+  --fondo-v: var(--v-no-apto-fondo);
+  --linea-v: var(--v-no-apto-linea);
+}
+.v--revisar {
+  --tinta-v: var(--v-revisar-tinta);
+  --fondo-v: var(--v-revisar-fondo);
+  --linea-v: var(--v-revisar-linea);
+}
+
+.sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5ch;
+  background: var(--fondo-v);
+  color: var(--tinta-v);
+  border: 1px solid var(--linea-v);
+  border-radius: 999px;
+  padding: 0.15rem var(--e2) 0.15rem var(--e1);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+}
+
+.sello__simbolo {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: var(--tinta-v);
+  color: var(--fondo-v);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.sello--grande {
+  font-size: 1rem;
+  padding: var(--e2) var(--e4) var(--e2) var(--e2);
+}
+.sello--grande .sello__simbolo {
+  width: 1.6rem;
+  height: 1.6rem;
+  font-size: 1rem;
+}
+
+/* =========================================================================
+   buscador
+   ========================================================================= */
+
+.hero {
+  padding-block: var(--e7) var(--e5);
+}
+
+.hero__bajada {
+  font-size: 1.0625rem;
+  color: var(--tinta-media);
+  max-width: 46ch;
+  margin-top: var(--e3);
+}
+
+.hero__bajada strong {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.busqueda {
+  position: relative;
+  margin-top: var(--e5);
+}
+
+.busqueda__campo {
+  width: 100%;
+  font: inherit;
+  font-size: 1.125rem;
+  color: var(--tinta);
+  background: var(--papel-elevado);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio);
+  padding: var(--e3) 5.5rem var(--e3) 2.75rem;
+  box-shadow: var(--sombra);
+}
+.busqueda__campo::placeholder {
+  color: var(--tinta-tenue);
+}
+.busqueda__campo:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 1px;
+}
+
+.busqueda__lupa {
+  position: absolute;
+  left: var(--e3);
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--tinta-tenue);
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+
+.busqueda__atajo {
+  position: absolute;
+  right: var(--e3);
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  gap: var(--e1);
+  align-items: center;
+}
+
+.tecla {
+  font-family: var(--fuente-mono), monospace;
+  font-size: 0.75rem;
+  color: var(--tinta-tenue);
+  border: 1px solid var(--linea);
+  border-bottom-width: 2px;
+  border-radius: var(--radio-chico);
+  padding: 0.1rem 0.4rem;
+  background: var(--papel-hundido);
+}
+
+.busqueda__limpiar {
+  border: 0;
+  background: transparent;
+  color: var(--tinta-media);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: var(--e1) var(--e2);
+  border-radius: var(--radio-chico);
+}
+.busqueda__limpiar:hover {
+  background: var(--papel-hundido);
+  color: var(--tinta);
+}
+
+/* --- filtros ----------------------------------------------------------- */
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  align-items: center;
+  margin-top: var(--e4);
+}
+
+.filtros__separador {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--linea);
+  margin-inline: var(--e2);
+}
+
+/* El chip es un checkbox real: se puede tabular, se puede activar con la
+   barra espaciadora y los lectores de pantalla anuncian su estado. */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5ch;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  padding: 0.3rem var(--e3);
+  font-size: 0.875rem;
+  background: var(--papel-elevado);
+  color: var(--tinta-media);
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.chip:hover {
+  border-color: var(--tinta-tenue);
+  color: var(--tinta);
+}
+.chip input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.chip:has(input:focus-visible) {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+}
+.chip:has(input:checked) {
+  background: var(--fondo-v, var(--papel-hundido));
+  color: var(--tinta-v, var(--tinta));
+  border-color: var(--linea-v, var(--tinta-tenue));
+  font-weight: 600;
+}
+/* Un chip apagado no depende solo del color para leerse como apagado: pierde
+   también el punto y el peso tipográfico. */
+.chip__punto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+.chip:has(input:checked) .chip__punto {
+  background: currentColor;
+}
+
+.selector {
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--tinta-media);
+  background: var(--papel-elevado);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  padding: 0.3rem var(--e3);
+  cursor: pointer;
+  max-width: 14rem;
+}
+
+/* --- estado de la lista ------------------------------------------------- */
+
+.resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-top: var(--e6);
+  padding-bottom: var(--e3);
+  border-bottom: 1px solid var(--linea);
+  color: var(--tinta-media);
+  font-size: 0.9375rem;
+}
+
+.resumen strong {
+  color: var(--tinta);
+}
+
+/* =========================================================================
+   resultados
+   ========================================================================= */
+
+.grilla {
+  display: grid;
+  gap: var(--e3);
+  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+  margin-top: var(--e4);
+  padding: 0;
+  list-style: none;
+}
+
+.ficha {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--e3);
+  align-items: start;
+  background: var(--papel-elevado);
+  border: 1px solid var(--linea);
+  /* El filo de color repite el veredicto en el borde: se ve de reojo al
+     barrer la lista, sin tener que leer cada tarjeta. */
+  border-left: 3px solid var(--tinta-v);
+  border-radius: var(--radio);
+  padding: var(--e3);
+}
+
+.ficha:hover {
+  border-color: var(--linea-fuerte);
+  border-left-color: var(--tinta-v);
+}
+
+.ficha__miniatura {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: contain;
+  background: var(--papel-hundido);
+  border-radius: var(--radio-chico);
+  flex: none;
+}
+
+/* Marco del mismo tamaño cuando no hay foto: sin esto la grilla se desalinea
+   producto por producto. */
+.ficha__sinfoto {
+  display: grid;
+  place-items: center;
+  color: var(--tinta-tenue);
+  font-size: 1.25rem;
+}
+
+.ficha__cuerpo {
+  min-width: 0;
+}
+
+.ficha__nombre {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+  margin-bottom: var(--e1);
+}
+
+/* El link cubre la tarjeta entera para que el área de toque sea grande, pero
+   el texto del link sigue siendo solo el nombre del producto. */
+.ficha__link {
+  text-decoration: none;
+}
+.ficha__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radio);
+}
+.ficha__link:focus-visible {
+  outline: none;
+}
+.ficha__link:focus-visible::after {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.ficha__marca {
+  color: var(--tinta-tenue);
+  font-size: 0.8125rem;
+  margin-bottom: var(--e2);
+}
+
+.ficha__pie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  align-items: center;
+  margin-top: var(--e2);
+}
+
+.ficha__porque {
+  font-size: 0.8125rem;
+  color: var(--tinta-media);
+  margin-top: var(--e2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vacio {
+  text-align: center;
+  padding: var(--e8) var(--e4);
+  color: var(--tinta-media);
+}
+.vacio h2 {
+  margin-bottom: var(--e3);
+}
+
+/* Reserva de alto mientras baja el índice: sin esto la página salta cuando
+   aparecen los resultados. */
+.cargando {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  color: var(--tinta-tenue);
+}
+
+.mas {
+  display: block;
+  margin: var(--e6) auto 0;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--tinta);
+  background: var(--papel-elevado);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  padding: var(--e2) var(--e5);
+  cursor: pointer;
+}
+.mas:hover {
+  background: var(--papel-hundido);
+}
+
+/* =========================================================================
+   ficha de producto
+   ========================================================================= */
+
+.migas {
+  font-size: 0.875rem;
+  color: var(--tinta-tenue);
+  padding-top: var(--e5);
+}
+.migas a {
+  text-decoration: none;
+  color: var(--tinta-media);
+}
+.migas a:hover {
+  text-decoration: underline;
+}
+
+.producto {
+  display: grid;
+  gap: var(--e6);
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: var(--e4);
+}
+
+@media (min-width: 56rem) {
+  .producto {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    align-items: start;
+  }
+}
+
+.producto__titulo {
+  margin-bottom: var(--e2);
+}
+
+.producto__marca {
+  color: var(--tinta-media);
+  font-size: 1.0625rem;
+}
+
+.dictamen {
+  background: var(--fondo-v);
+  border: 1px solid var(--linea-v);
+  border-radius: var(--radio);
+  padding: var(--e5);
+  margin-block: var(--e5);
+}
+
+.dictamen__frase {
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: 1.375rem;
+  line-height: 1.25;
+  color: var(--tinta-v);
+  margin: var(--e3) 0 var(--e2);
+  text-wrap: balance;
+}
+
+.dictamen__detalle {
+  color: var(--tinta-media);
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.bloque {
+  border-top: 1px solid var(--linea);
+  padding-top: var(--e4);
+  margin-top: var(--e5);
+}
+
+.bloque__titulo {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tinta-tenue);
+  margin-bottom: var(--e3);
+}
+
+.ingredientes {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* El ingrediente que disparó el veredicto, señalado dentro de la lista: sin
+   esto la persona tiene que buscarlo a ojo entre cuarenta. */
+.ingredientes mark {
+  background: var(--fondo-v);
+  color: var(--tinta-v);
+  border-bottom: 2px solid var(--tinta-v);
+  border-radius: 3px 3px 0 0;
+  padding: 0.05em 0.2em;
+  font-weight: 600;
+}
+
+.datos {
+  display: grid;
+  gap: var(--e3);
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.datos > div {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: var(--e3);
+}
+
+.datos dt {
+  color: var(--tinta-tenue);
+  font-size: 0.8125rem;
+  padding-top: 0.15em;
+}
+
+.datos dd {
+  margin: 0;
+}
+
+.panel {
+  background: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: var(--e4);
+}
+
+.panel + .panel {
+  margin-top: var(--e4);
+}
+
+.panel__titulo {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tinta-tenue);
+  margin-bottom: var(--e3);
+}
+
+.evidencia {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6ch;
+  font-size: 0.875rem;
+  margin-bottom: var(--e2);
+}
+
+.evidencia__marca {
+  color: var(--v-apto-tinta);
+  font-weight: 700;
+}
+
+.aviso {
+  font-size: 0.875rem;
+  color: var(--tinta-media);
+  border-left: 3px solid var(--linea-fuerte);
+  padding-left: var(--e4);
+  margin-block: var(--e5);
+}
+
+.cadenas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cadena {
+  font-size: 0.8125rem;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  padding: 0.15rem var(--e3);
+  color: var(--tinta-media);
+  background: var(--papel-elevado);
+}
+
+/* =========================================================================
+   páginas de texto y de categoría
+   ========================================================================= */
+
+.prosa {
+  max-width: 42rem;
+  padding-top: var(--e7);
+}
+
+.prosa h2 {
+  margin-top: var(--e7);
+  margin-bottom: var(--e3);
+}
+
+.prosa h3 {
+  margin-top: var(--e5);
+  margin-bottom: var(--e2);
+}
+
+.prosa ul {
+  padding-left: var(--e5);
+  margin-bottom: var(--e4);
+}
+
+.prosa li {
+  margin-bottom: var(--e2);
+}
+
+.prosa .aviso {
+  margin-block: var(--e5);
+}
+
+.cifras {
+  display: grid;
+  gap: var(--e4);
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  list-style: none;
+  padding: 0;
+  margin: var(--e5) 0;
+}
+
+.cifra {
+  border-top: 2px solid var(--tinta);
+  padding-top: var(--e2);
+}
+
+.cifra__valor {
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.1;
+  display: block;
+}
+
+.cifra__etiqueta {
+  font-size: 0.8125rem;
+  color: var(--tinta-media);
+  display: block;
+  margin-top: var(--e1);
+}
+
+.indice-categorias {
+  display: grid;
+  gap: var(--e2);
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  list-style: none;
+  padding: 0;
+  margin: var(--e5) 0 0;
+}
+
+.indice-categorias a {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e3);
+  align-items: baseline;
+  text-decoration: none;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: var(--e3) var(--e4);
+  background: var(--papel-elevado);
+}
+.indice-categorias a:hover {
+  border-color: var(--linea-fuerte);
+}
+
+.indice-categorias span:last-child {
+  color: var(--tinta-tenue);
+  font-size: 0.875rem;
+}
+
+/* =========================================================================
+   accesibilidad de movimiento
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

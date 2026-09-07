@@ -19,6 +19,11 @@ concurrency:
   group: refresh
   cancel-in-progress: false
 
+# Para poder commitear los datos exportados de la web. El deploy en Vercel se
+# dispara solo con ese commit: nadie tiene que acordarse de republicar.
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -55,6 +60,24 @@ jobs:
 
       - name: Correr los tests contra la base nueva
         run: python -m pytest tests -q
+
+      # Recién acá, con los tests en verde: exportar lo que consume el sitio y
+      # commitearlo. Vercel ve el commit y redeploya. Si los tests fallan, el
+      # sitio se queda con los datos buenos de la semana pasada.
+      - name: Exportar los datos de la web
+        run: python export_web.py
+
+      - name: Publicar los datos nuevos
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data
+          if git diff --cached --quiet; then
+            echo "El catálogo no cambió: no hay nada que publicar."
+          else
+            git commit -m "Refresca el catálogo publicado ($(date -u +%Y-%m-%d))"
+            git push
+          fi
 
       - name: Guardar el reporte de cobertura
         uses: actions/upload-artifact@v4

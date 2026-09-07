@@ -270,8 +270,11 @@ python sprint0.py
 python revision.py --exportar               # CSV ordenado por impacto
 python revision.py --importar data/revision_pendiente.csv
 
-# 8. Levantar la app
+# 8. Levantar la app interna de revisión
 streamlit run app.py
+
+# 9. Exportar lo que consume el sitio público
+python export_web.py
 ```
 
 Todo el pipeline de una sola vez:
@@ -280,6 +283,18 @@ Todo el pipeline de una sola vez:
 python refresh.py              # refresco normal (API rápida)
 python refresh.py --completo   # incluye el dump entero de OFF
 ```
+
+## Las dos caras del proyecto
+
+| | Para qué | Cómo se levanta |
+|---|---|---|
+| **[web/](web/)** — sitio público | Buscar un producto y ver el veredicto con su evidencia. Next.js estático en Vercel. | `cd web && npm run dev` |
+| **[app.py](app.py)** — herramienta interna | Auditar la cola de `revisar`, probar cambios del léxico contra la base real sin republicar nada. | `streamlit run app.py` |
+
+El sitio no consulta la base: `export_web.py` escribe `web/data/` y el build
+genera una página estática por producto. El catálogo entero pesa 236 KB
+comprimidos, así que la búsqueda corre en el navegador sin backend. El detalle
+está en [web/README.md](web/README.md).
 
 ## Frecuencia de refresco
 

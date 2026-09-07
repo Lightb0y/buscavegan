@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Índice de búsqueda: se deriva de data/productos.ndjson en cada build
+# (`npm run prebuild`). Versionar las dos copias sería duplicar 5 MB y
+# arriesgarse a que se desincronicen.
+public/catalogo.json

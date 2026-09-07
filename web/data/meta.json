@@ -1,0 +1,165 @@
+{
+  "actualizado": "2026-09-07",
+  "total": 7397,
+  "por_estado": {
+    "apto": 2743,
+    "vegetariano": 1715,
+    "no_apto": 1763,
+    "revisar": 1176
+  },
+  "por_fuente": {
+    "ingredientes": 3301,
+    "sin_datos": 1171,
+    "ingredientes_super": 1007,
+    "heuristica": 770,
+    "sello_super": 682,
+    "ml": 144,
+    "off_label": 121,
+    "certificacion_oficial": 97,
+    "duplicado": 81,
+    "off_analysis": 23
+  },
+  "categorias": [
+    {
+      "nombre": "Aceites y grasas",
+      "slug": "aceites-y-grasas",
+      "total": 3
+    },
+    {
+      "nombre": "Bebidas alcohólicas",
+      "slug": "bebidas-alcoholicas",
+      "total": 122
+    },
+    {
+      "nombre": "Bebidas sin alcohol",
+      "slug": "bebidas-sin-alcohol",
+      "total": 1017
+    },
+    {
+      "nombre": "Bebidas vegetales",
+      "slug": "bebidas-vegetales",
+      "total": 271
+    },
+    {
+      "nombre": "Carnes y fiambres",
+      "slug": "carnes-y-fiambres",
+      "total": 142
+    },
+    {
+      "nombre": "Cereales, pastas y legumbres",
+      "slug": "cereales-pastas-y-legumbres",
+      "total": 15
+    },
+    {
+      "nombre": "Comidas preparadas",
+      "slug": "comidas-preparadas",
+      "total": 36
+    },
+    {
+      "nombre": "Congelados",
+      "slug": "congelados",
+      "total": 10
+    },
+    {
+      "nombre": "Frutas y verduras",
+      "slug": "frutas-y-verduras",
+      "total": 14
+    },
+    {
+      "nombre": "Galletitas y bizcochos",
+      "slug": "galletitas-y-bizcochos",
+      "total": 640
+    },
+    {
+      "nombre": "Golosinas y chocolates",
+      "slug": "golosinas-y-chocolates",
+      "total": 525
+    },
+    {
+      "nombre": "Huevos",
+      "slug": "huevos",
+      "total": 13
+    },
+    {
+      "nombre": "Infusiones",
+      "slug": "infusiones",
+      "total": 159
+    },
+    {
+      "nombre": "Lácteos",
+      "slug": "lacteos",
+      "total": 662
+    },
+    {
+      "nombre": "Otros",
+      "slug": "otros",
+      "total": 2978
+    },
+    {
+      "nombre": "Panificados",
+      "slug": "panificados",
+      "total": 164
+    },
+    {
+      "nombre": "Pescados y mariscos",
+      "slug": "pescados-y-mariscos",
+      "total": 55
+    },
+    {
+      "nombre": "Postres y helados",
+      "slug": "postres-y-helados",
+      "total": 59
+    },
+    {
+      "nombre": "Salsas y condimentos",
+      "slug": "salsas-y-condimentos",
+      "total": 205
+    },
+    {
+      "nombre": "Snacks salados",
+      "slug": "snacks-salados",
+      "total": 168
+    },
+    {
+      "nombre": "Suplementos y dietéticos",
+      "slug": "suplementos-y-dieteticos",
+      "total": 52
+    },
+    {
+      "nombre": "Untables y mermeladas",
+      "slug": "untables-y-mermeladas",
+      "total": 87
+    }
+  ],
+  "con_evidencia": 5312,
+  "con_ingredientes": 5728,
+  "confirmados": 5581,
+  "fuente_legible": {
+    "certificacion_oficial": "Certificado en el registro oficial de ANMAT",
+    "off_label": "Declarado vegano por el fabricante",
+    "sello_super": "Sello de certificación en la ficha del supermercado",
+    "ingredientes": "Analizado desde la lista de ingredientes",
+    "ingredientes_super": "Analizado desde los ingredientes que publica el supermercado",
+    "off_analysis": "Análisis de ingredientes de Open Food Facts",
+    "duplicado": "Mismo producto que otro código de barras ya resuelto",
+    "heuristica": "Estimado por reglas sobre el nombre del producto",
+    "ml": "Estimado por clasificador automático",
+    "sin_datos": "Sin datos suficientes"
+  },
+  "cadena_legible": {
+    "carrefour": "Carrefour",
+    "vea": "Vea",
+    "dia": "Día",
+    "jumbo": "Jumbo",
+    "disco": "Disco"
+  },
+  "fuentes_con_evidencia": [
+    "certificacion_oficial",
+    "duplicado",
+    "ingredientes",
+    "ingredientes_super",
+    "off_analysis",
+    "off_label",
+    "sello_super"
+  ]
+}
