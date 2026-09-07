@@ -758,6 +758,22 @@ code,
   }
 }
 
+.producto__cabecera {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--e4);
+  align-items: start;
+}
+
+.producto__foto {
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: contain;
+  background: var(--papel-hundido);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-chico);
+}
+
 .producto__titulo {
   margin-bottom: var(--e2);
 }

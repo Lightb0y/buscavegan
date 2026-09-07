@@ -23,10 +23,10 @@ function indice(): Fila[] {
     fuentes: ['ingredientes', 'heuristica'],
     cadenas: ['disco', 'carrefour'],
     p: [
-      ['111', 'leche-de-almendras-111', 'Leche de almendras', 0, 0, 0, 0, 1, 1, 'Sin ingredientes animales'],
-      ['222', 'leche-entera-222', 'Leche entera', 2, 1, 1, 0, 0, 1, 'Contiene leche: es vegetariano pero no vegano'],
-      ['333', 'alfajor-333', 'Alfajor de chocolate', 1, 1, 2, 0, 3, 0, 'Contiene gelatina, de origen animal'],
-      ['444', 'lechuga-444', 'Lechuga criolla', -1, -1, 0, 1, 0, 0, ''],
+      ['111', 'leche-de-almendras-111', 'Leche de almendras', 0, 0, 0, 0, 1, 1, 'Sin ingredientes animales', '779/000/000/1111/front_es.4.200.jpg'],
+      ['222', 'leche-entera-222', 'Leche entera', 2, 1, 1, 0, 0, 1, 'Contiene leche: es vegetariano pero no vegano', ''],
+      ['333', 'alfajor-333', 'Alfajor de chocolate', 1, 1, 2, 0, 3, 0, 'Contiene gelatina, de origen animal', '779/000/000/3333/front_es.1.200.jpg'],
+      ['444', 'lechuga-444', 'Lechuga criolla', -1, -1, 0, 1, 0, 0, '', ''],
     ],
   };
   return rehidratar(crudo);
@@ -60,6 +60,20 @@ test('rehidratar reconstruye marcas, cadenas y ausencias', () => {
 test('el bitmask de cadenas guarda varias a la vez', () => {
   const alfajor = indice()[2];
   assert.deepEqual(alfajor.cadenas, ['disco', 'carrefour']);
+});
+
+test('rehidratar le vuelve a pegar el prefijo a la foto', () => {
+  // El índice guarda solo el sufijo para no repetir 6.030 veces la misma URL
+  // base. Si este test se rompe, la grilla de búsqueda vuelve a mostrar el
+  // marco vacío en todos los productos: fue exactamente el bug de la v1.
+  const [primero, segundo] = indice();
+  assert.equal(
+    primero.imagen,
+    'https://images.openfoodfacts.org/images/products/779/000/000/1111/front_es.4.200.jpg',
+  );
+  // Sin foto es `undefined`, no la cadena vacía: la tarjeta pregunta por
+  // `p.imagen` para decidir si dibuja el marco de reemplazo.
+  assert.equal(segundo.imagen, undefined);
 });
 
 // --- búsqueda -------------------------------------------------------------

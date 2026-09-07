@@ -97,7 +97,10 @@ def _fila_a_producto(f: sqlite3.Row) -> dict:
         p["motivo"] = f["motivo"]
     if f["ingredients_text"]:
         p["ingredientes"] = f["ingredients_text"]
-    if f["imagen_url"]:
+    # Open Food Facts a veces devuelve `.../products/invalid/front_es...`
+    # cuando la ficha quedó a medio cargar: es un 404 garantizado, así que es
+    # mejor mostrar el marco vacío que una imagen rota.
+    if f["imagen_url"] and "/invalid/" not in f["imagen_url"]:
         p["imagen"] = f["imagen_url"]
     if cadenas:
         p["cadenas"] = cadenas

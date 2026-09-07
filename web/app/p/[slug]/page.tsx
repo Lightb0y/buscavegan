@@ -97,8 +97,29 @@ export default async function PaginaProducto({ params }: Props) {
 
       <article className={`producto ${claseVeredicto(p.estado)}`}>
         <div>
-          <h1 className="producto__titulo">{p.nombre}</h1>
-          {p.marca && <p className="producto__marca">{p.marca}</p>}
+          {/* La foto va al lado del nombre, no en la columna lateral: quien
+              llega desde una búsqueda necesita confirmar de un vistazo que es
+              el producto que tiene en la mano, antes de leer el veredicto. */}
+          <div className={p.imagen ? 'producto__cabecera' : undefined}>
+            {p.imagen && (
+              // alt vacío a propósito: el h1 de al lado ya dice qué producto
+              // es, y repetirlo haría que el lector de pantalla lo anuncie dos
+              // veces seguidas.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                className="producto__foto"
+                src={p.imagen}
+                alt=""
+                width={88}
+                height={88}
+                decoding="async"
+              />
+            )}
+            <div>
+              <h1 className="producto__titulo">{p.nombre}</h1>
+              {p.marca && <p className="producto__marca">{p.marca}</p>}
+            </div>
+          </div>
 
           <section className="dictamen" aria-labelledby="veredicto">
             <h2 id="veredicto" className="solo-lectores">

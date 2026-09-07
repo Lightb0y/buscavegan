@@ -22,6 +22,11 @@ const SALIDA = join(raiz, 'public', 'catalogo.json');
 
 const ESTADOS = ['apto', 'vegetariano', 'no_apto', 'revisar'];
 
+// Las 6.030 fotos salen todas del mismo lugar, así que se guarda solo lo que
+// cambia. Repetir el prefijo 6.030 veces suma medio mega de JSON que el
+// navegador tiene que parsear al arrancar.
+const PREFIJO_IMAGEN = 'https://images.openfoodfacts.org/images/products/';
+
 /** Un diccionario por columna: los 6.129 valores de marca son ~1.900 marcas
  *  distintas, así que guardar el índice en vez del texto ahorra de verdad. */
 function diccionario() {
@@ -69,6 +74,11 @@ const filas = lineas.map((linea) => {
     // detrás de un clic sería tirar el diferencial del producto. Se repite
     // mucho entre productos, así que gzip lo deja casi gratis.
     p.motivo ?? '',
+    // Sin esto la grilla de búsqueda —la pantalla principal del sitio— mostraba
+    // el marco vacío en todos los productos, aunque el 82% tiene foto.
+    p.imagen?.startsWith(PREFIJO_IMAGEN)
+      ? p.imagen.slice(PREFIJO_IMAGEN.length)
+      : (p.imagen ?? ''),
   ];
 });
 

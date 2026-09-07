@@ -18,6 +18,7 @@ export interface Fila {
   cadenas: string[];
   tieneIngredientes: boolean;
   motivo?: string;
+  imagen?: string;
   /** Nombre normalizado, con un espacio al principio para poder preguntar
    *  "¿empieza alguna palabra con esto?" con un simple `includes`. */
   _nombre: string;
@@ -50,9 +51,13 @@ export function normalizar(texto: string): string {
     .toLowerCase();
 }
 
+/** El índice guarda las fotos sin el prefijo, que es siempre el mismo.
+ *  Debe coincidir con el de `scripts/build-index.mjs`. */
+const PREFIJO_IMAGEN = 'https://images.openfoodfacts.org/images/products/';
+
 export function rehidratar(crudo: IndiceCrudo): Fila[] {
   return crudo.p.map(
-    ([ean, slug, nombre, mi, ci, ei, fi, bits, ingr, motivo]): Fila => {
+    ([ean, slug, nombre, mi, ci, ei, fi, bits, ingr, motivo, imagen]): Fila => {
       const marca = mi >= 0 ? crudo.marcas[mi] : undefined;
       const cadenas: string[] = [];
       for (let i = 0; i < crudo.cadenas.length; i++) {
@@ -70,6 +75,7 @@ export function rehidratar(crudo: IndiceCrudo): Fila[] {
         cadenas,
         tieneIngredientes: ingr === 1,
         motivo: motivo || undefined,
+        imagen: imagen ? PREFIJO_IMAGEN + imagen : undefined,
         _nombre,
         _todo: marca ? _nombre + ' ' + normalizar(marca) : _nombre,
       };

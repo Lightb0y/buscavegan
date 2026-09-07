@@ -51,8 +51,11 @@ export interface IndiceCrudo {
   fuentes: string[];
   cadenas: string[];
   /** [ean, slug, nombre, marcaIdx, categoriaIdx, estadoIdx, fuenteIdx,
-   *   bitsCadenas, tieneIngredientes, motivo] — los índices valen -1 cuando
-   *   no hay dato, y `motivo` es '' cuando no hay. */
+   *   bitsCadenas, tieneIngredientes, motivo, imagen] — los índices valen -1
+   *   cuando no hay dato, y `motivo`/`imagen` son '' cuando no hay.
+   *
+   *   `imagen` viaja sin el prefijo común de Open Food Facts; lo vuelve a
+   *   pegar `rehidratar()`. */
   p: [
     string,
     string,
@@ -63,6 +66,7 @@ export interface IndiceCrudo {
     number,
     number,
     0 | 1,
+    string,
     string,
   ][];
 }
