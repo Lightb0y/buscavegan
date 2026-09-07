@@ -116,7 +116,7 @@ export default async function PaginaProducto({ params }: Props) {
           {p.motivo && (
             <section className="bloque">
               <h2 className="bloque__titulo">Por qué</h2>
-              <p style={{ marginBottom: 0 }}>{p.motivo}</p>
+              <p>{p.motivo}</p>
             </section>
           )}
 
@@ -159,7 +159,7 @@ export default async function PaginaProducto({ params }: Props) {
               <span>{m.fuente_legible[p.fuente] ?? p.fuente}</span>
             </p>
             {!conEvidencia && (
-              <p style={{ fontSize: '0.8125rem', margin: 0, color: 'var(--tinta-media)' }}>
+              <p className="panel__nota">
                 Es una estimación a partir del nombre comercial, no una lectura
                 de la etiqueta. Tomala con pinzas.
               </p>

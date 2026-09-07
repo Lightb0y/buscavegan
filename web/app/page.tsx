@@ -46,7 +46,7 @@ export default function Home() {
       </section>
 
       <section className="aviso">
-        <p style={{ marginBottom: 0 }}>
+        <p>
           {porcentaje(m.con_evidencia, m.total)} de las clasificaciones salen de
           evidencia sobre el producto real —su lista de ingredientes, un sello
           certificado o el registro de ANMAT—, no de adivinar por el nombre.{' '}

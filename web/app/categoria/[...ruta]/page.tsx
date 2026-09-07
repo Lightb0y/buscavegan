@@ -104,6 +104,9 @@ export default async function PaginaCategoria({ params }: Props) {
         </ul>
       </div>
 
+      {/* Sin este h2, los nombres de producto (h3) saltarían un nivel desde el
+          h1 de la categoría. */}
+      <h2 className="solo-lectores">Productos de {d.cat.nombre}</h2>
       <ul className="grilla">
         {d.items.map((p) => (
           <Ficha key={p.ean} p={p} fuenteLegible={m.fuente_legible} />
@@ -115,7 +118,7 @@ export default async function PaginaCategoria({ params }: Props) {
           <span>
             Página <strong>{d.n}</strong> de {d.paginas}
           </span>
-          <span style={{ display: 'flex', gap: '1rem' }}>
+          <span className="paginacion__links">
             {d.n > 1 && (
               <Link
                 href={

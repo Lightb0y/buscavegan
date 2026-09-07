@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-07T15:52:04+00:00",
+  "title": "Design System: buscavegan",
+  "extensions": {
+    "colorMeta": {
+      "papel-kraft": {
+        "role": "neutral",
+        "displayName": "Papel Kraft Cálido",
+        "canonical": "oklch(98.9% 0.006 84.6)",
+        "tonalRamp": [
+          "oklch(15% 0.006 84.6)",
+          "oklch(26% 0.006 84.6)",
+          "oklch(38% 0.006 84.6)",
+          "oklch(49% 0.006 84.6)",
+          "oklch(61% 0.006 84.6)",
+          "oklch(72% 0.006 84.6)",
+          "oklch(84% 0.006 84.6)",
+          "oklch(95% 0.006 84.6)"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta Casi Negra",
+        "canonical": "oklch(21.0% 0.008 84.6)",
+        "tonalRamp": [
+          "oklch(15% 0.008 84.6)",
+          "oklch(26% 0.008 84.6)",
+          "oklch(38% 0.008 84.6)",
+          "oklch(49% 0.008 84.6)",
+          "oklch(61% 0.008 84.6)",
+          "oklch(72% 0.008 84.6)",
+          "oklch(84% 0.008 84.6)",
+          "oklch(95% 0.008 84.6)"
+        ]
+      },
+      "apto-tinta": {
+        "role": "primary",
+        "displayName": "Verde Certificado",
+        "canonical": "oklch(44.7% 0.102 152.0)",
+        "tonalRamp": [
+          "oklch(15% 0.102 152.0)",
+          "oklch(26% 0.102 152.0)",
+          "oklch(38% 0.102 152.0)",
+          "oklch(49% 0.102 152.0)",
+          "oklch(61% 0.102 152.0)",
+          "oklch(72% 0.102 152.0)",
+          "oklch(84% 0.102 152.0)",
+          "oklch(95% 0.102 152.0)"
+        ]
+      },
+      "vegetariano-tinta": {
+        "role": "primary",
+        "displayName": "Ocre de Cautela",
+        "canonical": "oklch(49.4% 0.109 66.9)",
+        "tonalRamp": [
+          "oklch(15% 0.109 66.9)",
+          "oklch(26% 0.109 66.9)",
+          "oklch(38% 0.109 66.9)",
+          "oklch(49% 0.109 66.9)",
+          "oklch(61% 0.109 66.9)",
+          "oklch(72% 0.109 66.9)",
+          "oklch(84% 0.109 66.9)",
+          "oklch(95% 0.109 66.9)"
+        ]
+      },
+      "no-apto-tinta": {
+        "role": "primary",
+        "displayName": "Bermellón de Rechazo",
+        "canonical": "oklch(47.4% 0.161 28.6)",
+        "tonalRamp": [
+          "oklch(15% 0.161 28.6)",
+          "oklch(26% 0.161 28.6)",
+          "oklch(38% 0.161 28.6)",
+          "oklch(49% 0.161 28.6)",
+          "oklch(61% 0.161 28.6)",
+          "oklch(72% 0.161 28.6)",
+          "oklch(84% 0.161 28.6)",
+          "oklch(95% 0.161 28.6)"
+        ]
+      },
+      "revisar-tinta": {
+        "role": "primary",
+        "displayName": "Gris Pizarra Pendiente",
+        "canonical": "oklch(43.4% 0.026 252.7)",
+        "tonalRamp": [
+          "oklch(15% 0.026 252.7)",
+          "oklch(26% 0.026 252.7)",
+          "oklch(38% 0.026 252.7)",
+          "oklch(49% 0.026 252.7)",
+          "oklch(61% 0.026 252.7)",
+          "oklch(72% 0.026 252.7)",
+          "oklch(84% 0.026 252.7)",
+          "oklch(95% 0.026 252.7)"
+        ]
+      },
+      "foco": {
+        "role": "tertiary",
+        "displayName": "Azul de Foco",
+        "canonical": "oklch(48.8% 0.181 261.2)",
+        "tonalRamp": [
+          "oklch(15% 0.181 261.2)",
+          "oklch(26% 0.181 261.2)",
+          "oklch(38% 0.181 261.2)",
+          "oklch(49% 0.181 261.2)",
+          "oklch(61% 0.181 261.2)",
+          "oklch(72% 0.181 261.2)",
+          "oklch(84% 0.181 261.2)",
+          "oklch(95% 0.181 261.2)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "El h1 de cada página. Un solo uso por vista."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "h2 y la frase del dictamen en la ficha."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "h3. En la grilla el nombre usa el sans, no el serif."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido, con cifras tabulares heredadas del body."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Encabezados de bloque y panel, en mayúsculas."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Exclusivamente códigos de barras y teclas de atajo."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sombra-de-campo",
+        "value": "0 1px 2px rgb(26 24 20 / 6%), 0 4px 14px -6px rgb(26 24 20 / 10%)",
+        "purpose": "La única sombra del sistema. Exclusiva del campo de búsqueda: lo levanta del papel para que se lea como 'acá se escribe'."
+      },
+      {
+        "name": "sombra-de-campo-oscuro",
+        "value": "0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px -6px rgb(0 0 0 / 50%)",
+        "purpose": "La misma sombra en modo oscuro, a mayor opacidad: una sombra cálida tenue desaparece sobre fondo oscuro."
+      }
+    ],
+    "motion": [
+      {
+        "name": "transicion-de-estado",
+        "value": "120ms ease",
+        "purpose": "Cambios de fondo, color y borde en chips y navegación. Es el único tiempo del sistema."
+      },
+      {
+        "name": "salto-al-contenido",
+        "value": "top 120ms ease",
+        "purpose": "El link 'Saltar al contenido' que baja al recibir foco."
+      },
+      {
+        "name": "respeto-por-reduced-motion",
+        "value": "prefers-reduced-motion: reduce -> 0.01ms",
+        "purpose": "Toda animación y transición se anula, y scroll-behavior pasa a auto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "producto",
+        "value": "56rem"
+      },
+      {
+        "name": "grilla-resultados",
+        "value": "21rem"
+      },
+      {
+        "name": "contenedor",
+        "value": "68rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Sello de veredicto",
+      "kind": "chip",
+      "refersTo": "sello-veredicto",
+      "description": "El componente que define el sistema: símbolo + palabra + color, los tres canales juntos.",
+      "html": "<span class=\"ds-sello\"><span class=\"ds-sello__simbolo\" aria-hidden=\"true\">✓</span>Apto vegano</span>",
+      "css": ".ds-sello{display:inline-flex;align-items:center;gap:.5ch;background:#e6f1e8;color:#1c6437;border:1px solid #a9cfb6;border-radius:999px;padding:.15rem .5rem .15rem .25rem;font:600 .8125rem/1.4 'IBM Plex Sans',system-ui,sans-serif;white-space:nowrap}.ds-sello__simbolo{display:grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:999px;background:currentColor;color:#e6f1e8;font-size:.75rem;line-height:1}"
+    },
+    {
+      "name": "Campo de búsqueda",
+      "kind": "input",
+      "refersTo": "campo-busqueda",
+      "description": "El primer elemento con el que se interactúa, y el único con sombra en todo el sistema.",
+      "html": "<div class=\"ds-buscar\"><span class=\"ds-buscar__lupa\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" fill=\"none\"><circle cx=\"8.5\" cy=\"8.5\" r=\"5.75\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M13 13l4 4\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg></span><input class=\"ds-buscar__campo\" type=\"search\" placeholder=\"leche de almendras, Arcor, 779004…\"><kbd class=\"ds-buscar__tecla\">/</kbd></div>",
+      "css": ".ds-buscar{position:relative}.ds-buscar__campo{width:100%;font:1.125rem/1.55 'IBM Plex Sans',system-ui,sans-serif;color:#1a1814;background:#fff;border:1px solid #cdc5b0;border-radius:10px;padding:.75rem 3.5rem .75rem 2.75rem;box-shadow:0 1px 2px rgb(26 24 20/6%),0 4px 14px -6px rgb(26 24 20/10%)}.ds-buscar__campo::placeholder{color:#857e6d}.ds-buscar__campo:focus-visible{outline:2px solid #1b57c4;outline-offset:1px}.ds-buscar__lupa{position:absolute;left:.75rem;top:50%;translate:0 -50%;color:#857e6d;display:grid;place-items:center;pointer-events:none}.ds-buscar__tecla{position:absolute;right:.75rem;top:50%;translate:0 -50%;font:.75rem 'IBM Plex Mono',monospace;color:#857e6d;border:1px solid #e2dccd;border-bottom-width:2px;border-radius:6px;padding:.1rem .4rem;background:#f5f1e8}"
+    },
+    {
+      "name": "Chip de filtro",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Checkbox real disfrazado de píldora: tabulable, activable con espacio, anunciado por lectores de pantalla.",
+      "html": "<label class=\"ds-chip\"><input type=\"checkbox\" checked><span class=\"ds-chip__punto\"></span>Apto vegano</label>",
+      "css": ".ds-chip{position:relative;display:inline-flex;align-items:center;gap:.5ch;border:1px solid #cdc5b0;border-radius:999px;padding:.3rem .75rem;font:.875rem/1.4 'IBM Plex Sans',system-ui,sans-serif;background:#fff;color:#5c5648;cursor:pointer;user-select:none;transition:background 120ms ease,color 120ms ease,border-color 120ms ease}.ds-chip:hover{border-color:#857e6d;color:#1a1814}.ds-chip input{position:absolute;opacity:0;width:0;height:0}.ds-chip:has(input:focus-visible){outline:2px solid #1b57c4;outline-offset:2px}.ds-chip:has(input:checked){background:#e6f1e8;color:#1c6437;border-color:#a9cfb6;font-weight:600}.ds-chip__punto{width:.5rem;height:.5rem;border-radius:999px;border:1px solid currentColor;background:transparent}.ds-chip:has(input:checked) .ds-chip__punto{background:currentColor}"
+    },
+    {
+      "name": "Tarjeta de resultado",
+      "kind": "card",
+      "refersTo": "ficha-producto",
+      "description": "Filo izquierdo de 3px con el color del veredicto: permite barrer la lista sin leer una palabra.",
+      "html": "<article class=\"ds-ficha\"><div class=\"ds-ficha__min\">❧</div><div><h3 class=\"ds-ficha__nombre\"><a href=\"#\">Leche de almendras</a></h3><div class=\"ds-ficha__marca\">Ades</div><span class=\"ds-sello-mini\">✓ Apto vegano</span><p class=\"ds-ficha__porque\">Ningún ingrediente de origen animal en los 8 declarados.</p></div></article>",
+      "css": ".ds-ficha{position:relative;display:grid;grid-template-columns:auto 1fr;gap:.75rem;align-items:start;background:#fff;border:1px solid #e2dccd;border-left:3px solid #1c6437;border-radius:10px;padding:.75rem;font-family:'IBM Plex Sans',system-ui,sans-serif}.ds-ficha:hover{border-color:#cdc5b0;border-left-color:#1c6437}.ds-ficha__min{width:3.25rem;height:3.25rem;display:grid;place-items:center;background:#f5f1e8;border-radius:6px;color:#857e6d;font-size:1.25rem}.ds-ficha__nombre{font:600 .9375rem/1.35 inherit;margin:0 0 .25rem}.ds-ficha__nombre a{color:#1a1814;text-decoration:none}.ds-ficha__nombre a::after{content:'';position:absolute;inset:0;border-radius:10px}.ds-ficha__marca{color:#857e6d;font-size:.8125rem;margin-bottom:.5rem}.ds-sello-mini{display:inline-flex;background:#e6f1e8;color:#1c6437;border:1px solid #a9cfb6;border-radius:999px;padding:.15rem .5rem;font-size:.8125rem;font-weight:600}.ds-ficha__porque{font-size:.8125rem;color:#5c5648;margin:.5rem 0 0}"
+    },
+    {
+      "name": "Botón Ver más",
+      "kind": "button",
+      "refersTo": "boton-ver-mas",
+      "description": "El único botón con borde del sistema. Píldora neutra: nunca toma color de veredicto.",
+      "html": "<button class=\"ds-btn\">Ver 48 más</button>",
+      "css": ".ds-btn{font:600 .9375rem/1.55 'IBM Plex Sans',system-ui,sans-serif;color:#1a1814;background:#fff;border:1px solid #cdc5b0;border-radius:999px;padding:.5rem 1.5rem;cursor:pointer;transition:background 120ms ease}.ds-btn:hover{background:#f5f1e8}.ds-btn:focus-visible{outline:2px solid #1b57c4;outline-offset:2px}"
+    },
+    {
+      "name": "Resaltado de ingrediente",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Señala dentro de la lista el ingrediente que disparó el veredicto. La traducción visual del propósito del producto.",
+      "html": "<p class=\"ds-ingr\">Harina integral, agua, levadura, suero de <mark>leche</mark> en polvo, sal.</p>",
+      "css": ".ds-ingr{font:.9375rem/1.7 'IBM Plex Sans',system-ui,sans-serif;color:#1a1814;margin:0}.ds-ingr mark{background:#fbeed8;color:#8a5300;border-bottom:2px solid #8a5300;border-radius:3px 3px 0 0;padding:.05em .2em;font-weight:600}"
+    }
+  ],
+  "narrative": {
+    "northStar": "El Rótulo Honesto",
+    "overview": "buscavegan se ve como la letra chica en la que sí se puede confiar, no como la tapa que vende. Toda la estética viene de la ficha técnica y la etiqueta nutricional: papel tibio, tinta casi negra, cada dato en un lugar fijo y predecible. Es una obra de consulta, no una landing.\n\nDe ahí sale la decisión que gobierna todo el sistema: el color saturado se raciona como el sello de un inspector. Hay exactamente cuatro colores saturados —los cuatro veredictos— y no se usan para absolutamente nada más.\n\nLa tipografía sostiene la misma idea: un serif con carácter para los títulos, que da autoridad de texto impreso en vez de autoridad de pantalla de ventas, y un sans técnico para el cuerpo, elegido por sus cifras de ancho fijo.",
+    "keyCharacteristics": [
+      "Papel y tinta cálidos; nada de blanco puro ni de gris azulado.",
+      "Cuatro colores saturados, uno por veredicto, con uso exclusivo.",
+      "Plano por defecto: la profundidad se construye con bordes de 1px, no con sombra.",
+      "Serif editorial en títulos, sans técnico con cifras tabulares en el cuerpo.",
+      "El 'por qué' de cada dato es contenido de primera clase, nunca letra chica."
+    ],
+    "rules": [
+      {
+        "name": "La Regla del Reactivo",
+        "section": "colors",
+        "body": "Los cuatro colores de veredicto no se usan para nada que no sea comunicar un veredicto. Test: si un elemento saturado no responde a '¿esto es apto?', está mal pintado."
+      },
+      {
+        "name": "La Regla del Negro Cálido",
+        "section": "colors",
+        "body": "No hay #000000 ni grises azulados. Todo neutro tiene temperatura cálida, incluido el modo oscuro."
+      },
+      {
+        "name": "La Regla del Triple Canal",
+        "section": "colors",
+        "body": "Un veredicto se comunica siempre por símbolo, palabra y color a la vez. ~8% de los hombres no distingue rojo de verde."
+      },
+      {
+        "name": "La Regla de la Cifra en Columna",
+        "section": "typography",
+        "body": "font-variant-numeric: tabular-nums es global. EAN, conteos y porcentajes deben alinearse verticalmente."
+      },
+      {
+        "name": "La Regla del Serif Grande",
+        "section": "typography",
+        "body": "El serif solo aparece a partir de ~1.1rem; por debajo el sistema usa el sans, incluso en encabezados semánticos."
+      },
+      {
+        "name": "La Regla de la Sombra Única",
+        "section": "elevation",
+        "body": "Hay una sola sombra en el sistema y un solo elemento que la usa: el campo de búsqueda."
+      },
+      {
+        "name": "La Regla del Filo Semántico",
+        "section": "elevation",
+        "body": "La tarjeta lleva un borde izquierdo de 3px con el color del veredicto, y nunca cambia de color en hover."
+      },
+      {
+        "name": "La Regla del Marco Fijo",
+        "section": "layout",
+        "body": "Todo producto sin foto recibe un marco del tamaño de la miniatura. Solo ~82% del catálogo tiene imagen."
+      }
+    ],
+    "dos": [
+      "Do aplicar el color de veredicto con la clase .v .v--<estado> y consumirlo con var(--tinta-v)/var(--fondo-v)/var(--linea-v).",
+      "Do dar a todo veredicto sus tres canales: símbolo, palabra y color.",
+      "Do usar --linea y capas tonales para separar en vez de sombra.",
+      "Do reservar un marco del tamaño de la miniatura cuando no hay foto, y fijar width/height en toda imagen.",
+      "Do mantener el anillo de foco 2px solid var(--foco) idéntico en todo el sitio.",
+      "Do tratar 'a revisar' como un veredicto de pleno derecho, con la misma prominencia que los otros tres."
+    ],
+    "donts": [
+      "Don't usar los colores de veredicto en nada que no sea un veredicto.",
+      "Don't agregar sombras: hay una sola en el sistema y ya tiene dueño.",
+      "Don't usar #000000, #ffffff como fondo de página, ni grises de hue azul.",
+      "Don't poner el serif por debajo de 1.1rem.",
+      "Don't esconder el motivo del veredicto detrás de un acordeón, tooltip o 'ver más'.",
+      "Don't ordenar los veredictos por otra cosa que apto -> vegetariano -> no apto -> revisar.",
+      "Don't introducir una cuarta familia tipográfica."
+    ]
+  }
+}

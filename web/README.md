@@ -48,6 +48,19 @@ npm run build    # export estático completo en out/
 `prebuild` y `predev` regeneran `public/catalogo.json` solos, así que nunca se
 desincroniza del NDJSON.
 
+## Sistema de diseño
+
+[`DESIGN.md`](../DESIGN.md) en la raíz es la autoridad visual: tokens en el
+frontmatter, reglas con nombre en el cuerpo. [`PRODUCT.md`](../PRODUCT.md)
+guarda la verdad de producto que ninguna iteración de diseño puede pisar.
+
+Los revisa la skill [Impeccable](https://github.com/pbakaus/impeccable), que no
+se versiona acá porque es herramienta y no código. Para reinstalarla:
+
+```bash
+npx impeccable@latest install --yes --project --providers=claude-code
+```
+
 ## Decisiones que conviene no revertir sin pensarlo
 
 - **El color nunca comunica solo.** Cada veredicto lleva símbolo, palabra y

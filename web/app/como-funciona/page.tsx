@@ -170,7 +170,7 @@ export default function ComoFunciona() {
         </p>
 
         <div className="aviso">
-          <p style={{ marginBottom: 0 }}>
+          <p>
             <strong>«Apto» quiere decir vegano</strong>: sin ingredientes de
             origen animal. No quiere decir <em>cruelty-free</em>. Si la marca
             testea en animales, eso no figura en ninguna de estas fuentes y este

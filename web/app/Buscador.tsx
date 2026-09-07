@@ -247,10 +247,10 @@ export function Buscador({
         </label>
       </div>
 
-      {/* Los cambios de cantidad se anuncian a los lectores de pantalla, que
-          si no se quedarían sin saber que la lista cambió. */}
-      <div className="resumen" role="status" aria-live="polite">
-        <span>
+      <div className="resumen">
+        {/* Solo el conteo es región viva. Meter el botón acá adentro haría que
+            cada tecla lo re-anunciara junto con el número. */}
+        <span role="status" aria-live="polite">
           {filas === null ? (
             'Cargando el catálogo…'
           ) : (
@@ -291,6 +291,9 @@ export function Buscador({
 
       {resultados.length > 0 && (
         <>
+          {/* El h1 de la página es el título; sin este h2 los nombres de
+              producto (h3) saltarían un nivel de encabezado. */}
+          <h2 className="solo-lectores">Resultados</h2>
           <ul className="grilla">
             {resultados.slice(0, visibles).map((p) => (
               <Ficha key={p.ean} p={p} fuenteLegible={fuenteLegible} />

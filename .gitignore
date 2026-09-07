@@ -16,3 +16,12 @@ data/*.csv
 data/*.zip
 models/*.joblib
 .DS_Store
+
+# Impeccable: herramienta de diseño instalada, no código del proyecto.
+# Se reinstala con `npx impeccable@latest install --yes --project --providers=claude-code`.
+# El binario solo pesa 14 MB y es de Windows; los .md son de terceros y se
+# actualizan aparte. Lo que SÍ se versiona es lo que el proyecto es dueño:
+# PRODUCT.md, DESIGN.md y .impeccable/design.json.
+.claude/skills/
+.claude/agents/
+.claude/settings.local.json
