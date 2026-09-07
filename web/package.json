@@ -2,6 +2,9 @@
   "name": "buscavegan-web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "description": "Sitio público de buscavegan: buscador de productos argentinos aptos veganos.",
   "scripts": {
     "prebuild": "node scripts/build-index.mjs",

@@ -79,8 +79,13 @@ npx impeccable@latest install --yes --project --providers=claude-code
 
 ## Deploy
 
-Vercel, conectado al repo con **Root Directory = `web`**. Cada push a `main`
-redeploya.
+Vercel, conectado al repo. Cada push a `main` redeploya.
+
+> **Root Directory = `web`** es obligatorio, en *Settings → Build and
+> Deployment → Root Directory*. Sin eso Vercel construye desde la raíz del
+> repo, encuentra `app.py` (la app interna de Streamlit) y falla con
+> `Found app.py but it does not export a top-level "app"...`, porque cree que
+> el proyecto es una función serverless de Python.
 
 El workflow `refresh.yml` corre el pipeline una vez por semana y, si los tests
 pasan, commitea `web/data/` — con lo cual Vercel redeploya solo. Nadie tiene
