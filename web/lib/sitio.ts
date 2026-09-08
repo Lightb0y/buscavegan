@@ -10,5 +10,4 @@ export const SITIO = {
   url: (
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://buscavegan.vercel.app'
   ).replace(/\/$/, ''),
-  repo: 'https://github.com/Lightb0y/buscavegan',
 } as const;

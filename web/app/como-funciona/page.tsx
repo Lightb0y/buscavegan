@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { meta } from '@/lib/catalogo';
-import { SITIO } from '@/lib/sitio';
 import { numero, porcentaje } from '@/lib/veredicto';
 
 export const metadata: Metadata = {
@@ -180,9 +179,11 @@ export default function ComoFunciona() {
 
         <h2>Errores</h2>
         <p>
-          Los hay. Si encontrás uno, el código y los datos son abiertos:{' '}
-          <a href={SITIO.repo}>el repositorio está en GitHub</a> y se puede
-          abrir un issue con el código de barras del producto.
+          Los hay. Las fuentes a veces están desactualizadas, mal cargadas o
+          incompletas, y ningún veredicto puede ser mejor que el dato del que
+          sale. Por eso cada producto muestra de dónde salió su clasificación y
+          con qué evidencia: para que se pueda comprobar en vez de creer. Ante
+          la duda, la etiqueta del envase gana.
         </p>
 
         <p>

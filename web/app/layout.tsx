@@ -118,9 +118,6 @@ export default function RootLayout({
                   Fuentes: Open Food Facts, el registro de ANMAT y las fichas
                   publicadas por Carrefour, Vea, Día, Jumbo y Disco.
                 </p>
-                <p>
-                  <a href={SITIO.repo}>Código abierto en GitHub</a>
-                </p>
               </div>
             </div>
           </footer>
