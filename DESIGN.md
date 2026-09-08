@@ -1,66 +1,68 @@
 ---
 name: buscavegan
-description: Buscador de productos argentinos aptos veganos que muestra la evidencia detrás de cada veredicto.
+description: Buscador de productos argentinos aptos veganos que muestra la evidencia detrás de cada veredicto, con la estética de un cartel de zócalo de góndola.
 colors:
-  papel-kraft: "#fdfbf7"
-  papel-hundido: "#f5f1e8"
-  papel-elevado: "#ffffff"
-  tinta: "#1a1814"
-  tinta-media: "#5c5648"
-  tinta-tenue: "#857e6d"
-  linea: "#e2dccd"
-  linea-fuerte: "#cdc5b0"
+  stock: "#ffffff"
+  stock-hundido: "#f1f1ef"
+  stock-borde: "#e7e7e4"
+  tinta: "#111111"
+  tinta-media: "#5a5a57"
+  tinta-tenue: "#6e6e6a"
+  filete: "#d9d9d5"
+  filete-fuerte: "#111111"
   foco: "#1b57c4"
-  apto-tinta: "#1c6437"
-  apto-fondo: "#e6f1e8"
-  apto-linea: "#a9cfb6"
-  vegetariano-tinta: "#8a5300"
-  vegetariano-fondo: "#fbeed8"
-  vegetariano-linea: "#e6cd9c"
-  no-apto-tinta: "#a32820"
-  no-apto-fondo: "#fbe9e7"
-  no-apto-linea: "#eec0ba"
-  revisar-tinta: "#47525f"
-  revisar-fondo: "#edeff2"
-  revisar-linea: "#cfd5dd"
+  apto-campo: "#0b6b34"
+  apto-sobre: "#ffffff"
+  apto-tinta: "#0b6b34"
+  vegetariano-campo: "#f0b323"
+  vegetariano-sobre: "#1a1200"
+  vegetariano-tinta: "#8a5a00"
+  no-apto-campo: "#b4231a"
+  no-apto-sobre: "#ffffff"
+  no-apto-tinta: "#b4231a"
+  revisar-campo: "#3f4a56"
+  revisar-sobre: "#ffffff"
+  revisar-tinta: "#3f4a56"
 typography:
   display:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem)"
-    fontWeight: 600
-    lineHeight: 1.15
-    letterSpacing: "-0.015em"
+    fontFamily: "Archivo (var. wdth 75%), ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(1.875rem, 1.3rem + 2.4vw, 3.25rem)"
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: "-0.02em"
+    fontVariation: "font-stretch: 75%; text-transform: uppercase"
   headline:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "clamp(1.3rem, 1.05rem + 1.1vw, 1.75rem)"
-    fontWeight: 600
-    lineHeight: 1.15
-    letterSpacing: "-0.015em"
+    fontFamily: "Archivo (var. wdth 75%), ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 700
+    lineHeight: 1.05
+    fontVariation: "font-stretch: 75%; text-transform: uppercase"
   title:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "1.1rem"
-    fontWeight: 600
+    fontFamily: "Archivo (var. wdth 75%), ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.0625rem"
+    fontWeight: 700
     lineHeight: 1.15
+    letterSpacing: "0.005em"
+    fontVariation: "font-stretch: 75%; text-transform: uppercase"
   body:
-    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
-    lineHeight: 1.55
+    lineHeight: 1.5
     fontFeature: "tabular-nums"
   label:
-    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Archivo (var. wdth 87.5%), ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 700
     letterSpacing: "0.09em"
+    fontVariation: "font-stretch: 87.5%; text-transform: uppercase"
   mono:
-    fontFamily: "IBM Plex Mono, ui-monospace, monospace"
-    fontSize: "0.875em"
+    fontFamily: "Chivo Mono, ui-monospace, monospace"
+    fontSize: "0.8125em"
     fontWeight: 400
-    letterSpacing: "-0.01em"
+    letterSpacing: "-0.02em"
 rounded:
-  chico: "6px"
-  base: "10px"
-  pastilla: "999px"
+  ninguno: "0px"
 spacing:
   e1: "0.25rem"
   e2: "0.5rem"
@@ -71,337 +73,429 @@ spacing:
   e7: "3rem"
   e8: "4.5rem"
 components:
-  campo-busqueda:
-    backgroundColor: "{colors.papel-elevado}"
+  riel-campo:
+    backgroundColor: "transparent"
     textColor: "{colors.tinta}"
-    rounded: "{rounded.base}"
-    padding: "0.75rem 5.5rem 0.75rem 2.75rem"
-  chip:
-    backgroundColor: "{colors.papel-elevado}"
+    rounded: "{rounded.ninguno}"
+    padding: "0"
+  sello-apto:
+    backgroundColor: "{colors.apto-campo}"
+    textColor: "{colors.apto-sobre}"
+    rounded: "{rounded.ninguno}"
+    padding: "0.75rem 0.25rem"
+  sello-vegetariano:
+    backgroundColor: "{colors.vegetariano-campo}"
+    textColor: "{colors.vegetariano-sobre}"
+    rounded: "{rounded.ninguno}"
+    padding: "0.75rem 0.25rem"
+  sello-no-apto:
+    backgroundColor: "{colors.no-apto-campo}"
+    textColor: "{colors.no-apto-sobre}"
+    rounded: "{rounded.ninguno}"
+    padding: "0.75rem 0.25rem"
+  sello-revisar:
+    backgroundColor: "{colors.revisar-campo}"
+    textColor: "{colors.revisar-sobre}"
+    rounded: "{rounded.ninguno}"
+    padding: "0.75rem 0.25rem"
+  marca-v:
+    backgroundColor: "transparent"
     textColor: "{colors.tinta-media}"
-    rounded: "{rounded.pastilla}"
-    padding: "0.3rem 0.75rem"
-  chip-activo:
-    backgroundColor: "{colors.apto-fondo}"
-    textColor: "{colors.apto-tinta}"
-    rounded: "{rounded.pastilla}"
-    padding: "0.3rem 0.75rem"
-  sello-veredicto:
-    backgroundColor: "{colors.apto-fondo}"
-    textColor: "{colors.apto-tinta}"
-    rounded: "{rounded.pastilla}"
-    padding: "0.15rem 0.5rem 0.15rem 0.25rem"
-  ficha-producto:
-    backgroundColor: "{colors.papel-elevado}"
+    rounded: "{rounded.ninguno}"
+    padding: "0.5rem 0.75rem"
+  boton-mas:
+    backgroundColor: "{colors.stock-hundido}"
     textColor: "{colors.tinta}"
-    rounded: "{rounded.base}"
-    padding: "0.75rem"
-  boton-ver-mas:
-    backgroundColor: "{colors.papel-elevado}"
-    textColor: "{colors.tinta}"
-    rounded: "{rounded.pastilla}"
-    padding: "0.5rem 1.5rem"
-  panel:
-    backgroundColor: "{colors.papel-hundido}"
-    textColor: "{colors.tinta}"
-    rounded: "{rounded.base}"
+    rounded: "{rounded.ninguno}"
     padding: "1rem"
+  boton-mas-hover:
+    backgroundColor: "{colors.tinta}"
+    textColor: "{colors.stock}"
+  dictamen:
+    backgroundColor: "{colors.apto-campo}"
+    textColor: "{colors.apto-sobre}"
+    rounded: "{rounded.ninguno}"
+    padding: "2rem 1.5rem"
 ---
 
 # Design System: buscavegan
 
 ## Overview
 
-**Creative North Star: "El Rótulo Honesto"**
+**Creative North Star: "Zócalo de Góndola"**
 
-buscavegan se ve como la letra chica en la que sí se puede confiar, no como la
-tapa que vende. Toda la estética viene de la ficha técnica y la etiqueta
-nutricional: papel tibio, tinta casi negra, cada dato en un lugar fijo y
-predecible. Es una obra de consulta, no una landing — el visitante no viene a
-ser convencido de nada, viene a verificar un hecho antes de poner algo en el
-changuito.
+buscavegan se ve como el cartel que un supermercado argentino cuelga del filo
+del estante: cartón de imprenta bajo tubo fluorescente, tinta plana, y la
+letra chica que la ley obliga a poner para que el número grande se pueda
+comprobar. No es una landing que convence — es el dato que alguien lee
+caminando, con el celular en una mano y el paquete en la otra. Este mundo
+reemplazó por completo a un sistema anterior de papel kraft tibio y esquinas
+curvas ("El Rótulo Honesto"); no queda nada de ese vocabulario en el código
+servido y este archivo ya no lo describe.
 
-De ahí sale la decisión que gobierna todo el sistema: **el color saturado se
-raciona como el sello de un inspector**. Hay exactamente cuatro colores
-saturados —los cuatro veredictos— y no se usan para absolutamente nada más. Un
-botón verde o un link verde harían que el verde dejara de significar "apto", y
-el dato que la persona vino a buscar perdería su señal. Todo el resto del
-sistema (navegación, botones, links, bordes, filtros en reposo) vive en la
-escala papel/tinta.
+De la tesis del cartel de zócalo sale todo lo demás. Los resultados no son
+tarjetas flotando sobre un fondo: son tiras a sangre pegadas una contra otra
+por un filete de 1px, como una corrida real de góndola. Nada tiene radio,
+nada tiene sombra, y el color existe únicamente donde codifica uno de los
+cuatro veredictos — ni el cromo, ni la navegación, ni un botón lo toman
+prestado, tampoco en modo oscuro. La escena decide la luz: el modo claro es
+el principal, sobre un stock blanco frío, porque la persona que esto sirve
+está parada en un pasillo iluminado por tubos, no leyendo un libro a la luz
+de una lámpara cálida.
 
-La tipografía sostiene la misma idea: un serif con carácter (Fraunces) para
-los títulos, que da autoridad de texto impreso en vez de autoridad de pantalla
-de ventas, y un sans técnico (IBM Plex Sans) para el cuerpo, elegido por sus
-cifras de ancho fijo — los EAN, los porcentajes y los conteos se leen en
-columna. La densidad es alta pero no apretada: es un catálogo de 7.400
-productos que hay que poder barrer con la vista.
+La tipografía es una sola familia variable (Archivo, de la fundición
+porteña Omnibus-Type) usada en dos anchos: condensada para todo lo que hay
+que leer barriendo con la vista — nombres de producto, la palabra del
+veredicto, la consulta de búsqueda —, y ancho normal para el texto corrido.
+Una mono (Chivo Mono) aparece solo en códigos: EAN y RNPA. La densidad es
+alta — 7.397 productos que hay que poder recorrer sin fatiga — y la única
+concesión de espacio es la ficha de un solo producto, donde el veredicto se
+queda con el frame entero en vez de ser una pastilla en un rincón.
 
 **Key Characteristics:**
-- Papel y tinta cálidos; nada de blanco puro ni de gris azulado.
-- Cuatro colores saturados, uno por veredicto, con uso exclusivo.
-- Plano por defecto: la profundidad se construye con bordes de 1px, no con sombra.
-- Serif editorial en títulos, sans técnico con cifras tabulares en el cuerpo.
-- El "por qué" de cada dato es contenido de primera clase, nunca letra chica.
+- Cero radio, cero sombra decorativa: el filete de 1px es el único separador.
+- Stock blanco frío y tinta neutra; ningún neutro tiene temperatura cálida.
+- Cuatro tintas planas de veredicto, únicas cromáticas del sistema, en modo claro y oscuro.
+- Una sola familia tipográfica variable, condensada para lo que se barre, normal para lo que se lee.
+- El motivo del veredicto ("la letra chica") es contenido de primera clase, nunca oculto.
 
 ## Colors
 
-Una base de papel cálido casi monocroma, interrumpida solo por la familia de
-cuatro colores del veredicto. La paleta no tiene "color de marca": la marca es
-la ausencia de color decorativo.
+Una base casi acromática — blanco, tinta y filete — interrumpida solo por
+los cuatro veredictos. No hay color de marca: el isotipo y la navegación
+viven enteramente en la escala de tinta.
 
 ### Primary
 
-Los cuatro veredictos. Cada uno es un trío (tinta / fondo / línea) que se
-aplica junto, mediante variables locales `--tinta-v` / `--fondo-v` /
-`--linea-v` que un contenedor con clase `.v--<estado>` fija para su subárbol.
+Los cuatro veredictos. Cada uno es un **trío** de variables CSS que un
+contenedor con clase `.v--<estado>` fija para todo su subárbol —
+`--campo` (la tinta plana del bloque), `--sobre` (lo que se imprime encima
+del campo) y `--tinta-v` (el mismo veredicto usado como texto sobre el
+stock). Son tres valores y no uno porque el ámbar no puede servir a los dos
+usos con el mismo hex: como campo lleva tinta encima y llega a 11:1; como
+texto sobre blanco tiene que bajar a `#8a5a00` para llegar a 5,9:1.
 
-- **Verde Certificado** (`#1c6437`): el veredicto "apto vegano". Aparece en el
-  sello, en el filo izquierdo de la tarjeta y en el bloque de dictamen de la
-  ficha. Es el único verde del sistema.
-- **Ocre de Cautela** (`#8a5300`): "vegetariano, no vegano". Deliberadamente
-  ámbar y no amarillo brillante: es una advertencia matizada, no una alarma.
-- **Bermellón de Rechazo** (`#a32820`): "no apto". Rojo profundo y apagado, con
-  peso de sello de rechazo antes que de error de sistema.
-- **Gris Pizarra Pendiente** (`#47525f`): "a revisar". Desaturado a propósito,
-  pero **nunca desjerarquizado**: es un estado legítimo del producto, no un
-  fracaso que haya que esconder.
+- **Verde Apto** (`#0b6b34` campo / `#ffffff` sobre / `#0b6b34` tinta): el
+  veredicto "apto vegano". Sello de tira, dictamen de ficha, ícono de
+  fuente con evidencia.
+- **Ámbar Vegetariano** (`#f0b323` campo / `#1a1200` sobre / `#8a5a00`
+  tinta): "vegetariano, no vegano". El campo es un amarillo saturado —
+  necesita tinta casi negra encima para leerse — pero como texto baja a un
+  ocre oscuro para no perder contraste sobre blanco.
+- **Rojo No Apto** (`#b4231a` campo / `#ffffff` sobre / `#b4231a` tinta):
+  "no apto". Rojo de sello de rechazo, no de error de sistema.
+- **Gris Revisar** (`#3f4a56` campo / `#ffffff` sobre / `#3f4a56` tinta):
+  "a revisar". Desaturado a propósito, pero nunca desjerarquizado: mismo
+  tamaño de sello, mismo lugar, misma prominencia que los otros tres.
+
+**En modo oscuro** los cuatro campos se aclaran para sostener el contraste
+(`#2f9c58`, `#e0a520`, `#e35a4e`, `#7c8794`), pero la ley de paleta rige
+igual: ningún tono de veredicto se filtra al cromo. El campo de "no apto"
+se movió de `#d94236` a `#e35a4e` porque el primero daba 4,48:1 contra su
+tinta de encima — por debajo del piso de 4,5:1 que el proyecto se fijó — y
+un escalón más claro lo lleva a 5,47:1.
 
 ### Neutral
 
-- **Papel Kraft Cálido** (`#fdfbf7`): el fondo de todo el sitio. Blanco roto
-  con un dejo beige, como el papel de una etiqueta o un remito.
-- **Papel Hundido** (`#f5f1e8`): paneles laterales de la ficha, teclas, fondos
-  de miniatura sin foto. Un escalón por debajo del papel base.
-- **Papel Elevado** (`#ffffff`): tarjetas, campo de búsqueda y chips. Un
-  escalón por encima; es el único blanco puro del sistema.
-- **Tinta** (`#1a1814`): todo el texto principal. Negro cálido, nunca `#000`.
-- **Tinta Media** (`#5c5648`): texto secundario, motivos, navegación en reposo.
-- **Tinta Tenue** (`#857e6d`): placeholders, etiquetas de campo, metadatos.
-- **Línea** (`#e2dccd`) y **Línea Fuerte** (`#cdc5b0`): la única herramienta de
-  separación y contorno del sistema.
+- **Stock** (`#ffffff` / oscuro `#0e0e0d`): el fondo de todo el sitio.
+  Blanco frío de cartón de imprenta, no papel tibio.
+- **Stock Hundido** (`#f1f1ef` / oscuro `#171716`): miniaturas sin foto,
+  fondo del pie, fila de "ver más", fondo de la fila al pasar el mouse.
+- **Stock Borde** (`#e7e7e4` / oscuro `#232322`): reservado en el token
+  pero sin uso propio distinto de `--filete` en el CSS actual.
+- **Tinta** (`#111111` / oscuro `#f4f4f2`): texto principal, fondos
+  invertidos (botón "ver más" en hover, "saltar al contenido").
+- **Tinta Media** (`#5a5a57` / oscuro `#a8a8a3`): navegación en reposo,
+  metadatos de marca/categoría, texto del pie.
+- **Tinta Tenue** (`#6e6e6a` / oscuro `#8e8e89`): la letra chica —
+  `.tira__prueba`, placeholders, teclas de atajo. Se verificó a 5,3:1 sobre
+  el stock porque acá la letra chica es contenido de primera clase: si no
+  llega a AA, el argumento del producto no se lee.
+- **Filete** (`#d9d9d5` / oscuro `#2b2b29`): el único separador del
+  sistema — entre tiras, entre bloques de datos, bajo inputs.
+- **Filete Fuerte** (`#111111` / oscuro `#f4f4f2`): el borde de 2px del
+  encabezado, el riel de búsqueda, el pie y los títulos de sección
+  (`.bloque`, `.prosa h2`) — el filo del estante, no una línea cualquiera.
 
 ### Tertiary
 
-- **Azul de Foco** (`#1b57c4`): exclusivamente el anillo de foco de teclado. Es
-  azul justamente porque ningún veredicto lo es: nunca se puede confundir el
-  indicador de "estás acá" con el dato del producto.
+- **Foco** (`#1b57c4` / oscuro `#8fb2ff`): exclusivamente el anillo de
+  `:focus-visible`. Es azul justamente porque ningún veredicto lo es: el
+  indicador de "estás acá" no se puede confundir nunca con el dato del
+  producto.
 
 ### Named Rules
 
-**La Regla del Reactivo.** Los cuatro colores de veredicto no se usan para nada
-que no sea comunicar un veredicto. Ni botones, ni links, ni encabezados, ni
-estados de carga, ni acentos decorativos. Test: si un elemento saturado no
-responde a la pregunta "¿esto es apto?", está mal pintado.
+**La Ley de Paleta.** Un color no puede aparecer si no codifica un
+veredicto. Los cuatro campos de apto/vegetariano/no_apto/revisar son las
+únicas cromáticas del sistema, en modo claro y en modo oscuro. Test: si un
+elemento saturado no responde a "¿esto es apto?", está mal pintado.
 
-**La Regla del Negro Cálido.** No hay `#000000` ni grises azulados en el
-sistema. Todo neutro tiene temperatura cálida (hue amarillo-marrón), incluido
-el modo oscuro, donde el fondo es `#15140f` y no un carbón neutro.
+**La Regla del Trío.** Cada veredicto se declara una sola vez, como trío
+`--campo` / `--sobre` / `--tinta-v`, mediante una clase `.v--<estado>` en
+un ancestro. Un componente nuevo consume las tres variables sin saber cuál
+veredicto le tocó; nunca se hardcodea un hex de veredicto en un componente.
 
-**La Regla del Triple Canal.** Un veredicto se comunica siempre por tres vías
-simultáneas: símbolo (`✓ ◐ ✕ ?`), palabra ("Apto vegano") y color. Quitar
-cualquiera de las tres rompe el sistema — el color es el dato crítico y ~8% de
-los hombres no distingue rojo de verde.
+**El Piso AA.** Todo par tinta/fondo del sistema se verificó contra 4,5:1.
+No es una aspiración: es la razón por la que la letra chica sube a
+`#6e6e6a` en vez de quedarse en un gris más liviano, y por la que el rojo
+oscuro de "no apto" se movió de hex apenas por debajo del piso a uno que lo
+supera. Un color nuevo que no llegue a 4,5:1 contra su fondo no entra al
+sistema, sea cual sea su rol.
 
 ## Typography
 
-**Display Font:** Fraunces (con Georgia, serif de respaldo)
-**Body Font:** IBM Plex Sans (con ui-sans-serif, system-ui)
-**Label/Mono Font:** IBM Plex Mono (con ui-monospace)
+**Display / Body Font:** Archivo (variable, eje `wdth`), con `ui-sans-serif,
+system-ui, sans-serif` de respaldo.
+**Label/Mono Font:** Chivo Mono, con `ui-monospace, monospace` de respaldo.
 
-**Character:** Un serif variable con opinión contra un sans de ingeniería. La
-combinación da la autoridad de un documento impreso sin caer en lo solemne:
-Fraunces tiene suficiente calidez y rareza para no leerse como periódico, y
-Plex aporta la precisión de una hoja de datos. Ninguna de las dos es Inter.
+**Character:** Una sola grotesca condensable haciendo dos trabajos. Al 75%
+de ancho y en mayúsculas es la voz de todo lo que se barre con la vista —el
+nombre de un producto argentino entero, sin puntos suspensivos, el
+veredicto, la consulta de búsqueda—; al 100% es la voz neutra del texto
+corrido. La mono aparece solo donde el contenido es literalmente un código,
+nunca para dar aire "técnico" a prosa que no lo es.
 
 ### Hierarchy
 
-- **Display** (600, `clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem)`, 1.15,
-  `-0.015em`): el `h1` de cada página. Un solo uso por vista.
-- **Headline** (600, `clamp(1.3rem, 1.05rem + 1.1vw, 1.75rem)`, 1.15): `h2`,
-  incluida la frase del dictamen en la ficha de producto (1.375rem fijo ahí,
-  para no competir con el nombre del producto).
-- **Title** (600, `1.1rem`, 1.15): `h3`. En la tarjeta de resultado el nombre
-  del producto usa el sans a 0.9375rem/600, no el serif: a ese tamaño el serif
-  pierde legibilidad en una grilla densa.
-- **Body** (400, `1rem`, 1.55): texto corrido, con `text-wrap: pretty` y
-  `font-variant-numeric: tabular-nums` heredado del `body`.
-- **Label** (700, `0.75rem`, `0.09em`, MAYÚSCULAS): los encabezados de bloque y
-  de panel ("POR QUÉ", "DE DÓNDE SALE ESTE DATO"). Marcan sección sin robar
-  jerarquía al contenido.
-- **Mono** (400, `0.875em`, `-0.01em`): exclusivamente códigos de barras y
-  teclas de atajo.
+- **Display** (700, `clamp(1.875rem, 1.3rem + 2.4vw, 3.25rem)`, 1.05,
+  condensada 75%, mayúsculas): el `h1` de cada página (`.titular h1`). La
+  frase del dictamen de ficha usa la misma voz a una escala propia
+  (`clamp(1.5rem, 1.1rem + 1.7vw, 2.5rem)`), porque ahí compite con un
+  ícono de 32px y no con el resto de la página.
+- **Headline** (700, `1.375rem`, 1.05, condensada 75%, mayúsculas): los
+  `h2` de aviso y de sección de prosa (`.aviso-bloque h2`, `.prosa h2`,
+  con filete superior de 2px).
+- **Title** (700, `1.0625rem`, 1.15, condensada 75%, mayúsculas): el
+  nombre de producto en la tira y en el índice de categorías
+  (`.tira__nombre`, `.indice__nombre`).
+- **Body** (400, `1rem`, 1.5): texto corrido, con `font-variant-numeric:
+  tabular-nums` heredado del `body` — los EAN, los conteos y los
+  porcentajes se comparan en columna.
+- **Label** (700, `0.75rem`, `0.09em`, condensada 87,5%, mayúsculas):
+  encabezados de bloque en la ficha ("POR QUÉ", "DE DÓNDE SALE ESTE
+  DATO"), la palabra del sello (`.sello__palabra`), la etiqueta de la
+  cifra (`.cifra__etiqueta`).
+- **Mono** (400, `0.8125em`, `-0.02em`): exclusivamente `.codigo` — el EAN
+  en la ficha de producto. No se usa en ningún otro lugar del sitio.
 
 ### Named Rules
 
-**La Regla de la Cifra en Columna.** El `body` fija `font-variant-numeric:
-tabular-nums` globalmente. Los EAN, conteos y porcentajes tienen que alinearse
-verticalmente al comparar productos; nunca se revierte a cifras proporcionales.
+**La Regla de la Condensada Legible.** El eje `wdth` de Archivo comprime al
+75% únicamente títulos, nombres de producto y la palabra del veredicto —
+nunca párrafos. Es lo que permite que un nombre de producto argentino entre
+entero, en mayúsculas, sin recortarse ni encogerse fuera de escala.
 
-**La Regla del Serif Grande.** El serif solo aparece a partir de ~1.1rem. Por
-debajo de eso el sistema usa el sans, incluso en encabezados semánticos
-(`.ficha__nombre` es un `h3` pintado con el sans a 0.9375rem).
+**La Regla de la Cifra en Columna.** `font-variant-numeric: tabular-nums`
+es global en `body`. Los EAN, conteos y porcentajes tienen que poder
+compararse en columna; nunca se revierte a cifras proporcionales.
 
 ## Layout
 
-Contenedor único centrado de `68rem` máximo con `1rem` de padding lateral,
-usado por todas las páginas sin excepción. La escala de espaciado es de base
-4px, expuesta como `--e1`…`--e8` (0.25rem → 4.5rem) y nombrada por función, no
-por medida.
+Un contenedor único (`.contenedor`) de `72rem` máximo con `1rem` de padding
+lateral, usado por todas las páginas. La escala de espaciado es de base
+4px, expuesta como `--e1`…`--e8` (`0.25rem` → `4.5rem`) y nombrada por
+función, no por medida.
 
-La grilla de resultados es `repeat(auto-fill, minmax(21rem, 1fr))` con `0.75rem`
-de gap: colapsa a una columna en móvil sin media query. La ficha de producto es
-la única página con breakpoint explícito — a partir de `56rem` pasa a
-`minmax(0, 1fr) 19rem`, con la evidencia en la columna lateral; por debajo, la
-evidencia queda debajo del contenido principal, nunca oculta tras un acordeón.
+El riel de búsqueda es *sticky* y a sangre completa (`position: sticky;
+top: 0`), con un módulo propio, `--riel` (`5.5rem`, `4.25rem` bajo
+`34rem`), que además fija el ancho del bloque de veredicto en la corrida:
+toda la tira deriva sus columnas de ese único módulo, así la corrida entera
+es un sistema reglado y no una pila de cajas sueltas. Al scrollear más de
+120px el riel se condensa a una banda fina que conserva la consulta y la
+leyenda de filtro — la única transformación con movimiento del sitio, para
+no perder el filtro de vista mientras se barre la lista.
 
-La densidad es alta: la tarjeta de resultado tiene `0.75rem` de padding y una
-miniatura de `3.25rem`. Es deliberado — quien busca "leche" espera barrer
-decenas de resultados, no desplazarse por tarjetas de tamaño póster.
+La corrida de resultados es una lista (`.corrida`) de tiras (`.tira`) en
+grid de tres columnas (`--riel` / `3.25rem` / resto), sin gap: se pegan una
+contra otra por un filete de 1px inferior. Bajo `34rem` la columna de foto
+se oculta y la tira pasa a dos columnas. La leyenda de veredictos es grilla
+de 2 columnas en móvil y 4 desde `46rem` — nunca flex, porque
+"VEGETARIANO" es una sola palabra que no puede encogerse por debajo de su
+ancho mínimo sin desbordar. En la ficha de producto, a partir de `60rem` el
+cuerpo pasa a `minmax(0, 1fr) 20rem` con la evidencia secundaria en la
+columna lateral; por debajo, la evidencia queda debajo del contenido
+principal.
 
 ### Named Rules
 
-**La Regla del Marco Fijo.** Todo producto sin foto recibe un marco del mismo
-tamaño que la miniatura (`3.25rem`) con un glifo tenue. Sin esto la grilla se
-desalinea producto por producto, porque solo ~82% del catálogo tiene imagen.
+**La Regla del Riel Único.** Toda medida de la corrida —ancho del bloque
+de veredicto, columnas de la tira— deriva del módulo `--riel`. Cambiarlo
+en un solo lugar reordena la corrida entera sin tocar cada componente.
+
+**La Regla del Marco Fijo.** Todo producto sin foto recibe un marco del
+mismo tamaño que la miniatura (`2.5rem` en la tira, `5rem` en la cabecera
+de ficha), con un patrón rayado tenue en vez de vacío. Sin esto la corrida
+se desalinea producto por producto, porque solo ~82% del catálogo tiene
+imagen.
 
 ## Elevation & Depth
 
-Plano por diseño, con una excepción deliberada. La profundidad se construye
-casi enteramente con **capas tonales y bordes de 1px**: papel hundido → papel
-base → papel elevado, separados por `--linea`. Las tarjetas de resultado, los
-paneles, los chips y las píldoras no tienen sombra en ningún estado.
-
-La única sombra del sistema está en el campo de búsqueda, y está ahí porque
-es el elemento con el que hay que interactuar primero: la sombra lo levanta del
-papel para que se lea como "acá se escribe".
-
-### Shadow Vocabulary
-
-- **Sombra de campo** (`box-shadow: 0 1px 2px rgb(26 24 20 / 6%), 0 4px 14px -6px rgb(26 24 20 / 10%)`):
-  exclusiva del campo de búsqueda. En modo oscuro sube a 40%/50% de opacidad
-  sobre negro puro, porque una sombra cálida tenue desaparece sobre fondo
-  oscuro.
+Plano, sin excepción. No hay ni una sola sombra decorativa en el
+sistema — ni en la corrida, ni en el riel, ni en los botones. La
+profundidad y la separación se construyen enteramente con **filetes de
+1px** y dos capas de stock (stock / stock hundido). El único
+`box-shadow` del CSS es funcional, no decorativo: el anillo de foco
+(`:focus-visible`) y el subrayado grueso de navegación activa
+(`inset 0 -2px 0`).
 
 ### Named Rules
 
-**La Regla de la Sombra Única.** Hay una sola sombra en el sistema y un solo
-elemento que la usa. Cualquier nuevo elemento que "necesite" sombra
-probablemente necesita en realidad un borde o un cambio de capa tonal.
+**La Regla de Cero Sombra.** Ningún elemento del sistema —tira, sello,
+input, botón, panel de ficha— usa `box-shadow` para levantarse del stock.
+Todo elemento nuevo que "necesite" profundidad recibe un filete o un
+cambio de capa tonal, nunca una sombra.
 
-**La Regla del Filo Semántico.** La tarjeta de resultado lleva un borde
-izquierdo de 3px con el color del veredicto. No es decoración: permite barrer
-la lista y ver la distribución de veredictos sin leer una sola palabra. Ese
-filo nunca cambia de color en hover.
+**La Regla del Frame Entero.** En la corrida el veredicto es una columna
+angosta de ancho fijo (`--riel`) porque compite con miles de filas. En la
+ficha de un solo producto no hay esa competencia: el `.dictamen` toma el
+color del veredicto como fondo de la sección entera, ocupando todo el
+ancho del frame. Este contraste de escala —columna en la lista, banda
+completa en la ficha— es la firma del sistema y no se ablanda a una
+pastilla ni en un lugar ni en el otro.
 
 ## Shapes
 
-Dos radios y una píldora. `10px` (`--radio`) para todo lo que es superficie
-—tarjetas, paneles, el campo de búsqueda—; `6px` (`--radio-chico`) para
-elementos chicos dentro de esas superficies —miniaturas, teclas, anillos de
-foco—; y `999px` para todo lo que es una etiqueta o un control redondeado:
-sellos de veredicto, chips de filtro, el selector de categoría y el botón "Ver
-más".
-
-Los bordes son siempre de 1px salvo el filo semántico de 3px en la tarjeta y el
-borde inferior de 2px de las teclas de atajo (que imita el relieve de una
-tecla real).
+Cero radio en todo el sistema (`border-radius: 0` implícito; ningún
+componente lo declara). No hay esquinas curvas en ningún elemento: tiras,
+sellos, inputs, botones, chips de filtro y el marco de "ver más" son todos
+rectángulos de filo vivo. Los únicos bordes del sistema son filetes de
+1px, salvo el filete fuerte de 2px que marca los umbrales estructurales
+(encabezado, riel, pie, títulos de sección de prosa) y el borde inferior
+de 2px de la tecla de atajo, que imita el relieve de una tecla real.
 
 ## Components
 
 ### Buttons
 
-- **Shape:** píldora completa (`999px`).
-- **"Ver más":** papel elevado sobre borde `--linea-fuerte` de 1px, texto en
-  tinta a 0.9375rem/600, padding `0.5rem 1.5rem`. Centrado bajo la grilla.
-- **Hover:** cambia el fondo a papel hundido. Sin transformación ni sombra.
-- **Botones de icono** ("limpiar búsqueda", "limpiar todo"): sin borde ni
-  fondo en reposo; en hover toman fondo papel hundido y tinta plena.
+- **Shape:** rectángulo de filo vivo, sin radio ni borde propio.
+- **"Ver más" (`.mas`):** fondo stock hundido, texto en tinta, condensada
+  87,5%, `0.875rem`, mayúsculas, ancho completo, padding `1rem`. En hover
+  invierte a fondo tinta / texto stock.
+- **Botones de icono** ("limpiar búsqueda", `.riel__limpiar`): sin fondo
+  ni borde en reposo; en hover toman fondo tinta y texto stock, igual que
+  "ver más" — la misma inversión tinta/stock es el único feedback de hover
+  del sistema.
+- **Enlace-botón** (`.enlace-boton`, "Limpiar todo"): sin fondo, subrayado
+  con `--filete`, pasa a `currentColor` en hover.
 
 ### Chips
 
-- **Style:** píldora de papel elevado, borde `--linea-fuerte` de 1px, texto en
-  tinta media a 0.875rem. Contienen un `<input type="checkbox">` real oculto —
-  son tabulables y activables con la barra espaciadora, y los lectores de
-  pantalla anuncian su estado.
-- **State:** al activarse toman el trío de color de su veredicto (fondo, tinta
-  y borde) **y además** ganan peso 600 y rellenan su punto indicador. Un chip
-  apagado nunca depende solo del color para leerse como apagado.
-- Los chips que no son de veredicto (con ingredientes, en góndola) usan los
-  neutros al activarse — no toman color de veredicto.
+- **Marca de veredicto (`.marca-v`):** checkbox real oculto detrás de una
+  etiqueta con borde de 1px `--filete` y un cuadrito indicador
+  (`.marca-v__muestra`) con borde del color del veredicto. Tabulable,
+  activable con espacio, anunciado por lectores de pantalla.
+- **State:** activo (`input:checked`) toma el trío completo del veredicto
+  — fondo `--campo`, texto `--sobre`, y el cuadrito se rellena con
+  `--sobre`. Apagado queda en filete con el cuadrito vacío: el estado
+  nunca depende solo del color.
+- **Filtros secundarios (`.tamiz__opcion`):** checkbox nativo con
+  `accent-color: var(--ink)`, sin trío de veredicto — son filtros de
+  atributo del producto, no de veredicto, y usan la escala neutra.
 
-### Cards / Containers
+### Cards / Containers — la Tira
 
-- **Corner Style:** `10px`.
-- **Background:** papel elevado sobre el papel base de la página.
+- **Corner Style:** ninguno.
+- **Background:** stock; stock hundido en hover.
 - **Shadow Strategy:** ninguna (ver Elevation).
-- **Border:** 1px `--linea` en tres lados, 3px del color del veredicto a la
-  izquierda.
-- **Internal Padding:** `0.75rem`.
-- El link del nombre cubre la tarjeta entera con un `::after` absoluto, para
+- **Border:** filete de 1px inferior únicamente; no hay borde lateral ni
+  superior propio — el filete superior de la primera tira lo pone
+  `.corrida`.
+- **Internal Padding:** `0.75rem 1rem` (`0.75rem` bajo `34rem`).
+- El link del nombre cubre la tira entera con un `::after` absoluto para
   que el área de toque sea grande, pero el texto accesible del link sigue
-  siendo solo el nombre del producto. El anillo de foco se pinta sobre ese
-  pseudo-elemento, no sobre el texto.
+  siendo solo el nombre del producto. El anillo de foco se pinta sobre la
+  tira entera (`outline-offset: -2px`), no sobre el texto del link.
 
 ### Inputs / Fields
 
-- **Style:** campo de búsqueda de papel elevado, borde `--linea-fuerte` de 1px,
-  radio `10px`, texto a 1.125rem, con lupa a la izquierda y tecla `/` a la
-  derecha (que se reemplaza por un botón de limpiar cuando hay texto).
-- **Focus:** anillo `2px solid #1b57c4` con `outline-offset: 1px`.
-- **Selector de categoría:** píldora, mismo borde, `max-width: 14rem`.
+- **Riel de búsqueda (`.riel__campo`):** sin borde ni fondo propios —
+  vive directamente sobre el stock del riel. Condensada 75%,
+  `clamp(1.5rem, 1.05rem + 1.9vw, 2.5rem)`, mayúsculas; se achica a
+  `clamp(1.125rem, 1rem + 0.6vw, 1.375rem)` cuando el riel está
+  condensado.
+- **Focus:** el anillo se pinta sobre el riel entero
+  (`box-shadow: inset 0 0 0 2px var(--foco)`), no sobre el input — el
+  campo no tiene borde propio, así que un anillo ceñido al texto no se
+  vería.
+- **Selector de categoría (`.tamiz__selector`):** borde de 1px `--filete`,
+  fondo stock, `0.8125rem`, sin radio.
 
 ### Navigation
 
-- Links en tinta media a 0.9375rem, sin subrayado.
-- **Hover / activo:** tinta plena más un `box-shadow: inset 0 -2px 0` que actúa
-  de subrayado grueso. Nunca color de veredicto.
-- El encabezado no es sticky y no colapsa en móvil: son tres links, envuelven.
+- Links en tinta media, `0.875rem`, peso 500, sin subrayado.
+- **Hover / activo:** tinta plena más `box-shadow: inset 0 -2px 0
+  var(--filete-fuerte)` — un subrayado grueso, nunca color de veredicto.
+- El encabezado no es sticky ni colapsa en móvil: envuelve (`flex-wrap`).
 
-### Sello de veredicto (signature component)
+### El Sello (signature component)
 
-El componente que define el sistema. Píldora con el trío de color de su
-veredicto, compuesta por un disco sólido con el símbolo en negativo más la
-palabra. Existe en dos tamaños: el de tarjeta (0.8125rem, disco de 1.15rem) y
-el de ficha (`--grande`: 1rem, disco de 1.6rem). El símbolo es texto (`✓ ◐ ✕
-?`), no un icono, para que se copie y se lea sin depender de una fuente de
-iconos.
+El bloque de veredicto que define el sistema. Dos formas: `sello--bloque`
+(columna en la tira, ancho fijo `--riel`, icono + palabra apilados) y
+`sello--linea` (icono + palabra en línea, para usos secundarios). Las tres
+señales —**icono dibujado, palabra y color de campo**— viajan siempre
+juntas; ninguna variante puede quitar una. Los iconos son SVG propios
+(`Iconos.tsx`) sobre grilla de 16, trazo de 2px, terminaciones redondeadas
+— reemplazaron a glifos Unicode (`✓ ◐ ✕ ?`) que se veían distinto por
+plataforma y no compartían ni grosor ni caja óptica entre sí; el código
+deja constancia explícita de por qué no vuelven.
 
-### Resaltado de ingrediente (signature component)
+### El Dictamen (signature component)
 
-Dentro de la lista de ingredientes, el que disparó el veredicto va en un
-`<mark>` con el fondo y la tinta de su veredicto más un subrayado de 2px del
-color pleno. Es la traducción visual del propósito del producto: no solo
-decimos que contiene gelatina, señalamos dónde.
+En la ficha de un solo producto, el veredicto deja de ser una columna
+angosta y se convierte en una sección (`.dictamen`) que toma el color de
+campo del veredicto como fondo de todo el ancho del frame, con la frase en
+escala de titular y un icono de 32px. "A revisar" ocupa exactamente el
+mismo espacio, con el mismo tratamiento, que los otros tres estados.
+
+### Resaltado de ingrediente
+
+Dentro de la lista de ingredientes de la ficha, el ingrediente que
+disparó el veredicto va en un `<mark>` con el fondo `--campo` y el texto
+`--sobre` del veredicto activo, en negrita. Es la traducción visual del
+propósito del producto: no solo se dice que contiene gelatina, se señala
+dónde.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** aplicar el color de veredicto mediante la clase `.v .v--<estado>` en
-  un contenedor, y consumirlo con `var(--tinta-v)` / `var(--fondo-v)` /
-  `var(--linea-v)` adentro. Así un componente nuevo hereda el veredicto sin
-  saber cuál es.
-- **Do** dar a todo veredicto sus tres canales: símbolo, palabra y color.
-- **Do** usar `--linea` y capas tonales para separar. Un borde de 1px resuelve
-  casi todo lo que uno cree que necesita sombra.
-- **Do** reservar un marco del tamaño de la miniatura cuando no hay foto, y
-  fijar `width`/`height` en toda imagen, para que nada salte al cargar.
-- **Do** mantener el anillo de foco `2px solid var(--foco)` idéntico en todo el
-  sitio. Es la única señal de navegación por teclado.
-- **Do** tratar "a revisar" como un veredicto de pleno derecho: mismo tamaño de
-  sello, mismo lugar en la jerarquía, misma prominencia que los otros tres.
+- **Do** aplicar el veredicto con una clase `.v--<estado>` en un
+  contenedor ancestro y consumirlo adentro con `var(--campo)` /
+  `var(--sobre)` / `var(--tinta-v)`. Ningún componente hardcodea un hex de
+  veredicto.
+- **Do** dar a todo veredicto sus tres canales a la vez: icono dibujado,
+  palabra y color de campo.
+- **Do** tratar "a revisar" como un veredicto de pleno derecho: mismo
+  tamaño de sello, mismo lugar en la jerarquía, misma prominencia — nunca
+  una versión apagada o más chica de los otros tres.
+- **Do** dejar que el dictamen de la ficha ocupe el ancho completo del
+  frame; no reducirlo a una pastilla ni a un badge de esquina.
+- **Do** usar filetes de 1px (2px en los umbrales estructurales) y capas
+  de stock para separar. Nunca sombra.
+- **Do** reservar un marco del tamaño de la miniatura cuando no hay foto,
+  y fijar `width`/`height` en toda imagen, para que nada salte al cargar.
+- **Do** mantener el anillo de foco `2px solid var(--foco)` como única
+  señal de navegación por teclado en todo el sitio.
+- **Do** verificar cualquier color nuevo de veredicto contra 4,5:1 en
+  ambos usos (campo con tinta encima, texto sobre stock) antes de sumarlo.
 
 ### Don't:
 
-- **Don't** usar verde, ocre, bermellón o gris pizarra de veredicto en nada que
-  no sea un veredicto — ni un botón, ni un link, ni un badge de marketing.
-- **Don't** agregar sombras. Hay una sola en el sistema y ya tiene dueño.
-- **Don't** usar `#000000`, `#ffffff` como fondo de página, ni grises de hue
-  azul. Todos los neutros son cálidos.
-- **Don't** poner el serif por debajo de 1.1rem.
-- **Don't** esconder el motivo del veredicto detrás de un acordeón, un tooltip
-  o un "ver más". El "por qué" es el producto.
+- **Don't** usar verde, ámbar, rojo o gris de veredicto en nada que no
+  sea un veredicto — ni un botón, ni un link, ni un acento decorativo, ni
+  en modo oscuro.
+- **Don't** agregar `border-radius` ni `box-shadow` decorativo a ningún
+  elemento. El sistema es de filo vivo y plano por invariante, no por
+  omisión temporal.
+- **Don't** ablandar "a revisar" — ni en tamaño, ni en color, ni en orden
+  — porque es un estado legítimo del producto, no un error a esconder.
+- **Don't** reintroducir glifos Unicode (`✓ ◐ ✕ ?`) como símbolo de
+  veredicto. El código los sacó a propósito porque no comparten trazo ni
+  caja óptica entre plataformas; el icono dibujado es el sistema.
+- **Don't** esconder el motivo del veredicto detrás de un acordeón, un
+  tooltip o un "ver más". La letra chica es el producto.
 - **Don't** ordenar los veredictos por otra cosa que apto → vegetariano →
   no apto → revisar. Ese orden es fijo en filtros, contadores y leyendas.
-- **Don't** introducir una segunda familia tipográfica sin quitar una: son tres
-  y ya cubren display, cuerpo y código.
+- **Don't** introducir una segunda familia tipográfica. Archivo cubre
+  título, cuerpo y label en sus dos anchos; Chivo Mono cubre el código.

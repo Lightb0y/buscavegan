@@ -1,30 +1,29 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
+import { Archivo, Chivo_Mono } from 'next/font/google';
 import Link from 'next/link';
 
+import { Isotipo } from '@/components/Iconos';
 import { meta } from '@/lib/catalogo';
 import { numero } from '@/lib/veredicto';
 import { SITIO } from '@/lib/sitio';
 
 import './globals.css';
 
-// Un serif con carácter para los títulos y un sans técnico para el cuerpo.
-// La elección no es decorativa: los EAN, los porcentajes y los conteos se leen
-// mejor con las cifras de ancho fijo que trae Plex.
-const titulo = Fraunces({
+// Archivo y Chivo Mono son de Omnibus-Type, fundición de Buenos Aires. La
+// elección no es un guiño: Archivo es una grotesca variable pensada para
+// impresión de alto rendimiento —titulares, formularios, cartelería—, que es
+// exactamente el trabajo acá. Su eje de ancho es el que permite que un nombre
+// de producto argentino entre entero en la tira, sin puntos suspensivos, sin
+// cambiar de familia.
+const sans = Archivo({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--fuente-titulo',
+  axes: ['wdth'],
+  variable: '--fuente-sans',
 });
 
-const texto = IBM_Plex_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  variable: '--fuente-texto',
-});
-
-const mono = IBM_Plex_Mono({
+// Solo para códigos: EAN y RNPA. No se usa para dar aire técnico a prosa.
+const mono = Chivo_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
   display: 'swap',
@@ -56,8 +55,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fdfbf7' },
-    { media: '(prefers-color-scheme: dark)', color: '#15140f' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0e0e0d' },
   ],
 };
 
@@ -65,10 +64,9 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const m = meta();
-  const clases = `${titulo.variable} ${texto.variable} ${mono.variable}`;
 
   return (
-    <html lang="es-AR" className={clases}>
+    <html lang="es-AR" className={`${sans.variable} ${mono.variable}`}>
       <body>
         <div className="sitio">
           <a className="saltar" href="#contenido">
@@ -78,9 +76,7 @@ export default function RootLayout({
           <header className="encabezado">
             <div className="contenedor encabezado__fila">
               <Link href="/" className="marca">
-                <span className="marca__brote" aria-hidden="true">
-                  ❧
-                </span>
+                <Isotipo />
                 buscavegan
               </Link>
               <nav className="navegacion" aria-label="Principal">

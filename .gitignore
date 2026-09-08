@@ -25,3 +25,8 @@ models/*.joblib
 .claude/skills/
 .claude/agents/
 .claude/settings.local.json
+
+# Rastro de trabajo de Impeccable: capturas de revisión y logs de las
+# preguntas. Se regeneran en cada corrida y no describen al proyecto.
+.impeccable/review/
+.impeccable/questions/

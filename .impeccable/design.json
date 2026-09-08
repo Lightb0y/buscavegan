@@ -1,303 +1,290 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-07T15:52:04+00:00",
+  "generatedAt": "2026-09-07T00:00:00Z",
   "title": "Design System: buscavegan",
   "extensions": {
     "colorMeta": {
-      "papel-kraft": {
+      "stock": {
         "role": "neutral",
-        "displayName": "Papel Kraft Cálido",
-        "canonical": "oklch(98.9% 0.006 84.6)",
+        "displayName": "Stock Blanco Frío",
+        "canonical": "#ffffff",
         "tonalRamp": [
-          "oklch(15% 0.006 84.6)",
-          "oklch(26% 0.006 84.6)",
-          "oklch(38% 0.006 84.6)",
-          "oklch(49% 0.006 84.6)",
-          "oklch(61% 0.006 84.6)",
-          "oklch(72% 0.006 84.6)",
-          "oklch(84% 0.006 84.6)",
-          "oklch(95% 0.006 84.6)"
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(99% 0 0)"
         ]
       },
       "tinta": {
         "role": "neutral",
-        "displayName": "Tinta Casi Negra",
-        "canonical": "oklch(21.0% 0.008 84.6)",
+        "displayName": "Tinta",
+        "canonical": "#111111",
         "tonalRamp": [
-          "oklch(15% 0.008 84.6)",
-          "oklch(26% 0.008 84.6)",
-          "oklch(38% 0.008 84.6)",
-          "oklch(49% 0.008 84.6)",
-          "oklch(61% 0.008 84.6)",
-          "oklch(72% 0.008 84.6)",
-          "oklch(84% 0.008 84.6)",
-          "oklch(95% 0.008 84.6)"
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(95% 0 0)"
         ]
       },
-      "apto-tinta": {
+      "apto-campo": {
         "role": "primary",
-        "displayName": "Verde Certificado",
-        "canonical": "oklch(44.7% 0.102 152.0)",
+        "displayName": "Verde Apto",
+        "canonical": "#0b6b34",
         "tonalRamp": [
-          "oklch(15% 0.102 152.0)",
-          "oklch(26% 0.102 152.0)",
-          "oklch(38% 0.102 152.0)",
-          "oklch(49% 0.102 152.0)",
-          "oklch(61% 0.102 152.0)",
-          "oklch(72% 0.102 152.0)",
-          "oklch(84% 0.102 152.0)",
-          "oklch(95% 0.102 152.0)"
+          "oklch(15% 0.09 152)",
+          "oklch(26% 0.09 152)",
+          "oklch(38% 0.09 152)",
+          "oklch(45% 0.11 152)",
+          "oklch(58% 0.13 152)",
+          "oklch(70% 0.12 152)",
+          "oklch(83% 0.09 152)",
+          "oklch(95% 0.05 152)"
         ]
       },
-      "vegetariano-tinta": {
+      "vegetariano-campo": {
         "role": "primary",
-        "displayName": "Ocre de Cautela",
-        "canonical": "oklch(49.4% 0.109 66.9)",
+        "displayName": "Ámbar Vegetariano",
+        "canonical": "#f0b323",
         "tonalRamp": [
-          "oklch(15% 0.109 66.9)",
-          "oklch(26% 0.109 66.9)",
-          "oklch(38% 0.109 66.9)",
-          "oklch(49% 0.109 66.9)",
-          "oklch(61% 0.109 66.9)",
-          "oklch(72% 0.109 66.9)",
-          "oklch(84% 0.109 66.9)",
-          "oklch(95% 0.109 66.9)"
+          "oklch(15% 0.1 70)",
+          "oklch(26% 0.1 70)",
+          "oklch(38% 0.11 70)",
+          "oklch(49% 0.12 70)",
+          "oklch(61% 0.13 70)",
+          "oklch(74% 0.14 70)",
+          "oklch(85% 0.13 70)",
+          "oklch(95% 0.08 70)"
         ]
       },
-      "no-apto-tinta": {
+      "no-apto-campo": {
         "role": "primary",
-        "displayName": "Bermellón de Rechazo",
-        "canonical": "oklch(47.4% 0.161 28.6)",
+        "displayName": "Rojo No Apto",
+        "canonical": "#b4231a",
         "tonalRamp": [
-          "oklch(15% 0.161 28.6)",
-          "oklch(26% 0.161 28.6)",
-          "oklch(38% 0.161 28.6)",
-          "oklch(49% 0.161 28.6)",
-          "oklch(61% 0.161 28.6)",
-          "oklch(72% 0.161 28.6)",
-          "oklch(84% 0.161 28.6)",
-          "oklch(95% 0.161 28.6)"
+          "oklch(15% 0.1 27)",
+          "oklch(26% 0.12 27)",
+          "oklch(38% 0.15 27)",
+          "oklch(46% 0.17 27)",
+          "oklch(58% 0.17 27)",
+          "oklch(70% 0.14 27)",
+          "oklch(83% 0.09 27)",
+          "oklch(95% 0.04 27)"
         ]
       },
-      "revisar-tinta": {
+      "revisar-campo": {
         "role": "primary",
-        "displayName": "Gris Pizarra Pendiente",
-        "canonical": "oklch(43.4% 0.026 252.7)",
+        "displayName": "Gris Revisar",
+        "canonical": "#3f4a56",
         "tonalRamp": [
-          "oklch(15% 0.026 252.7)",
-          "oklch(26% 0.026 252.7)",
-          "oklch(38% 0.026 252.7)",
-          "oklch(49% 0.026 252.7)",
-          "oklch(61% 0.026 252.7)",
-          "oklch(72% 0.026 252.7)",
-          "oklch(84% 0.026 252.7)",
-          "oklch(95% 0.026 252.7)"
+          "oklch(15% 0.02 240)",
+          "oklch(26% 0.02 240)",
+          "oklch(35% 0.03 240)",
+          "oklch(44% 0.03 240)",
+          "oklch(56% 0.03 240)",
+          "oklch(68% 0.02 240)",
+          "oklch(82% 0.02 240)",
+          "oklch(95% 0.01 240)"
         ]
       },
       "foco": {
         "role": "tertiary",
-        "displayName": "Azul de Foco",
-        "canonical": "oklch(48.8% 0.181 261.2)",
+        "displayName": "Foco",
+        "canonical": "#1b57c4",
         "tonalRamp": [
-          "oklch(15% 0.181 261.2)",
-          "oklch(26% 0.181 261.2)",
-          "oklch(38% 0.181 261.2)",
-          "oklch(49% 0.181 261.2)",
-          "oklch(61% 0.181 261.2)",
-          "oklch(72% 0.181 261.2)",
-          "oklch(84% 0.181 261.2)",
-          "oklch(95% 0.181 261.2)"
+          "oklch(15% 0.15 261)",
+          "oklch(26% 0.16 261)",
+          "oklch(38% 0.18 261)",
+          "oklch(49% 0.19 261)",
+          "oklch(61% 0.18 261)",
+          "oklch(72% 0.14 261)",
+          "oklch(84% 0.08 261)",
+          "oklch(95% 0.03 261)"
         ]
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "El h1 de cada página. Un solo uso por vista."
+        "purpose": "El h1 de cada página (.titular h1) y, a escala propia, la frase del dictamen de ficha."
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "h2 y la frase del dictamen en la ficha."
+        "purpose": "h2 de aviso-bloque y de secciones de prosa, con filete superior de 2px."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "h3. En la grilla el nombre usa el sans, no el serif."
+        "purpose": "Nombre de producto en la tira y en el índice de categorías."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Texto corrido, con cifras tabulares heredadas del body."
+        "purpose": "Texto corrido, cifras tabulares heredadas del body."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Encabezados de bloque y panel, en mayúsculas."
+        "purpose": "Encabezados de bloque, palabra del sello, etiqueta de cifra. Siempre mayúsculas."
       },
       "mono": {
         "displayName": "Mono",
-        "purpose": "Exclusivamente códigos de barras y teclas de atajo."
+        "purpose": "Exclusivamente el código de barras (.codigo) en la ficha de producto."
       }
     },
-    "shadows": [
-      {
-        "name": "sombra-de-campo",
-        "value": "0 1px 2px rgb(26 24 20 / 6%), 0 4px 14px -6px rgb(26 24 20 / 10%)",
-        "purpose": "La única sombra del sistema. Exclusiva del campo de búsqueda: lo levanta del papel para que se lea como 'acá se escribe'."
-      },
-      {
-        "name": "sombra-de-campo-oscuro",
-        "value": "0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px -6px rgb(0 0 0 / 50%)",
-        "purpose": "La misma sombra en modo oscuro, a mayor opacidad: una sombra cálida tenue desaparece sobre fondo oscuro."
-      }
-    ],
+    "shadows": [],
     "motion": [
       {
-        "name": "transicion-de-estado",
-        "value": "120ms ease",
-        "purpose": "Cambios de fondo, color y borde en chips y navegación. Es el único tiempo del sistema."
+        "name": "sale",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Única curva de salida del sitio: condensado del riel al scrollear, escala de la lupa, 'saltar al contenido'."
       },
       {
-        "name": "salto-al-contenido",
-        "value": "top 120ms ease",
-        "purpose": "El link 'Saltar al contenido' que baja al recibir foco."
+        "name": "hover-lineal",
+        "value": "120ms linear",
+        "purpose": "Cambios de fondo/color en la marca de veredicto (.marca-v) al activarse."
       },
       {
         "name": "respeto-por-reduced-motion",
-        "value": "prefers-reduced-motion: reduce -> 0.01ms",
-        "purpose": "Toda animación y transición se anula, y scroll-behavior pasa a auto."
+        "value": "prefers-reduced-motion: reduce -> transition-duration y animation-duration en 0.01ms",
+        "purpose": "Toda animación y transición se anula para quien lo pide."
       }
     ],
     "breakpoints": [
-      {
-        "name": "producto",
-        "value": "56rem"
-      },
-      {
-        "name": "grilla-resultados",
-        "value": "21rem"
-      },
-      {
-        "name": "contenedor",
-        "value": "68rem"
-      }
+      { "name": "tira-sin-foto", "value": "34rem" },
+      { "name": "leyenda-cuatro-columnas", "value": "46rem" },
+      { "name": "ficha-dos-columnas", "value": "60rem" }
     ]
   },
   "components": [
     {
-      "name": "Sello de veredicto",
-      "kind": "chip",
-      "refersTo": "sello-veredicto",
-      "description": "El componente que define el sistema: símbolo + palabra + color, los tres canales juntos.",
-      "html": "<span class=\"ds-sello\"><span class=\"ds-sello__simbolo\" aria-hidden=\"true\">✓</span>Apto vegano</span>",
-      "css": ".ds-sello{display:inline-flex;align-items:center;gap:.5ch;background:#e6f1e8;color:#1c6437;border:1px solid #a9cfb6;border-radius:999px;padding:.15rem .5rem .15rem .25rem;font:600 .8125rem/1.4 'IBM Plex Sans',system-ui,sans-serif;white-space:nowrap}.ds-sello__simbolo{display:grid;place-items:center;width:1.15rem;height:1.15rem;border-radius:999px;background:currentColor;color:#e6f1e8;font-size:.75rem;line-height:1}"
+      "name": "Sello de veredicto (bloque)",
+      "kind": "custom",
+      "refersTo": "sello-apto",
+      "description": "El bloque de veredicto que gobierna la corrida: icono dibujado + palabra apiladas en tinta plana, ancho fijo igual al módulo --riel.",
+      "html": "<span class=\"ds-sello\"><svg class=\"ds-sello__icono\" width=\"20\" height=\"20\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M3.5 8.5 6.75 12l5.75-7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span class=\"ds-sello__palabra\">Apto vegano</span></span>",
+      "css": ".ds-sello{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;width:5.5rem;padding:.75rem .25rem;background:#0b6b34;color:#fff;text-align:center;border-radius:0}.ds-sello__icono{flex:none}.ds-sello__palabra{font:700 .6875rem/1.1 'Archivo',ui-sans-serif,sans-serif;font-stretch:75%;letter-spacing:.04em;text-transform:uppercase}"
     },
     {
-      "name": "Campo de búsqueda",
+      "name": "Riel de búsqueda",
       "kind": "input",
-      "refersTo": "campo-busqueda",
-      "description": "El primer elemento con el que se interactúa, y el único con sombra en todo el sistema.",
-      "html": "<div class=\"ds-buscar\"><span class=\"ds-buscar__lupa\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" fill=\"none\"><circle cx=\"8.5\" cy=\"8.5\" r=\"5.75\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M13 13l4 4\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg></span><input class=\"ds-buscar__campo\" type=\"search\" placeholder=\"leche de almendras, Arcor, 779004…\"><kbd class=\"ds-buscar__tecla\">/</kbd></div>",
-      "css": ".ds-buscar{position:relative}.ds-buscar__campo{width:100%;font:1.125rem/1.55 'IBM Plex Sans',system-ui,sans-serif;color:#1a1814;background:#fff;border:1px solid #cdc5b0;border-radius:10px;padding:.75rem 3.5rem .75rem 2.75rem;box-shadow:0 1px 2px rgb(26 24 20/6%),0 4px 14px -6px rgb(26 24 20/10%)}.ds-buscar__campo::placeholder{color:#857e6d}.ds-buscar__campo:focus-visible{outline:2px solid #1b57c4;outline-offset:1px}.ds-buscar__lupa{position:absolute;left:.75rem;top:50%;translate:0 -50%;color:#857e6d;display:grid;place-items:center;pointer-events:none}.ds-buscar__tecla{position:absolute;right:.75rem;top:50%;translate:0 -50%;font:.75rem 'IBM Plex Mono',monospace;color:#857e6d;border:1px solid #e2dccd;border-bottom-width:2px;border-radius:6px;padding:.1rem .4rem;background:#f5f1e8}"
+      "refersTo": "riel-campo",
+      "description": "Barra a sangre completa, sin borde ni fondo propios; el foco se pinta sobre el riel entero, no sobre el input.",
+      "html": "<div class=\"ds-riel\"><svg class=\"ds-riel__lupa\" width=\"22\" height=\"22\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.25\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"m10.25 10.25 3 3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg><input class=\"ds-riel__campo\" type=\"search\" placeholder=\"leche de almendras, Arcor, 779004…\"><span class=\"ds-riel__tecla\">/</span></div>",
+      "css": ".ds-riel{display:flex;align-items:center;gap:.75rem;padding:1.5rem 0 1rem;background:#fff;border-bottom:2px solid #111}.ds-riel__lupa{flex:none;color:#6e6e6a}.ds-riel__campo{flex:1;min-width:0;padding:0;border:0;background:none;font:700 clamp(1.5rem,1.05rem + 1.9vw,2.5rem)/1.1 'Archivo',ui-sans-serif,sans-serif;font-stretch:75%;letter-spacing:-.01em;text-transform:uppercase;color:#111}.ds-riel__campo::placeholder{color:#6e6e6a;font-stretch:87.5%;font-size:.55em;font-weight:400;text-transform:none}.ds-riel:has(.ds-riel__campo:focus-visible){box-shadow:inset 0 0 0 2px #1b57c4}.ds-riel__campo:focus-visible{outline:none}.ds-riel__tecla{flex:none;padding:.15rem .45rem;border:1px solid #d9d9d5;border-bottom-width:2px;color:#6e6e6a;font:.75rem 'Chivo Mono',ui-monospace,monospace}"
     },
     {
-      "name": "Chip de filtro",
+      "name": "Marca de veredicto (chip de filtro)",
       "kind": "chip",
-      "refersTo": "chip",
-      "description": "Checkbox real disfrazado de píldora: tabulable, activable con espacio, anunciado por lectores de pantalla.",
-      "html": "<label class=\"ds-chip\"><input type=\"checkbox\" checked><span class=\"ds-chip__punto\"></span>Apto vegano</label>",
-      "css": ".ds-chip{position:relative;display:inline-flex;align-items:center;gap:.5ch;border:1px solid #cdc5b0;border-radius:999px;padding:.3rem .75rem;font:.875rem/1.4 'IBM Plex Sans',system-ui,sans-serif;background:#fff;color:#5c5648;cursor:pointer;user-select:none;transition:background 120ms ease,color 120ms ease,border-color 120ms ease}.ds-chip:hover{border-color:#857e6d;color:#1a1814}.ds-chip input{position:absolute;opacity:0;width:0;height:0}.ds-chip:has(input:focus-visible){outline:2px solid #1b57c4;outline-offset:2px}.ds-chip:has(input:checked){background:#e6f1e8;color:#1c6437;border-color:#a9cfb6;font-weight:600}.ds-chip__punto{width:.5rem;height:.5rem;border-radius:999px;border:1px solid currentColor;background:transparent}.ds-chip:has(input:checked) .ds-chip__punto{background:currentColor}"
+      "refersTo": "marca-v",
+      "description": "Checkbox real disfrazado de etiqueta de filtro; encendido toma el trío completo del veredicto, apagado deja el cuadrito vacío para no depender solo del color.",
+      "html": "<label class=\"ds-marca-v ds-marca-v--activa\"><input type=\"checkbox\" checked><span class=\"ds-marca-v__muestra\"></span><span class=\"ds-marca-v__texto\">Apto vegano</span><span class=\"ds-marca-v__conteo\">3.412</span></label>",
+      "css": ".ds-marca-v{position:relative;display:flex;min-width:0;align-items:center;gap:.5rem;padding:.5rem .75rem;border:1px solid #d9d9d5;color:#5a5a57;cursor:pointer;border-radius:0;transition:background 120ms linear,color 120ms linear}.ds-marca-v input{position:absolute;opacity:0;pointer-events:none}.ds-marca-v__muestra{flex:none;width:.875rem;height:.875rem;border:1px solid #6e6e6a}.ds-marca-v__texto{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 .75rem/1 'Archivo',ui-sans-serif,sans-serif;font-stretch:87.5%;letter-spacing:.04em;text-transform:uppercase}.ds-marca-v__conteo{margin-left:auto;font-size:.75rem;font-variant-numeric:tabular-nums}.ds-marca-v--activa{background:#0b6b34;border-color:#0b6b34;color:#fff}.ds-marca-v--activa .ds-marca-v__muestra{background:#fff;border-color:#fff}.ds-marca-v:has(input:focus-visible){outline:2px solid #1b57c4;outline-offset:2px}"
     },
     {
-      "name": "Tarjeta de resultado",
+      "name": "Tira de resultado",
       "kind": "card",
-      "refersTo": "ficha-producto",
-      "description": "Filo izquierdo de 3px con el color del veredicto: permite barrer la lista sin leer una palabra.",
-      "html": "<article class=\"ds-ficha\"><div class=\"ds-ficha__min\">❧</div><div><h3 class=\"ds-ficha__nombre\"><a href=\"#\">Leche de almendras</a></h3><div class=\"ds-ficha__marca\">Ades</div><span class=\"ds-sello-mini\">✓ Apto vegano</span><p class=\"ds-ficha__porque\">Ningún ingrediente de origen animal en los 8 declarados.</p></div></article>",
-      "css": ".ds-ficha{position:relative;display:grid;grid-template-columns:auto 1fr;gap:.75rem;align-items:start;background:#fff;border:1px solid #e2dccd;border-left:3px solid #1c6437;border-radius:10px;padding:.75rem;font-family:'IBM Plex Sans',system-ui,sans-serif}.ds-ficha:hover{border-color:#cdc5b0;border-left-color:#1c6437}.ds-ficha__min{width:3.25rem;height:3.25rem;display:grid;place-items:center;background:#f5f1e8;border-radius:6px;color:#857e6d;font-size:1.25rem}.ds-ficha__nombre{font:600 .9375rem/1.35 inherit;margin:0 0 .25rem}.ds-ficha__nombre a{color:#1a1814;text-decoration:none}.ds-ficha__nombre a::after{content:'';position:absolute;inset:0;border-radius:10px}.ds-ficha__marca{color:#857e6d;font-size:.8125rem;margin-bottom:.5rem}.ds-sello-mini{display:inline-flex;background:#e6f1e8;color:#1c6437;border:1px solid #a9cfb6;border-radius:999px;padding:.15rem .5rem;font-size:.8125rem;font-weight:600}.ds-ficha__porque{font-size:.8125rem;color:#5c5648;margin:.5rem 0 0}"
+      "refersTo": null,
+      "description": "El cartel de un estante: sello a la izquierda, foto o marco fijo, nombre condensado, y la letra chica (motivo) bajo un filete, sin tarjeta ni radio ni sombra.",
+      "html": "<li class=\"ds-tira\"><span class=\"ds-tira__sello\">✓</span><div class=\"ds-tira__foto\"><div class=\"ds-tira__sinfoto\"></div></div><div class=\"ds-tira__cuerpo\"><h3 class=\"ds-tira__nombre\"><a href=\"#\">Leche de almendras sin azúcar</a></h3><div class=\"ds-tira__meta\">Ades · Bebidas vegetales</div><p class=\"ds-tira__prueba\">Ningún ingrediente de origen animal en los 8 declarados.</p></div></li>",
+      "css": ".ds-tira{position:relative;display:grid;grid-template-columns:5.5rem 3.25rem minmax(0,1fr);align-items:stretch;border-bottom:1px solid #d9d9d5;list-style:none;border-radius:0}.ds-tira:hover{background:#f1f1ef}.ds-tira__sello{display:flex;align-items:center;justify-content:center;background:#0b6b34;color:#fff;font-weight:700}.ds-tira__foto{display:flex;align-items:center;justify-content:center;padding:.5rem;background:#f1f1ef;border-right:1px solid #d9d9d5}.ds-tira__sinfoto{width:2.5rem;height:2.5rem;background:repeating-linear-gradient(-45deg,transparent,transparent 4px,#d9d9d5 4px,#d9d9d5 5px)}.ds-tira__cuerpo{min-width:0;padding:.75rem 1rem}.ds-tira__nombre{margin:0;font:700 1.0625rem/1.15 'Archivo',ui-sans-serif,sans-serif;font-stretch:75%;letter-spacing:.005em;text-transform:uppercase}.ds-tira__nombre a{color:#111;text-decoration:none}.ds-tira__meta{margin-top:.15rem;color:#5a5a57;font-size:.8125rem}.ds-tira__prueba{margin-top:.5rem;padding-top:.5rem;border-top:1px solid #d9d9d5;color:#6e6e6a;font-size:.8125rem;line-height:1.4}"
     },
     {
       "name": "Botón Ver más",
       "kind": "button",
-      "refersTo": "boton-ver-mas",
-      "description": "El único botón con borde del sistema. Píldora neutra: nunca toma color de veredicto.",
-      "html": "<button class=\"ds-btn\">Ver 48 más</button>",
-      "css": ".ds-btn{font:600 .9375rem/1.55 'IBM Plex Sans',system-ui,sans-serif;color:#1a1814;background:#fff;border:1px solid #cdc5b0;border-radius:999px;padding:.5rem 1.5rem;cursor:pointer;transition:background 120ms ease}.ds-btn:hover{background:#f5f1e8}.ds-btn:focus-visible{outline:2px solid #1b57c4;outline-offset:2px}"
+      "refersTo": "boton-mas",
+      "description": "Botón de ancho completo, fondo stock hundido; en hover invierte a tinta/stock, el único feedback de hover del sistema.",
+      "html": "<button class=\"ds-mas\">Ver 48 más</button>",
+      "css": ".ds-mas{display:block;width:100%;padding:1rem;border:0;border-bottom:1px solid #d9d9d5;background:#f1f1ef;color:#111;font:700 .875rem/1 'Archivo',ui-sans-serif,sans-serif;font-stretch:87.5%;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:0}.ds-mas:hover{background:#111;color:#fff}"
     },
     {
-      "name": "Resaltado de ingrediente",
+      "name": "Dictamen",
       "kind": "custom",
-      "refersTo": null,
-      "description": "Señala dentro de la lista el ingrediente que disparó el veredicto. La traducción visual del propósito del producto.",
-      "html": "<p class=\"ds-ingr\">Harina integral, agua, levadura, suero de <mark>leche</mark> en polvo, sal.</p>",
-      "css": ".ds-ingr{font:.9375rem/1.7 'IBM Plex Sans',system-ui,sans-serif;color:#1a1814;margin:0}.ds-ingr mark{background:#fbeed8;color:#8a5300;border-bottom:2px solid #8a5300;border-radius:3px 3px 0 0;padding:.05em .2em;font-weight:600}"
+      "refersTo": "dictamen",
+      "description": "En la ficha de un solo producto el veredicto toma el frame entero: fondo del color de campo, frase a escala de titular, icono de 32px.",
+      "html": "<section class=\"ds-dictamen\"><p class=\"ds-dictamen__frase\"><svg width=\"32\" height=\"32\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M3.5 8.5 6.75 12l5.75-7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>Este producto es apto vegano</span></p><p class=\"ds-dictamen__glosa\">No encontramos ningún ingrediente de origen animal en su lista.</p></section>",
+      "css": ".ds-dictamen{margin-top:1rem;padding:2rem 1.5rem;background:#0b6b34;color:#fff;border-radius:0}.ds-dictamen__frase{display:flex;align-items:flex-start;gap:.75rem;margin:0;font:700 clamp(1.5rem,1.1rem + 1.7vw,2.5rem)/1.05 'Archivo',ui-sans-serif,sans-serif;font-stretch:75%;letter-spacing:-.01em;text-transform:uppercase}.ds-dictamen__glosa{max-width:56ch;margin-top:1rem;font-size:1rem;line-height:1.5}"
     }
   ],
   "narrative": {
-    "northStar": "El Rótulo Honesto",
-    "overview": "buscavegan se ve como la letra chica en la que sí se puede confiar, no como la tapa que vende. Toda la estética viene de la ficha técnica y la etiqueta nutricional: papel tibio, tinta casi negra, cada dato en un lugar fijo y predecible. Es una obra de consulta, no una landing.\n\nDe ahí sale la decisión que gobierna todo el sistema: el color saturado se raciona como el sello de un inspector. Hay exactamente cuatro colores saturados —los cuatro veredictos— y no se usan para absolutamente nada más.\n\nLa tipografía sostiene la misma idea: un serif con carácter para los títulos, que da autoridad de texto impreso en vez de autoridad de pantalla de ventas, y un sans técnico para el cuerpo, elegido por sus cifras de ancho fijo.",
+    "northStar": "Zócalo de Góndola",
+    "overview": "buscavegan se ve como el cartel que un supermercado argentino cuelga del filo del estante: cartón de imprenta bajo tubo fluorescente, tinta plana, y la letra chica que la ley obliga a poner para que el número grande se pueda comprobar. No es una landing que convence — es el dato que alguien lee caminando, con el celular en una mano y el paquete en la otra. Este mundo reemplazó por completo a un sistema anterior de papel kraft tibio y esquinas curvas ('El Rótulo Honesto'); no queda nada de ese vocabulario en el código servido.\n\nDe la tesis del cartel de zócalo sale todo lo demás. Los resultados no son tarjetas flotando sobre un fondo: son tiras a sangre pegadas una contra otra por un filete de 1px, como una corrida real de góndola. Nada tiene radio, nada tiene sombra, y el color existe únicamente donde codifica uno de los cuatro veredictos.\n\nLa tipografía es una sola familia variable (Archivo) usada en dos anchos: condensada para todo lo que hay que leer barriendo con la vista, y ancho normal para el texto corrido. Una mono (Chivo Mono) aparece solo en códigos.",
     "keyCharacteristics": [
-      "Papel y tinta cálidos; nada de blanco puro ni de gris azulado.",
-      "Cuatro colores saturados, uno por veredicto, con uso exclusivo.",
-      "Plano por defecto: la profundidad se construye con bordes de 1px, no con sombra.",
-      "Serif editorial en títulos, sans técnico con cifras tabulares en el cuerpo.",
-      "El 'por qué' de cada dato es contenido de primera clase, nunca letra chica."
+      "Cero radio, cero sombra decorativa: el filete de 1px es el único separador.",
+      "Stock blanco frío y tinta neutra; ningún neutro tiene temperatura cálida.",
+      "Cuatro tintas planas de veredicto, únicas cromáticas del sistema, en modo claro y oscuro.",
+      "Una sola familia tipográfica variable, condensada para lo que se barre, normal para lo que se lee.",
+      "El motivo del veredicto ('la letra chica') es contenido de primera clase, nunca oculto."
     ],
     "rules": [
       {
-        "name": "La Regla del Reactivo",
+        "name": "La Ley de Paleta",
         "section": "colors",
-        "body": "Los cuatro colores de veredicto no se usan para nada que no sea comunicar un veredicto. Test: si un elemento saturado no responde a '¿esto es apto?', está mal pintado."
+        "body": "Un color no puede aparecer si no codifica un veredicto. Los cuatro campos son las únicas cromáticas del sistema, en modo claro y oscuro."
       },
       {
-        "name": "La Regla del Negro Cálido",
+        "name": "La Regla del Trío",
         "section": "colors",
-        "body": "No hay #000000 ni grises azulados. Todo neutro tiene temperatura cálida, incluido el modo oscuro."
+        "body": "Cada veredicto se declara una vez como trío --campo/--sobre/--tinta-v vía .v--<estado>; ningún componente hardcodea un hex de veredicto."
       },
       {
-        "name": "La Regla del Triple Canal",
+        "name": "El Piso AA",
         "section": "colors",
-        "body": "Un veredicto se comunica siempre por símbolo, palabra y color a la vez. ~8% de los hombres no distingue rojo de verde."
+        "body": "Todo par tinta/fondo se verifica contra 4,5:1. El campo de no-apto en oscuro se movió de #d94236 (4,48:1) a #e35a4e (5,47:1) por esto."
+      },
+      {
+        "name": "La Regla de la Condensada Legible",
+        "section": "typography",
+        "body": "El eje wdth comprime al 75% solo títulos, nombres de producto y la palabra del veredicto, nunca párrafos."
       },
       {
         "name": "La Regla de la Cifra en Columna",
         "section": "typography",
-        "body": "font-variant-numeric: tabular-nums es global. EAN, conteos y porcentajes deben alinearse verticalmente."
+        "body": "tabular-nums es global en body. EAN, conteos y porcentajes se comparan en columna."
       },
       {
-        "name": "La Regla del Serif Grande",
-        "section": "typography",
-        "body": "El serif solo aparece a partir de ~1.1rem; por debajo el sistema usa el sans, incluso en encabezados semánticos."
-      },
-      {
-        "name": "La Regla de la Sombra Única",
-        "section": "elevation",
-        "body": "Hay una sola sombra en el sistema y un solo elemento que la usa: el campo de búsqueda."
-      },
-      {
-        "name": "La Regla del Filo Semántico",
-        "section": "elevation",
-        "body": "La tarjeta lleva un borde izquierdo de 3px con el color del veredicto, y nunca cambia de color en hover."
+        "name": "La Regla del Riel Único",
+        "section": "layout",
+        "body": "Toda medida de la corrida deriva del módulo --riel; cambiarlo reordena la corrida entera."
       },
       {
         "name": "La Regla del Marco Fijo",
         "section": "layout",
-        "body": "Todo producto sin foto recibe un marco del tamaño de la miniatura. Solo ~82% del catálogo tiene imagen."
+        "body": "Todo producto sin foto recibe un marco del tamaño de la miniatura, porque solo ~82% del catálogo tiene imagen."
+      },
+      {
+        "name": "La Regla de Cero Sombra",
+        "section": "elevation",
+        "body": "Ningún elemento usa box-shadow decorativo. Separación y profundidad son filete de 1px y capas de stock."
+      },
+      {
+        "name": "La Regla del Frame Entero",
+        "section": "elevation",
+        "body": "En la ficha el dictamen toma el color de veredicto como fondo de la sección entera, no una pastilla de esquina; el mismo tratamiento para 'a revisar' que para los otros tres."
       }
     ],
     "dos": [
-      "Do aplicar el color de veredicto con la clase .v .v--<estado> y consumirlo con var(--tinta-v)/var(--fondo-v)/var(--linea-v).",
-      "Do dar a todo veredicto sus tres canales: símbolo, palabra y color.",
-      "Do usar --linea y capas tonales para separar en vez de sombra.",
+      "Do aplicar el veredicto con .v--<estado> y consumirlo con var(--campo)/var(--sobre)/var(--tinta-v).",
+      "Do dar a todo veredicto sus tres canales: icono dibujado, palabra y color de campo.",
+      "Do tratar 'a revisar' como un veredicto de pleno derecho, con la misma prominencia que los otros tres.",
+      "Do dejar que el dictamen de la ficha ocupe el ancho completo del frame.",
+      "Do usar filetes de 1px (2px en umbrales estructurales) y capas de stock para separar, nunca sombra.",
       "Do reservar un marco del tamaño de la miniatura cuando no hay foto, y fijar width/height en toda imagen.",
-      "Do mantener el anillo de foco 2px solid var(--foco) idéntico en todo el sitio.",
-      "Do tratar 'a revisar' como un veredicto de pleno derecho, con la misma prominencia que los otros tres."
+      "Do mantener el anillo de foco 2px solid var(--foco) como única señal de navegación por teclado.",
+      "Do verificar cualquier color nuevo de veredicto contra 4,5:1 en ambos usos antes de sumarlo."
     ],
     "donts": [
-      "Don't usar los colores de veredicto en nada que no sea un veredicto.",
-      "Don't agregar sombras: hay una sola en el sistema y ya tiene dueño.",
-      "Don't usar #000000, #ffffff como fondo de página, ni grises de hue azul.",
-      "Don't poner el serif por debajo de 1.1rem.",
+      "Don't usar verde, ámbar, rojo o gris de veredicto en nada que no sea un veredicto, ni en modo oscuro.",
+      "Don't agregar border-radius ni box-shadow decorativo a ningún elemento.",
+      "Don't ablandar 'a revisar' en tamaño, color u orden.",
+      "Don't reintroducir glifos Unicode como símbolo de veredicto: el icono dibujado es el sistema.",
       "Don't esconder el motivo del veredicto detrás de un acordeón, tooltip o 'ver más'.",
       "Don't ordenar los veredictos por otra cosa que apto -> vegetariano -> no apto -> revisar.",
-      "Don't introducir una cuarta familia tipográfica."
+      "Don't introducir una segunda familia tipográfica."
     ]
   }
 }

@@ -1,9 +1,16 @@
 /** El vocabulario del veredicto, en un solo lugar.
  *
  *  Regla de accesibilidad que no se negocia: el veredicto NUNCA se comunica
- *  solo con color. Cada uno tiene además un símbolo y una palabra, porque un
+ *  solo con color. Cada uno lleva además un símbolo y una palabra, porque un
  *  8% de los varones no distingue rojo de verde y este dato es justamente el
  *  que la persona vino a buscar.
+ *
+ *  El símbolo no vive acá: lo dibuja `components/Iconos.tsx` como SVG sobre
+ *  una grilla de 16 con trazo de 2. Antes era un glifo Unicode por veredicto
+ *  (`✓ ◐ ✕ ?`), que se ve distinto en cada plataforma y no comparte ni grosor
+ *  ni caja óptica con los demás: era tipografía haciendo de sistema de
+ *  iconos. Los cuatro campos quedaron sin uso al migrar y se borraron, para
+ *  que nadie vuelva a tomarlos de acá por costumbre.
  */
 import type { Estado } from './tipos';
 
@@ -15,7 +22,6 @@ export interface Veredicto {
   titular: string;
   /** Qué significa exactamente, en una frase. */
   explicacion: string;
-  simbolo: string;
   /** Sufijo de las variables CSS: --v-apto-tinta, --v-apto-fondo, etc. */
   tono: string;
 }
@@ -27,7 +33,6 @@ export const VEREDICTOS: Record<Estado, Veredicto> = {
     titular: 'es apto vegano',
     explicacion:
       'No encontramos ningún ingrediente de origen animal en su lista.',
-    simbolo: '✓',
     tono: 'apto',
   },
   vegetariano: {
@@ -37,7 +42,6 @@ export const VEREDICTOS: Record<Estado, Veredicto> = {
     explicacion:
       'Tiene ingredientes de origen animal que no implican matar al animal ' +
       '(leche, huevo, miel), pero no es vegano.',
-    simbolo: '◐',
     tono: 'vegetariano',
   },
   no_apto: {
@@ -47,7 +51,6 @@ export const VEREDICTOS: Record<Estado, Veredicto> = {
     explicacion:
       'Tiene al menos un ingrediente de origen animal incompatible con una ' +
       'dieta vegana.',
-    simbolo: '✕',
     tono: 'no-apto',
   },
   revisar: {
@@ -58,7 +61,6 @@ export const VEREDICTOS: Record<Estado, Veredicto> = {
       'No tenemos datos suficientes, o la lista de ingredientes tiene algo ' +
       'ambiguo que puede ser de origen animal o vegetal. Preferimos decirte ' +
       'que no sabemos antes que arriesgar.',
-    simbolo: '?',
     tono: 'revisar',
   },
 };

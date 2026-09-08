@@ -1,57 +1,70 @@
 /* =========================================================================
-   buscavegan — sistema visual
+   buscavegan — Zócalo de Góndola
 
-   Tesis: esto es una obra de consulta, no una landing. Se parece más a un
-   resultado de laboratorio que a una app: papel tibio, tinta casi negra, y
-   una sola familia de colores saturados —la del veredicto— que no se usa
-   para NADA más. Si el verde apareciera en un botón o en un link, dejaría de
-   significar "apto" y el dato que la persona vino a buscar perdería su señal.
+   La tesis: un resultado es el cartel del estante. Un dato que se lee
+   caminando, y abajo la letra chica que lo hace auditable — el lugar donde el
+   cartel real imprime el precio por unidad de medida, esa línea que la ley
+   obliga a poner justamente para que el número grande se pueda comprobar.
+   Acá esa línea es el motivo del veredicto.
+
+   De ahí sale todo lo demás. Los resultados no son tarjetas flotando sobre un
+   fondo: son tiras a sangre pegadas una contra otra por un filete, como una
+   corrida de góndola. Nada tiene radio, nada tiene sombra, y el color existe
+   únicamente donde codifica un veredicto.
+
+   La escena decide la luz: alguien parado en un pasillo bajo tubos
+   fluorescentes, con el celular a la distancia del brazo y reflejo en la
+   pantalla. Por eso el modo claro es el principal y el stock es blanco frío
+   de cartón couché — no papel tibio, que es lo que este sistema reemplaza.
    ========================================================================= */
 
 :root {
   color-scheme: light dark;
 
-  /* --- superficie ------------------------------------------------------ */
-  --papel: #fdfbf7;
-  --papel-hundido: #f5f1e8;
-  --papel-elevado: #ffffff;
-  --tinta: #1a1814;
-  --tinta-media: #5c5648;
-  /* 4,91:1 sobre el fondo más claro que le toca (--papel-hundido). El valor
-     anterior (#857e6d) daba 3,58:1 y no llegaba al AA que este proyecto se
-     fijó como piso: lo usan los metadatos, los placeholders y las etiquetas
-     de bloque, todo texto chico. */
-  --tinta-tenue: #6e685a;
-  /* --linea es solo separación decorativa; --linea-fuerte dibuja el borde de
-     los controles (campo de búsqueda, chips, selector, botones) y por eso
-     tiene que llegar a 3:1 contra el papel — WCAG 1.4.11. */
-  --linea: #e2dccd;
-  --linea-fuerte: #a09068;
+  /* --- stock y tinta --------------------------------------------------
+     Neutros de verdad: ni un grado de calidez. El mundo anterior era papel
+     kraft; este es cartón de imprenta bajo tubo fluorescente. */
+  --stock: #ffffff;
+  --stock-hundido: #f1f1ef;
+  --stock-borde: #e7e7e4;
+  --ink: #111111;
+  --ink-2: #5a5a57;
+  /* 5,3:1 sobre el stock. Lo usa la letra chica, que es contenido de primera
+     clase acá: si no llega a AA, el argumento del producto no se lee. */
+  --ink-3: #6e6e6a;
+  --filete: #d9d9d5;
+  --filete-fuerte: #111111;
 
   /* --- veredictos ------------------------------------------------------
-     Cada uno lleva símbolo y palabra además del color: un 8% de los varones
-     no distingue rojo de verde, y acá el color es el dato. */
-  --v-apto-tinta: #1c6437;
-  --v-apto-fondo: #e6f1e8;
-  --v-apto-linea: #a9cfb6;
+     Cada uno es un trío: `--campo` es la tinta plana del bloque, `--sobre` lo
+     que se imprime encima, y `--tinta-v` el mismo veredicto usado como texto
+     sobre el stock. Son tres porque el ámbar no puede ser las tres cosas: como
+     campo lleva tinta encima (11:1), como texto sobre blanco necesita bajar a
+     #8a5a00 para llegar a 5,9:1. Un solo hex no resuelve los dos usos. */
+  --v-apto-campo: #0b6b34;
+  --v-apto-sobre: #ffffff;
+  --v-apto-tinta: #0b6b34;
 
-  --v-vegetariano-tinta: #8a5300;
-  --v-vegetariano-fondo: #fbeed8;
-  --v-vegetariano-linea: #e6cd9c;
+  --v-vegetariano-campo: #f0b323;
+  --v-vegetariano-sobre: #1a1200;
+  --v-vegetariano-tinta: #8a5a00;
 
-  --v-no-apto-tinta: #a32820;
-  --v-no-apto-fondo: #fbe9e7;
-  --v-no-apto-linea: #eec0ba;
+  --v-no-apto-campo: #b4231a;
+  --v-no-apto-sobre: #ffffff;
+  --v-no-apto-tinta: #b4231a;
 
-  --v-revisar-tinta: #47525f;
-  --v-revisar-fondo: #edeff2;
-  --v-revisar-linea: #cfd5dd;
+  --v-revisar-campo: #3f4a56;
+  --v-revisar-sobre: #ffffff;
+  --v-revisar-tinta: #3f4a56;
 
-  /* --- foco ------------------------------------------------------------ */
+  /* --- foco ------------------------------------------------------------
+     Azul justamente porque ningún veredicto lo es: el indicador de "estás
+     acá" nunca se puede confundir con el dato del producto. */
   --foco: #1b57c4;
 
   /* --- ritmo -----------------------------------------------------------
-     Escala de 4px. Los nombres dicen para qué sirven, no cuánto miden. */
+     Escala de 4px. Toda medida de la tira sale del módulo de riel `--riel`,
+     así la corrida entera es un sistema reglado y no una pila de cajas. */
   --e1: 0.25rem;
   --e2: 0.5rem;
   --e3: 0.75rem;
@@ -61,42 +74,48 @@
   --e7: 3rem;
   --e8: 4.5rem;
 
-  --radio: 10px;
-  --radio-chico: 6px;
-  --ancho: 68rem;
+  --riel: 5.5rem;
+  --ancho: 72rem;
 
-  --sombra: 0 1px 2px rgb(26 24 20 / 6%), 0 4px 14px -6px rgb(26 24 20 / 10%);
+  --f-sans: var(--fuente-sans), 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --f-mono: var(--fuente-mono), 'Chivo Mono', ui-monospace, monospace;
+
+  /* Una sola curva de salida para todo el sitio. */
+  --sale: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --papel: #15140f;
-    --papel-hundido: #1d1b15;
-    --papel-elevado: #221f18;
-    --tinta: #f2eee4;
-    --tinta-media: #b3ac9b;
-    --tinta-tenue: #8e8776;
-    --linea: #343026;
-    --linea-fuerte: #726a53;
+    --stock: #0e0e0d;
+    --stock-hundido: #171716;
+    --stock-borde: #232322;
+    --ink: #f4f4f2;
+    --ink-2: #a8a8a3;
+    --ink-3: #8e8e89;
+    --filete: #2b2b29;
+    --filete-fuerte: #f4f4f2;
 
-    --v-apto-tinta: #8fd6a5;
-    --v-apto-fondo: #16281c;
-    --v-apto-linea: #2f5a3c;
+    /* La ley de paleta rige también acá: los campos se aclaran para sostener
+       el contraste, pero ningún tono de veredicto se filtra al cromo. */
+    --v-apto-campo: #2f9c58;
+    --v-apto-sobre: #04180c;
+    --v-apto-tinta: #62c98a;
 
-    --v-vegetariano-tinta: #edc178;
-    --v-vegetariano-fondo: #2b2113;
-    --v-vegetariano-linea: #5d4826;
+    --v-vegetariano-campo: #e0a520;
+    --v-vegetariano-sobre: #1a1200;
+    --v-vegetariano-tinta: #e5b342;
 
-    --v-no-apto-tinta: #f0a49a;
-    --v-no-apto-fondo: #2c1815;
-    --v-no-apto-linea: #63332c;
+    /* #d94236 daba 4,48:1 con la tinta de encima: quedaba por debajo del piso
+       de 4,5 que el proyecto se fijó. Un escalón más claro lo lleva a 5,47. */
+    --v-no-apto-campo: #e35a4e;
+    --v-no-apto-sobre: #1a0503;
+    --v-no-apto-tinta: #f08278;
 
-    --v-revisar-tinta: #b3bdca;
-    --v-revisar-fondo: #1e2126;
-    --v-revisar-linea: #3b424c;
+    --v-revisar-campo: #7c8794;
+    --v-revisar-sobre: #0d1116;
+    --v-revisar-tinta: #a7b1bd;
 
     --foco: #8fb2ff;
-    --sombra: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px -6px rgb(0 0 0 / 50%);
   }
 }
 
@@ -116,68 +135,120 @@ html {
 
 body {
   margin: 0;
-  background: var(--papel);
-  color: var(--tinta);
-  font-family: var(--fuente-texto), ui-sans-serif, system-ui, sans-serif;
+  background: var(--stock);
+  color: var(--ink);
+  font-family: var(--f-sans);
   font-size: 1rem;
-  line-height: 1.55;
-  /* Números de ancho fijo: los EAN y los precios se leen en columna. */
+  line-height: 1.5;
+  /* Los EAN, los conteos y los porcentajes se comparan en columna. */
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
-h3 {
-  font-family: var(--fuente-titulo), Georgia, serif;
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
+h3,
+h4 {
   margin: 0;
-}
-
-h1 {
-  font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem);
-}
-h2 {
-  font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.75rem);
-}
-h3 {
-  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 p {
-  margin: 0 0 var(--e4);
+  margin: 0;
   text-wrap: pretty;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 a {
   color: inherit;
-  text-decoration-color: var(--linea-fuerte);
-  text-underline-offset: 0.2em;
+  text-decoration-color: var(--filete);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
 }
+
 a:hover {
   text-decoration-color: currentColor;
 }
 
-/* Foco visible siempre, y del mismo modo en todos lados. Nunca se quita. */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* --- superficies que no dibujé pero igual son del sistema ---------------
+   Selección, cursor, barra de scroll y anillo de foco vienen con defaults del
+   navegador que no pertenecen a ningún diseño. Se pintan desde la paleta. */
+
+::selection {
+  background: var(--ink);
+  color: var(--stock);
+}
+
+:root {
+  scrollbar-color: var(--filete) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--stock-hundido);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--filete);
+  border: 3px solid var(--stock-hundido);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+}
+
 :focus-visible {
   outline: 2px solid var(--foco);
   outline-offset: 2px;
-  border-radius: var(--radio-chico);
 }
 
-img {
-  max-width: 100%;
-  height: auto;
+/* =========================================================================
+   tipografía del sistema
+
+   Dos anchos de la misma familia variable. La condensada es la voz de los
+   nombres —así entra un nombre de producto argentino entero, sin puntos
+   suspensivos— y la normal es la del texto corrido. La mono aparece
+   únicamente en códigos: EAN y RNPA. No se usa para dar aire "técnico" a
+   prosa que no es un dato.
+   ========================================================================= */
+
+.condensada {
+  font-stretch: 75%;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
 }
 
-code,
-.ean {
-  font-family: var(--fuente-mono), ui-monospace, monospace;
-  font-size: 0.875em;
-  letter-spacing: -0.01em;
+.codigo {
+  font-family: var(--f-mono);
+  font-size: 0.8125em;
+  letter-spacing: -0.02em;
 }
 
 .solo-lectores {
@@ -189,863 +260,991 @@ code,
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+  border: 0;
 }
 
-/* Saltar al contenido: primero en el orden de tabulación, invisible hasta
-   que recibe foco. */
 .saltar {
   position: absolute;
-  left: var(--e4);
-  top: -100%;
-  z-index: 50;
-  background: var(--papel-elevado);
-  border: 1px solid var(--linea-fuerte);
-  border-radius: var(--radio-chico);
+  left: var(--e3);
+  top: -4rem;
+  z-index: 40;
   padding: var(--e2) var(--e4);
-  transition: top 120ms ease;
+  background: var(--ink);
+  color: var(--stock);
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 160ms var(--sale);
 }
+
 .saltar:focus {
-  top: var(--e4);
+  top: var(--e3);
 }
 
 /* =========================================================================
-   estructura
+   armazón
    ========================================================================= */
 
 .contenedor {
   width: 100%;
   max-width: var(--ancho);
-  margin-inline: auto;
-  padding-inline: var(--e4);
+  margin: 0 auto;
+  padding: 0 var(--e4);
 }
 
 .sitio {
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  min-height: 100dvh;
 }
 
 .sitio > main {
   flex: 1;
 }
 
+/* --- encabezado: el filo del estante ---------------------------------- */
+
 .encabezado {
-  border-bottom: 1px solid var(--linea);
-  background: var(--papel);
+  border-bottom: 2px solid var(--filete-fuerte);
 }
 
 .encabezado__fila {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--e4);
-  min-height: 3.75rem;
-  flex-wrap: wrap;
+  gap: var(--e3) var(--e5);
+  min-height: 3.25rem;
 }
 
 .marca {
-  font-family: var(--fuente-titulo), Georgia, serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  text-decoration: none;
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.4ch;
+  align-items: center;
+  gap: var(--e2);
+  font-stretch: 75%;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-decoration: none;
 }
 
-.marca__brote {
-  color: var(--v-apto-tinta);
+.isotipo {
+  display: block;
+  flex: none;
 }
 
 .navegacion {
   display: flex;
-  gap: var(--e5);
-  font-size: 0.9375rem;
+  gap: var(--e4);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .navegacion a {
-  color: var(--tinta-media);
+  padding: var(--e1) 0;
+  color: var(--ink-2);
   text-decoration: none;
-  padding-block: var(--e1);
-}
-.navegacion a:hover,
-.navegacion a[aria-current='page'] {
-  color: var(--tinta);
-  box-shadow: inset 0 -2px 0 var(--tinta);
 }
 
+.navegacion a:hover,
+.navegacion a[aria-current='page'] {
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--filete-fuerte);
+}
+
+/* --- pie --------------------------------------------------------------- */
+
 .pie {
-  border-top: 1px solid var(--linea);
-  margin-top: var(--e8);
-  padding-block: var(--e6);
-  color: var(--tinta-media);
-  font-size: 0.875rem;
+  margin-top: var(--e7);
+  border-top: 2px solid var(--filete-fuerte);
+  background: var(--stock-hundido);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--ink-2);
 }
 
 .pie__grilla {
   display: grid;
   gap: var(--e5);
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  padding-top: var(--e6);
+  padding-bottom: var(--e6);
 }
 
-.pie p:last-child {
-  margin-bottom: 0;
+.pie strong {
+  color: var(--ink);
+}
+
+.pie p + p {
+  margin-top: var(--e2);
 }
 
 /* =========================================================================
-   veredicto — el elemento con más carga de significado del sitio
+   el veredicto
+
+   `.v--<estado>` fija el trío para todo su subárbol; los componentes de
+   adentro consumen `--campo` / `--sobre` / `--tinta-v` sin saber cuál es.
    ========================================================================= */
 
-.v {
-  --tinta-v: var(--v-revisar-tinta);
-  --fondo-v: var(--v-revisar-fondo);
-  --linea-v: var(--v-revisar-linea);
-}
 .v--apto {
+  --campo: var(--v-apto-campo);
+  --sobre: var(--v-apto-sobre);
   --tinta-v: var(--v-apto-tinta);
-  --fondo-v: var(--v-apto-fondo);
-  --linea-v: var(--v-apto-linea);
 }
+
 .v--vegetariano {
+  --campo: var(--v-vegetariano-campo);
+  --sobre: var(--v-vegetariano-sobre);
   --tinta-v: var(--v-vegetariano-tinta);
-  --fondo-v: var(--v-vegetariano-fondo);
-  --linea-v: var(--v-vegetariano-linea);
 }
+
 .v--no-apto {
+  --campo: var(--v-no-apto-campo);
+  --sobre: var(--v-no-apto-sobre);
   --tinta-v: var(--v-no-apto-tinta);
-  --fondo-v: var(--v-no-apto-fondo);
-  --linea-v: var(--v-no-apto-linea);
 }
+
 .v--revisar {
+  --campo: var(--v-revisar-campo);
+  --sobre: var(--v-revisar-sobre);
   --tinta-v: var(--v-revisar-tinta);
-  --fondo-v: var(--v-revisar-fondo);
-  --linea-v: var(--v-revisar-linea);
 }
 
-.sello {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5ch;
-  background: var(--fondo-v);
-  color: var(--tinta-v);
-  border: 1px solid var(--linea-v);
-  border-radius: 999px;
-  padding: 0.15rem var(--e2) 0.15rem var(--e1);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.005em;
-  white-space: nowrap;
-}
-
-.sello__simbolo {
-  display: grid;
-  place-items: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  border-radius: 999px;
-  background: var(--tinta-v);
-  color: var(--fondo-v);
-  font-size: 0.75rem;
-  line-height: 1;
-}
-
-.sello--grande {
-  font-size: 1rem;
-  padding: var(--e2) var(--e4) var(--e2) var(--e2);
-}
-.sello--grande .sello__simbolo {
-  width: 1.6rem;
-  height: 1.6rem;
-  font-size: 1rem;
-}
-
-/* =========================================================================
-   buscador
-   ========================================================================= */
-
-.hero {
-  padding-block: var(--e7) var(--e5);
-}
-
-.hero__bajada {
-  font-size: 1.0625rem;
-  color: var(--tinta-media);
-  max-width: 46ch;
-  margin-top: var(--e3);
-}
-
-.hero__bajada strong {
-  color: var(--tinta);
-  font-weight: 600;
-}
-
-.busqueda {
-  position: relative;
-  margin-top: var(--e5);
-}
-
-.busqueda__campo {
-  width: 100%;
-  font: inherit;
-  font-size: 1.125rem;
-  color: var(--tinta);
-  background: var(--papel-elevado);
-  border: 1px solid var(--linea-fuerte);
-  border-radius: var(--radio);
-  padding: var(--e3) 5.5rem var(--e3) 2.75rem;
-  box-shadow: var(--sombra);
-}
-.busqueda__campo::placeholder {
-  color: var(--tinta-tenue);
-}
-.busqueda__campo:focus-visible {
-  outline: 2px solid var(--foco);
-  outline-offset: 1px;
-}
-
-.busqueda__lupa {
-  position: absolute;
-  left: var(--e3);
-  top: 50%;
-  translate: 0 -50%;
-  color: var(--tinta-tenue);
-  pointer-events: none;
-  display: grid;
-  place-items: center;
-}
-
-.busqueda__atajo {
-  position: absolute;
-  right: var(--e3);
-  top: 50%;
-  translate: 0 -50%;
+/* El bloque: tinta plana, icono y palabra apilados, ancho fijo. Apilados en
+   la corrida forman la columna de color que se barre con la vista. */
+.sello--bloque {
   display: flex;
-  gap: var(--e1);
-  align-items: center;
-}
-
-.tecla {
-  font-family: var(--fuente-mono), monospace;
-  font-size: 0.75rem;
-  color: var(--tinta-tenue);
-  border: 1px solid var(--linea);
-  border-bottom-width: 2px;
-  border-radius: var(--radio-chico);
-  padding: 0.1rem 0.4rem;
-  background: var(--papel-hundido);
-}
-
-.busqueda__limpiar {
-  display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 2.25rem;
-  min-width: 2.25rem;
-  border: 0;
-  background: transparent;
-  color: var(--tinta-media);
-  cursor: pointer;
-  font-size: 1.25rem;
-  line-height: 1;
-  padding: var(--e1) var(--e2);
-  border-radius: var(--radio-chico);
-}
-.busqueda__limpiar:hover {
-  background: var(--papel-hundido);
-  color: var(--tinta);
+  gap: var(--e1);
+  width: var(--riel);
+  padding: var(--e3) var(--e1);
+  background: var(--campo);
+  color: var(--sobre);
+  text-align: center;
 }
 
-/* --- filtros ----------------------------------------------------------- */
-
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e2);
-  align-items: center;
-  margin-top: var(--e4);
+.sello--bloque .sello__palabra {
+  font-stretch: 75%;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.filtros__separador {
-  width: 1px;
-  height: 1.5rem;
-  background: var(--linea);
-  margin-inline: var(--e2);
-}
-
-/* El chip es un checkbox real: se puede tabular, se puede activar con la
-   barra espaciadora y los lectores de pantalla anuncian su estado.
-   El alto mínimo de 2.25rem (36px) supera con holgura los 24px que pide WCAG
-   2.5.8, y no es un capricho: el escenario de uso es una persona parada en
-   una góndola, con el changuito en una mano y el teléfono en la otra. */
-.chip {
-  position: relative;
+.sello--linea {
   display: inline-flex;
   align-items: center;
-  gap: 0.5ch;
-  min-height: 2.25rem;
-  border: 1px solid var(--linea-fuerte);
-  border-radius: 999px;
-  padding: 0.3rem var(--e3);
-  font-size: 0.875rem;
-  background: var(--papel-elevado);
-  color: var(--tinta-media);
+  gap: var(--e2);
+  padding: var(--e1) var(--e3) var(--e1) var(--e2);
+  background: var(--campo);
+  color: var(--sobre);
+  font-stretch: 87.5%;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.icono {
+  flex: none;
+}
+
+/* =========================================================================
+   el riel de búsqueda
+
+   Es lo primero y es a sangre: la barra donde se escribe ocupa el ancho
+   entero, con la consulta en condensada grande. La única transformación con
+   movimiento del sitio vive acá — al scrollear, el riel se condensa en una
+   banda fina que conserva la consulta y la leyenda, para no perder el filtro
+   mientras se barre la corrida.
+   ========================================================================= */
+
+.riel {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--stock);
+  border-bottom: 2px solid var(--filete-fuerte);
+}
+
+.riel__caja {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  padding: var(--e5) 0 var(--e4);
+}
+
+.riel--condensado .riel__caja {
+  padding: var(--e2) 0;
+}
+
+.riel__lupa {
+  flex: none;
+  color: var(--ink-3);
+  transition: transform 200ms var(--sale);
+}
+
+.riel--condensado .riel__lupa {
+  transform: scale(0.82);
+}
+
+.riel__campo {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-stretch: 75%;
+  font-size: clamp(1.5rem, 1.05rem + 1.9vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.riel--condensado .riel__campo {
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+}
+
+.riel__campo::placeholder {
+  color: var(--ink-3);
+  font-stretch: 87.5%;
+  font-size: 0.55em;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 1;
+}
+
+.riel__campo:focus-visible {
+  outline: none;
+}
+
+/* El foco se pinta sobre el riel entero, no sobre el input: el campo no tiene
+   borde propio, así que un anillo ceñido al texto no se vería. */
+.riel:has(.riel__campo:focus-visible) {
+  box-shadow: inset 0 0 0 2px var(--foco);
+}
+
+.riel__tecla {
+  flex: none;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--filete);
+  border-bottom-width: 2px;
+  color: var(--ink-3);
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+}
+
+.riel__limpiar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
   cursor: pointer;
-  user-select: none;
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
 }
-.chip:hover {
-  border-color: var(--tinta-tenue);
-  color: var(--tinta);
+
+.riel__limpiar:hover {
+  background: var(--ink);
+  color: var(--stock);
 }
-.chip input {
+
+/* --- la leyenda: filtro y recuento a la vez ----------------------------
+   Los cuatro veredictos siempre en el mismo orden y siempre los cuatro, con
+   su recuento vivo. Es la leyenda de un mapa que además filtra. */
+
+.leyenda {
+  gap: 1px;
+  padding-bottom: var(--e3);
+}
+
+.riel--condensado .leyenda {
+  padding-bottom: var(--e2);
+}
+
+/* Grilla y no flex: con `flex: 1 1 8rem` los cuatro items no podian encogerse
+   por debajo de su min-content —"VEGETARIANO" es una sola palabra— asi que
+   desbordaban, ensanchaban el documento y cortaban la pagina entera en movil.
+   Dos columnas abajo, cuatro arriba, y nunca desborda. */
+.leyenda {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 46rem) {
+  .leyenda {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.marca-v {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--e2);
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--filete);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background 120ms linear,
+    color 120ms linear;
+}
+
+.marca-v input {
   position: absolute;
   opacity: 0;
-  width: 0;
-  height: 0;
+  pointer-events: none;
 }
-.chip:has(input:focus-visible) {
+
+.marca-v__muestra {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 1px solid var(--campo, var(--ink-3));
+  background: transparent;
+}
+
+.marca-v__texto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-stretch: 87.5%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.marca-v__conteo {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Encendida: toma la tinta plana. Apagada: queda en filete y el cuadrito se
+   vacía, así el estado no depende solamente del color. */
+.marca-v:has(input:checked) {
+  background: var(--campo);
+  border-color: var(--campo);
+  color: var(--sobre);
+}
+
+.marca-v:has(input:checked) .marca-v__muestra {
+  background: var(--sobre);
+  border-color: var(--sobre);
+}
+
+.marca-v:has(input:focus-visible) {
   outline: 2px solid var(--foco);
   outline-offset: 2px;
 }
-.chip:has(input:checked) {
-  background: var(--fondo-v, var(--papel-hundido));
-  color: var(--tinta-v, var(--tinta));
-  border-color: var(--linea-v, var(--tinta-tenue));
-  font-weight: 600;
-}
-/* Un chip apagado no depende solo del color para leerse como apagado: pierde
-   también el punto y el peso tipográfico. */
-.chip__punto {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  background: transparent;
-}
-.chip:has(input:checked) .chip__punto {
-  background: currentColor;
+
+.marca-v:hover {
+  border-color: var(--ink-3);
 }
 
-.selector {
-  font: inherit;
-  font-size: 0.875rem;
-  color: var(--tinta-media);
-  background: var(--papel-elevado);
-  border: 1px solid var(--linea-fuerte);
-  border-radius: 999px;
-  min-height: 2.25rem;
-  padding: 0.3rem var(--e3);
+/* --- filtros secundarios ---------------------------------------------- */
+
+.tamiz {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e2) var(--e3);
+  padding-bottom: var(--e3);
+  font-size: 0.8125rem;
+}
+
+.riel--condensado .tamiz {
+  display: none;
+}
+
+.tamiz__selector {
+  max-width: 16rem;
+  padding: var(--e1) var(--e2);
+  border: 1px solid var(--filete);
+  background: var(--stock);
+  font-size: 0.8125rem;
+}
+
+.tamiz__opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  color: var(--ink-2);
   cursor: pointer;
-  max-width: 14rem;
 }
 
-/* --- estado de la lista ------------------------------------------------- */
+.tamiz__opcion input {
+  width: 0.9rem;
+  height: 0.9rem;
+  accent-color: var(--ink);
+}
 
-.resumen {
+.tamiz__opcion:hover {
+  color: var(--ink);
+}
+
+/* =========================================================================
+   la corrida
+
+   Tiras a sangre pegadas una contra otra. No hay tarjeta, no hay separación,
+   no hay radio: es una góndola.
+   ========================================================================= */
+
+.corrida {
+  border-top: 1px solid var(--filete);
+}
+
+.tira {
+  display: grid;
+  grid-template-columns: var(--riel) 3.25rem minmax(0, 1fr);
+  align-items: stretch;
+  border-bottom: 1px solid var(--filete);
+}
+
+.tira:hover {
+  background: var(--stock-hundido);
+}
+
+.tira__foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--e2);
+  background: var(--stock-hundido);
+  border-right: 1px solid var(--filete);
+}
+
+/* Marco fijo aunque no haya foto: solo el 82% del catálogo tiene imagen y sin
+   esto la corrida se desalinea producto por producto. */
+.tira__miniatura {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tira__miniatura {
+    mix-blend-mode: normal;
+  }
+}
+
+.tira__sinfoto {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    var(--filete) 4px,
+    var(--filete) 5px
+  );
+}
+
+.tira__cuerpo {
+  min-width: 0;
+  padding: var(--e3) var(--e4);
+}
+
+.tira__nombre {
+  font-stretch: 75%;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+
+.tira__link {
+  text-decoration: none;
+}
+
+/* El link cubre la tira entera para que el área de toque sea grande, pero su
+   texto accesible sigue siendo solo el nombre del producto. */
+.tira__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.tira {
+  position: relative;
+}
+
+.tira__link:focus-visible {
+  outline: none;
+}
+
+.tira:has(.tira__link:focus-visible) {
+  outline: 2px solid var(--foco);
+  outline-offset: -2px;
+}
+
+.tira__meta {
+  margin-top: 0.15rem;
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+/* La letra chica: va donde el cartel real pone el precio por unidad de
+   medida. Separada por un filete porque es de otra naturaleza que el nombre —
+   es la prueba, no la identidad. */
+.tira__prueba {
+  margin-top: var(--e2);
+  padding-top: var(--e2);
+  border-top: 1px solid var(--filete);
+  color: var(--ink-3);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 34rem) {
+  :root {
+    --riel: 4.25rem;
+  }
+
+  .tira {
+    grid-template-columns: var(--riel) minmax(0, 1fr);
+  }
+
+  .tira__foto {
+    display: none;
+  }
+
+  .tira__cuerpo {
+    padding: var(--e3);
+  }
+}
+
+/* --- el recuento y el botón de más ------------------------------------ */
+
+.recuento {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--e3);
-  margin-top: var(--e6);
-  padding-bottom: var(--e3);
-  border-bottom: 1px solid var(--linea);
-  color: var(--tinta-media);
-  font-size: 0.9375rem;
+  gap: var(--e2) var(--e4);
+  padding: var(--e4) 0 var(--e3);
+  font-size: 0.875rem;
+  color: var(--ink-2);
 }
 
-.resumen strong {
-  color: var(--tinta);
-}
-
-/* =========================================================================
-   resultados
-   ========================================================================= */
-
-.grilla {
-  display: grid;
-  gap: var(--e3);
-  /* El `min(21rem, 100%)` no es cosmético: sin él, en un teléfono de 360px
-     (328px útiles tras el padding) la columna se planta en 336px y la página
-     entera scrollea de costado. */
-  grid-template-columns: repeat(auto-fill, minmax(min(21rem, 100%), 1fr));
-  margin-top: var(--e4);
-  padding: 0;
-  list-style: none;
-}
-
-.ficha {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--e3);
-  align-items: start;
-  background: var(--papel-elevado);
-  border: 1px solid var(--linea);
-  border-radius: var(--radio);
-  padding: var(--e3);
-}
-
-.ficha:hover {
-  border-color: var(--linea-fuerte);
-}
-
-/* Marco de tamaño fijo: sin esto la grilla se desalinea producto por producto,
-   porque solo ~82% del catálogo tiene foto. */
-.ficha__marco {
-  position: relative;
-  width: 3.25rem;
-  height: 3.25rem;
-}
-
-.ficha__miniatura {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: var(--papel-hundido);
-  border-radius: var(--radio-chico);
-}
-
-.ficha__sinfoto {
-  display: grid;
-  place-items: center;
-  color: var(--tinta-tenue);
+.recuento strong {
+  color: var(--ink);
+  font-stretch: 75%;
   font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-/* El veredicto marcado sobre la propia foto, como el sello de un inspector
-   sobre el producto. Es lo que permite barrer la grilla y ver la distribución
-   de veredictos sin leer una sola palabra; la píldora de abajo pone la
-   palabra, esta insignia pone la señal. */
-.ficha__insignia {
-  position: absolute;
-  right: -0.2rem;
-  bottom: -0.2rem;
-  width: 1.3rem;
-  height: 1.3rem;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--tinta-v);
-  color: var(--fondo-v);
-  /* Anillo del color de la tarjeta para que la insignia se despegue de
-     cualquier foto, sin recurrir a una sombra. */
-  border: 2px solid var(--papel-elevado);
-  font-size: 0.7rem;
-  line-height: 1;
-}
-
-.ficha__cuerpo {
-  min-width: 0;
-}
-
-.ficha__nombre {
-  font-family: inherit;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: 0;
-  margin-bottom: var(--e1);
-}
-
-/* El link cubre la tarjeta entera para que el área de toque sea grande, pero
-   el texto del link sigue siendo solo el nombre del producto. */
-.ficha__link {
-  text-decoration: none;
-}
-.ficha__link::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radio);
-}
-.ficha__link:focus-visible {
-  outline: none;
-}
-.ficha__link:focus-visible::after {
-  outline: 2px solid var(--foco);
-  outline-offset: 2px;
-}
-
-.ficha__marca {
-  color: var(--tinta-tenue);
+.enlace-boton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
   font-size: 0.8125rem;
-  margin-bottom: var(--e2);
+  text-decoration: underline;
+  text-decoration-color: var(--filete);
+  text-underline-offset: 0.18em;
+  cursor: pointer;
 }
 
-.ficha__pie {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e2);
-  align-items: center;
-  margin-top: var(--e2);
-}
-
-.ficha__porque {
-  font-size: 0.8125rem;
-  color: var(--tinta-media);
-  margin-top: var(--e2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.vacio {
-  text-align: center;
-  padding: var(--e8) var(--e4);
-  color: var(--tinta-media);
-}
-.vacio h2 {
-  margin-bottom: var(--e3);
-}
-
-/* Reserva de alto mientras baja el índice: sin esto la página salta cuando
-   aparecen los resultados. */
-.cargando {
-  min-height: 60vh;
-  display: grid;
-  place-items: center;
-  color: var(--tinta-tenue);
+.enlace-boton:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
 }
 
 .mas {
   display: block;
-  margin: var(--e6) auto 0;
-  font: inherit;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--tinta);
-  background: var(--papel-elevado);
-  border: 1px solid var(--linea-fuerte);
-  border-radius: 999px;
-  padding: var(--e2) var(--e5);
+  width: 100%;
+  padding: var(--e4);
+  border: 0;
+  border-bottom: 1px solid var(--filete);
+  background: var(--stock-hundido);
+  color: var(--ink);
+  font-stretch: 87.5%;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
 }
+
 .mas:hover {
-  background: var(--papel-hundido);
+  background: var(--ink);
+  color: var(--stock);
+}
+
+/* --- estados vacíos y de carga ---------------------------------------- */
+
+.aviso-bloque {
+  padding: var(--e7) 0;
+  border-bottom: 1px solid var(--filete);
+}
+
+.aviso-bloque h2 {
+  font-stretch: 75%;
+  font-size: 1.375rem;
+  text-transform: uppercase;
+}
+
+.aviso-bloque p {
+  max-width: 46ch;
+  margin-top: var(--e2);
+  color: var(--ink-2);
+}
+
+.cargando {
+  padding: var(--e5) 0;
+  border-bottom: 1px solid var(--filete);
+  color: var(--ink-3);
+  font-size: 0.875rem;
 }
 
 /* =========================================================================
-   ficha de producto
+   páginas de texto y de ficha
    ========================================================================= */
 
-.migas {
-  font-size: 0.875rem;
-  color: var(--tinta-tenue);
-  padding-top: var(--e5);
+.titular {
+  padding: var(--e6) 0 var(--e5);
 }
+
+.titular h1 {
+  font-stretch: 75%;
+  font-size: clamp(1.875rem, 1.3rem + 2.4vw, 3.25rem);
+  text-transform: uppercase;
+}
+
+.titular__bajada {
+  max-width: 60ch;
+  margin-top: var(--e3);
+  color: var(--ink-2);
+  font-size: 1.0625rem;
+}
+
+.migas {
+  padding: var(--e4) 0 0;
+  color: var(--ink-3);
+  font-size: 0.8125rem;
+}
+
 .migas a {
   text-decoration: none;
-  color: var(--tinta-media);
 }
+
 .migas a:hover {
   text-decoration: underline;
 }
 
-.producto {
-  display: grid;
-  gap: var(--e6);
-  grid-template-columns: minmax(0, 1fr);
-  padding-top: var(--e4);
-}
-
-@media (min-width: 56rem) {
-  .producto {
-    grid-template-columns: minmax(0, 1fr) 19rem;
-    align-items: start;
-  }
-}
+/* --- cabecera de la ficha ---------------------------------------------- */
 
 .producto__cabecera {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  align-items: center;
   gap: var(--e4);
-  align-items: start;
 }
 
 .producto__foto {
-  width: 5.5rem;
-  height: 5.5rem;
+  flex: none;
+  width: 5rem;
+  height: 5rem;
   object-fit: contain;
-  background: var(--papel-hundido);
-  border: 1px solid var(--linea);
-  border-radius: var(--radio-chico);
+  background: var(--stock-hundido);
+  padding: var(--e2);
+  mix-blend-mode: multiply;
 }
 
-.producto__titulo {
-  margin-bottom: var(--e2);
+@media (prefers-color-scheme: dark) {
+  .producto__foto {
+    mix-blend-mode: normal;
+  }
 }
 
-.producto__marca {
-  color: var(--tinta-media);
-  font-size: 1.0625rem;
-}
-
-.dictamen {
-  background: var(--fondo-v);
-  border: 1px solid var(--linea-v);
-  border-radius: var(--radio);
-  padding: var(--e5);
-  margin-block: var(--e5);
-}
-
-.dictamen__frase {
-  font-family: var(--fuente-titulo), Georgia, serif;
-  font-size: 1.375rem;
-  line-height: 1.25;
-  color: var(--tinta-v);
-  margin: var(--e3) 0 var(--e2);
-  text-wrap: balance;
-}
-
-.dictamen__detalle {
-  color: var(--tinta-media);
-  margin: 0;
+.producto__cabecera .titular__bajada {
+  margin-top: var(--e1);
   font-size: 0.9375rem;
 }
 
+/* --- el dictamen: el veredicto se queda con el frame entero ------------
+   En la corrida el color es una columna angosta porque compite con otros
+   6.000 productos. Acá hay uno solo, y la respuesta es toda la pantalla. */
+
+.dictamen {
+  margin-top: var(--e4);
+  padding: var(--e6) var(--e5);
+  background: var(--campo);
+  color: var(--sobre);
+}
+
+.dictamen__frase {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e3);
+  font-stretch: 75%;
+  font-size: clamp(1.5rem, 1.1rem + 1.7vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.dictamen__frase .icono {
+  margin-top: 0.15em;
+  width: 1em;
+  height: 1em;
+}
+
+.dictamen__glosa {
+  max-width: 56ch;
+  margin-top: var(--e4);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.ficha-grilla {
+  display: grid;
+  gap: var(--e6);
+  padding: var(--e6) 0 var(--e7);
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .ficha-grilla {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+}
+
 .bloque {
-  border-top: 1px solid var(--linea);
-  padding-top: var(--e4);
+  border-top: 2px solid var(--filete-fuerte);
+  padding-top: var(--e3);
+}
+
+.bloque + .bloque {
   margin-top: var(--e5);
 }
 
 .bloque__titulo {
-  font-family: inherit;
+  font-stretch: 87.5%;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--tinta-tenue);
-  margin-bottom: var(--e3);
+  color: var(--ink-2);
+}
+
+.bloque__cuerpo {
+  margin-top: var(--e3);
+  line-height: 1.55;
 }
 
 .ingredientes {
   font-size: 0.9375rem;
   line-height: 1.7;
-  margin: 0;
+  color: var(--ink-2);
 }
 
-/* El ingrediente que disparó el veredicto, señalado dentro de la lista: sin
-   esto la persona tiene que buscarlo a ojo entre cuarenta. */
+/* El ingrediente que disparó el veredicto: no alcanza con decir que contiene
+   gelatina, hay que señalar dónde. */
 .ingredientes mark {
-  background: var(--fondo-v);
-  color: var(--tinta-v);
-  border-bottom: 2px solid var(--tinta-v);
-  border-radius: 3px 3px 0 0;
-  padding: 0.05em 0.2em;
-  font-weight: 600;
+  padding: 0.1em 0.2em;
+  background: var(--campo);
+  color: var(--sobre);
+  font-weight: 700;
 }
 
 .datos {
-  display: grid;
-  gap: var(--e3);
-  margin: 0;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 }
 
-.datos > div {
-  display: grid;
-  grid-template-columns: 8.5rem 1fr;
+.datos div {
+  display: flex;
+  justify-content: space-between;
   gap: var(--e3);
+  padding: var(--e2) 0;
+  border-bottom: 1px solid var(--filete);
 }
 
 .datos dt {
-  color: var(--tinta-tenue);
-  font-size: 0.8125rem;
-  padding-top: 0.15em;
+  color: var(--ink-3);
 }
 
 .datos dd {
   margin: 0;
+  text-align: right;
 }
 
-.panel {
-  background: var(--papel-hundido);
-  border: 1px solid var(--linea);
-  border-radius: var(--radio);
-  padding: var(--e4);
+/* --- índice de categorías --------------------------------------------- */
+
+.indice {
+  border-top: 1px solid var(--filete);
+  margin-bottom: var(--e8);
 }
 
-.panel + .panel {
-  margin-top: var(--e4);
-}
-
-.panel__titulo {
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--tinta-tenue);
-  margin-bottom: var(--e3);
-}
-
-.evidencia {
+.indice a {
   display: flex;
   align-items: baseline;
-  gap: 0.6ch;
-  font-size: 0.875rem;
-  margin-bottom: var(--e2);
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e3) 0;
+  border-bottom: 1px solid var(--filete);
+  text-decoration: none;
 }
 
-.evidencia__marca {
-  color: var(--v-apto-tinta);
+.indice a:hover {
+  background: var(--stock-hundido);
+}
+
+.indice__nombre {
+  font-stretch: 75%;
+  font-size: 1.0625rem;
   font-weight: 700;
+  text-transform: uppercase;
 }
 
-/* La letra chica del rótulo: una regla fina arriba y el texto debajo, como la
-   aclaración que va al pie de una tabla nutricional. */
-.aviso {
+.indice__total {
+  color: var(--ink-3);
   font-size: 0.875rem;
-  color: var(--tinta-media);
-  border-top: 1px solid var(--linea-fuerte);
-  padding-top: var(--e3);
-  margin-block: var(--e5);
 }
 
-/* El último párrafo de un bloque no arrastra su margen: así ningún caso de uso
-   necesita un `style={{ marginBottom: 0 }}` suelto que se escape del sistema
-   de tokens. */
-.aviso p:last-child,
-.panel p:last-child,
-.dictamen p:last-child,
-.bloque p:last-child {
-  margin-bottom: 0;
+/* --- cifras ------------------------------------------------------------ */
+
+.cifras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  margin-top: var(--e5);
 }
 
-.panel__nota {
-  font-size: 0.8125rem;
-  color: var(--tinta-media);
-  margin: 0;
+.cifra {
+  flex: 1 1 7rem;
+  padding: var(--e3);
+  border: 1px solid var(--filete);
+}
+
+.cifra__valor {
+  display: block;
+  color: var(--tinta-v, var(--ink));
+  font-stretch: 75%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cifra__etiqueta {
+  display: block;
+  margin-top: var(--e1);
+  color: var(--ink-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* --- paginación -------------------------------------------------------- */
+
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding: var(--e4) 0 var(--e8);
+  font-size: 0.875rem;
+  color: var(--ink-2);
 }
 
 .paginacion__links {
   display: flex;
-  gap: var(--e4);
+  gap: var(--e1);
 }
 
-.cadenas {
-  display: flex;
-  flex-wrap: wrap;
+.paginacion__links a {
+  display: inline-flex;
+  align-items: center;
   gap: var(--e2);
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--filete);
+  font-weight: 700;
+  text-decoration: none;
 }
 
-.cadena {
-  font-size: 0.8125rem;
-  border: 1px solid var(--linea-fuerte);
-  border-radius: 999px;
-  padding: 0.15rem var(--e3);
-  color: var(--tinta-media);
-  background: var(--papel-elevado);
+.paginacion__links a:hover {
+  background: var(--ink);
+  color: var(--stock);
+  border-color: var(--ink);
 }
 
-/* =========================================================================
-   páginas de texto y de categoría
-   ========================================================================= */
+/* --- prosa ------------------------------------------------------------- */
 
 .prosa {
-  max-width: 42rem;
-  padding-top: var(--e7);
+  max-width: 68ch;
+  padding-bottom: var(--e8);
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
 .prosa h2 {
   margin-top: var(--e7);
-  margin-bottom: var(--e3);
+  padding-top: var(--e3);
+  border-top: 2px solid var(--filete-fuerte);
+  font-stretch: 75%;
+  font-size: 1.375rem;
+  text-transform: uppercase;
 }
 
 .prosa h3 {
   margin-top: var(--e5);
-  margin-bottom: var(--e2);
+  font-size: 1.0625rem;
 }
 
+.prosa p,
 .prosa ul {
-  padding-left: var(--e5);
-  margin-bottom: var(--e4);
+  margin-top: var(--e3);
+  color: var(--ink-2);
 }
 
 .prosa li {
-  margin-bottom: var(--e2);
+  padding-left: var(--e4);
+  text-indent: calc(var(--e4) * -1);
 }
 
-.prosa .aviso {
-  margin-block: var(--e5);
+.prosa li + li {
+  margin-top: var(--e2);
 }
 
-.cifras {
-  display: grid;
-  gap: var(--e4);
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  list-style: none;
-  padding: 0;
+.prosa li::before {
+  content: '—';
+  padding-right: var(--e2);
+  color: var(--ink-3);
+}
+
+.nota {
   margin: var(--e5) 0;
+  padding: var(--e4);
+  border-left: 1px solid var(--filete-fuerte);
+  background: var(--stock-hundido);
+  font-size: 0.9375rem;
+  color: var(--ink-2);
 }
-
-.cifra {
-  border-top: 2px solid var(--tinta);
-  padding-top: var(--e2);
-}
-
-.cifra__valor {
-  font-family: var(--fuente-titulo), Georgia, serif;
-  font-size: 1.75rem;
-  font-weight: 600;
-  line-height: 1.1;
-  display: block;
-}
-
-.cifra__etiqueta {
-  font-size: 0.8125rem;
-  color: var(--tinta-media);
-  display: block;
-  margin-top: var(--e1);
-}
-
-.indice-categorias {
-  display: grid;
-  gap: var(--e2);
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-  list-style: none;
-  padding: 0;
-  margin: var(--e5) 0 0;
-}
-
-.indice-categorias a {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--e3);
-  align-items: baseline;
-  text-decoration: none;
-  border: 1px solid var(--linea);
-  border-radius: var(--radio);
-  padding: var(--e3) var(--e4);
-  background: var(--papel-elevado);
-}
-.indice-categorias a:hover {
-  border-color: var(--linea-fuerte);
-}
-
-.indice-categorias span:last-child {
-  color: var(--tinta-tenue);
-  font-size: 0.875rem;
-}
-
-/* =========================================================================
-   accesibilidad de movimiento
-   ========================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
   }
 }

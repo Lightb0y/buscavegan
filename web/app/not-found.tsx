@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function NoEncontrado() {
   return (
     <div className="contenedor">
-      <div className="vacio">
+      <div className="aviso-bloque">
         <h1>No encontramos esa página</h1>
         <p>
           El producto puede haber cambiado de nombre, o el link puede estar

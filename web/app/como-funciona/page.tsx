@@ -69,7 +69,7 @@ export default function ComoFunciona() {
     <div className="contenedor">
       <article className="prosa">
         <h1>Cómo funciona</h1>
-        <p className="hero__bajada">
+        <p className="titular__bajada">
           Cualquiera puede publicar una lista de productos veganos. Lo difícil
           —y lo único que hace que una lista sirva— es poder decir de dónde
           salió cada dato.
@@ -169,7 +169,7 @@ export default function ComoFunciona() {
           clasificados, entre ellos 457 con sello vegano certificado.
         </p>
 
-        <div className="aviso">
+        <div className="nota">
           <p>
             <strong>«Apto» quiere decir vegano</strong>: sin ingredientes de
             origen animal. No quiere decir <em>cruelty-free</em>. Si la marca

@@ -112,6 +112,35 @@ function puntaje(f: Fila, q: string, tokens: string[]): number {
   return p + Math.max(0, 40 - f.nombre.length / 4);
 }
 
+/** Cuánto sabemos de un producto, de 0 a 4.
+ *
+ *  Ordena la vista por defecto —la que ve alguien que entra sin buscar nada—.
+ *  Con orden alfabético la portada del sitio abría con las filas más rotas del
+ *  catálogo: productos llamados «1», «1001843» o «1X 906K 216KCAL = 45G
+ *  CHOCOLATE MA 100G: 2014/480», que son ruido de las fuentes y la peor cara
+ *  posible del proyecto.
+ *
+ *  El puntaje es deliberadamente ciego al veredicto: mide cuánta evidencia
+ *  hay, no si esa evidencia es buena noticia. Un «a revisar» con foto y lista
+ *  de ingredientes rankea por encima de un «apto» sin nada, porque lo que se
+ *  premia es tener con qué respaldar el dato. La distribución de veredictos de
+ *  la primera pantalla sigue siendo la real. */
+export function completitud(f: {
+  nombre: string;
+  tieneIngredientes: boolean;
+  imagen?: string;
+  cadenas: string[];
+}): number {
+  // Un nombre que casi no tiene letras es un código que se coló como nombre.
+  const letras = (f.nombre.match(/\p{L}/gu) ?? []).length;
+  return (
+    (letras >= 3 ? 1 : 0) +
+    (f.tieneIngredientes ? 2 : 0) +
+    (f.imagen ? 1 : 0) +
+    (f.cadenas.length > 0 ? 1 : 0)
+  );
+}
+
 export function buscar(filas: Fila[], filtros: Filtros): Fila[] {
   const { texto, estados, categoria, soloConfirmados, soloConIngredientes } =
     filtros;
@@ -132,10 +161,16 @@ export function buscar(filas: Fila[], filtros: Filtros): Fila[] {
     return filas.filter((f) => f.ean === q);
   }
 
+  // Sin texto no hay relevancia que medir, así que manda la evidencia
+  // disponible y después el alfabeto.
   if (!tokens.length) {
     return filas
       .filter(pasaFiltros)
-      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+      .sort(
+        (a, b) =>
+          completitud(b) - completitud(a) ||
+          a.nombre.localeCompare(b.nombre, 'es'),
+      );
   }
 
   const conPuntaje: { f: Fila; p: number }[] = [];

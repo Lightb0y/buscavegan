@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { Ficha } from '@/components/Ficha';
+import { IconoFlecha } from '@/components/Iconos';
+import { Tira } from '@/components/Tira';
 import { categoria, deCategoria, meta } from '@/lib/catalogo';
 import { numero, ORDEN_ESTADOS, VEREDICTOS } from '@/lib/veredicto';
 
@@ -42,6 +43,7 @@ function leer(ruta: string[]) {
     n,
     paginas,
     items: todos.slice((n - 1) * POR_PAGINA, n * POR_PAGINA),
+    todos,
     total: todos.length,
   };
 }
@@ -74,7 +76,7 @@ export default async function PaginaCategoria({ params }: Props) {
 
   const m = meta();
   const conteo = new Map(ORDEN_ESTADOS.map((e) => [e, 0]));
-  for (const p of deCategoria(d.cat.nombre)) {
+  for (const p of d.todos) {
     conteo.set(p.estado, (conteo.get(p.estado) ?? 0) + 1);
   }
 
@@ -84,19 +86,19 @@ export default async function PaginaCategoria({ params }: Props) {
         <Link href="/">Inicio</Link> / <Link href="/categorias/">Categorías</Link>
       </nav>
 
-      <div className="hero">
+      <div className="titular">
         <h1>
           {d.cat.nombre}
           {d.n > 1 && <> — página {d.n}</>}
         </h1>
-        <p className="hero__bajada">
+        <p className="titular__bajada">
           {numero(d.total)} productos. Si ya sabés el nombre,{' '}
           <Link href="/">buscalo en el catálogo completo</Link>.
         </p>
 
         <ul className="cifras">
           {ORDEN_ESTADOS.map((e) => (
-            <li key={e} className="cifra">
+            <li key={e} className={`cifra v v--${VEREDICTOS[e].tono}`}>
               <span className="cifra__valor">{numero(conteo.get(e) ?? 0)}</span>
               <span className="cifra__etiqueta">{VEREDICTOS[e].etiqueta}</span>
             </li>
@@ -107,14 +109,14 @@ export default async function PaginaCategoria({ params }: Props) {
       {/* Sin este h2, los nombres de producto (h3) saltarían un nivel desde el
           h1 de la categoría. */}
       <h2 className="solo-lectores">Productos de {d.cat.nombre}</h2>
-      <ul className="grilla">
+      <ul className="corrida">
         {d.items.map((p) => (
-          <Ficha key={p.ean} p={p} fuenteLegible={m.fuente_legible} />
+          <Tira key={p.ean} p={p} fuenteLegible={m.fuente_legible} />
         ))}
       </ul>
 
       {d.paginas > 1 && (
-        <nav className="resumen" aria-label="Paginación">
+        <nav className="paginacion" aria-label="Paginación">
           <span>
             Página <strong>{d.n}</strong> de {d.paginas}
           </span>
@@ -128,12 +130,14 @@ export default async function PaginaCategoria({ params }: Props) {
                 }
                 rel="prev"
               >
-                ← Anterior
+                <IconoFlecha sentido="izquierda" />
+                Anterior
               </Link>
             )}
             {d.n < d.paginas && (
               <Link href={`/categoria/${d.cat.slug}/${d.n + 1}/`} rel="next">
-                Siguiente →
+                Siguiente
+                <IconoFlecha />
               </Link>
             )}
           </span>

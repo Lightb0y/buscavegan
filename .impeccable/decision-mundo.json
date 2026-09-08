@@ -1,0 +1,261 @@
+{
+  "roll": {
+    "seed": "f0f3166a",
+    "scope": "direction",
+    "mode": "operate",
+    "assignedIndex": 4,
+    "assignedLabel": "Zócalo de Góndola",
+    "candidateCount": 7,
+    "reproducir": "impeccable concept-seed --scope direction --mode operate --from f0f3166a --candidate-count 7",
+    "challengers": [
+      {
+        "id": "japanese-high-density-web",
+        "verdict": "competitive"
+      },
+      {
+        "id": "signals-instruments-drum-machine-step-row",
+        "verdict": "declined"
+      },
+      {
+        "id": "medium-native-crt-arcade-pixel-glow",
+        "verdict": "declined"
+      },
+      {
+        "id": "paper-folds-pleats-deployable-miura-orbit-sheet",
+        "verdict": "declined"
+      },
+      {
+        "id": "dream-surreal-impossible-worlds-alphabet-storm",
+        "verdict": "declined"
+      },
+      {
+        "id": "posters-covers-sleeves-yeye-pop-sleeve",
+        "verdict": "declined"
+      }
+    ],
+    "resuelto": {
+      "elegido": "assigned",
+      "canal": "structured question tool",
+      "nota": "La página servida en 127.0.0.1 no le llegó al usuario, así que la ronda se volvió a presentar por el canal de texto y ahí eligió."
+    }
+  },
+  "title": "Elegí el mundo visual de buscavegan",
+  "question": "El dado asignó Zócalo de Góndola. Quedátelo, tomá una alternativa, o volvé a tirar.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Zócalo de Góndola",
+      "kicker": "THE ROLL",
+      "lineage": "cartelería de zócalo de supermercado argentino",
+      "thesis": "El resultado como el cartel del estante: un dato enorme que se lee caminando, y la letra chica obligatoria que lo hace verificable.",
+      "palette": [
+        "#ffffff",
+        "#14130f",
+        "#0f7a3d",
+        "#c02016",
+        "#f0b323"
+      ],
+      "materials": [
+        "cartón de zócalo",
+        "tinta plana",
+        "filete de 1px",
+        "grotesca condensada",
+        "mono de código"
+      ],
+      "viewport": "El buscador es el riel del estante: una barra plena, tinta sobre stock blanco, con la consulta en condensada grande. Debajo, los resultados no son tarjetas flotantes sino tiras a sangre pegadas una contra otra por un filete, como una corrida de góndola real. Cada tira lleva el bloque de veredicto a la izquierda en tinta plana con símbolo y palabra, el nombre en condensada de caja alta, marca y categoría en la línea secundaria, y abajo el motivo en mono, ocupando el lugar que en un cartel real tiene el precio por unidad de medida: esa letra chica que la ley obliga a poner justamente para que el número grande se pueda auditar. Barrer la lista con la vista deja una columna de color legible a la velocidad de caminar.",
+      "risk": "La cartelería de retail grita. Si el stock o los filetes toman color, los cuatro veredictos dejan de ser señal y todo se vuelve ruido de oferta; la disciplina es que el color lo tenga el veredicto y nadie más.",
+      "raised": [
+        {
+          "from": "challenger-drum-machine",
+          "raise": "El único encendido: el veredicto es la única fuente de luz de la pantalla y todo lo demás baja a serigrafía callada."
+        },
+        {
+          "from": "challenger-crt-arcade",
+          "raise": "Ley de paleta: un color no puede aparecer si no codifica un estado, y la ley rige también el modo oscuro, donde ningún tono de veredicto se filtra al cromo."
+        },
+        {
+          "from": "challenger-miura",
+          "raise": "Retícula ligada: toda medida de la tira se deriva de un único módulo de riel, así la corrida entera es un sistema reglado y no una pila de tarjetas."
+        },
+        {
+          "from": "challenger-alphabet-storm",
+          "raise": "Tipo como materia: la consulta y la palabra del veredicto se componen a escala monumental, como masa tipográfica y no como etiquetas chiquitas."
+        },
+        {
+          "from": "challenger-yeye-sleeve",
+          "raise": "Fondo total: en la ficha de un solo producto el veredicto se queda con el frame entero, en vez de ser una pastilla en un rincón."
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "Señalética de Subte",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "señalética del Subte de Buenos Aires",
+      "thesis": "Un sistema donde el color ES la información y nunca la decoración, y que este público ya sabe leer sin que nadie se lo explique.",
+      "palette": [
+        "#f2f0ea",
+        "#1a1a1a",
+        "#0a7d3e",
+        "#d32011",
+        "#f2a900"
+      ],
+      "materials": [
+        "esmalte sobre chapa",
+        "azulejo",
+        "grotesca de placa",
+        "flecha de andén"
+      ],
+      "viewport": "Placas esmaltadas: el veredicto como color de línea, el nombre del producto como nombre de estación, y la evidencia como el cartel de correspondencia que va debajo.",
+      "risk": "Es la dirección más fuerte de mi lista y por eso mismo la más previsible. «Sistema inspirado en señalética de transporte» es una zona segura muy transitada, con riesgo real de terminar pareciéndose a cualquier design system de los últimos diez años."
+    },
+    {
+      "id": "challenger-japones",
+      "label": "Alta Densidad Japonesa",
+      "verdict": "competitive",
+      "lineage": "web japonesa contemporánea de alta densidad",
+      "thesis": "El catálogo como mosaico de módulos reglados: cientos de bloques chicos, filetes finos, nada desperdicia un píxel.",
+      "palette": [
+        "#ffffff",
+        "#111111",
+        "#d0021b",
+        "#8a8a8a"
+      ],
+      "materials": [
+        "filete hairline",
+        "pestaña roja",
+        "gótica compacta"
+      ],
+      "viewport": "Mosaico de módulos con pestaña de encabezado, rail de navegación persistente y acordeones de categoría a la izquierda.",
+      "case": "Fusiona muy bien y gana en claridad de producto: 7.397 filas con evidencia por fila es exactamente lo que este sistema resuelve mejor que nadie, sin la inflación de blanco del grid SaaS. Pierde en identificación, porque es una tradición de pantalla que este público no lee a diario, mientras que la góndola es literalmente el lugar donde está parado cuando abre la app.",
+      "risk": "Sin una retícula estrictísima se lee como novedad retro-web en lugar de densidad con propósito.",
+      "hero": "https://impeccable.style/worlds/cards/japanese-high-density-web-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/japanese-high-density-web.webp"
+    },
+    {
+      "id": "challenger-drum-machine",
+      "label": "Caja de Ritmos",
+      "verdict": "declined",
+      "lineage": "fila de pasos de caja de ritmos de los 80",
+      "palette": [
+        "#2b2b2b",
+        "#d8382a",
+        "#e8a33d",
+        "#f2f2f2"
+      ],
+      "materials": [
+        "panel de carbón",
+        "LED",
+        "serigrafía"
+      ],
+      "case": "Fusiona mal: la grilla de dieciséis pasos y la luz de barrido implican tiempo y tempo, que este producto no tiene, y una TR-808 no significa nada para quien está parado en la góndola.",
+      "kept": "El único encendido: el estado activo como única fuente de luz del panel.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-drum-machine-step-row-hero.webp"
+    },
+    {
+      "id": "challenger-crt-arcade",
+      "label": "Arcade CRT",
+      "verdict": "declined",
+      "lineage": "pantalla de arcade con brillo de fósforo",
+      "palette": [
+        "#0a0a0a",
+        "#ffd94a",
+        "#3aa7ff",
+        "#ff5a5a"
+      ],
+      "materials": [
+        "píxel de 8x8",
+        "scanline",
+        "bloom"
+      ],
+      "case": "Fusiona mal en los dos ejes: la versal de píxel destruye la legibilidad de nombres largos en español y de una oración de evidencia, y las scanlines bajan el contraste justo donde el proyecto se fijó AA como piso.",
+      "kept": "Ley de paleta: un color no existe si no codifica un estado.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-crt-arcade-pixel-glow-hero.webp"
+    },
+    {
+      "id": "challenger-miura",
+      "label": "Pliegue Miura",
+      "verdict": "declined",
+      "lineage": "hoja desplegable de pliegue Miura",
+      "palette": [
+        "#ffffff",
+        "#c9a227",
+        "#8a8a8a",
+        "#b8cfe0"
+      ],
+      "materials": [
+        "papel matte",
+        "foil dorado",
+        "mono aeroespacial"
+      ],
+      "case": "Fusiona mal: su gesto central es que el contenido viaja plegado y se despliega, y la primera regla de este producto es que la evidencia nunca se pliega ni se esconde detrás de un gesto.",
+      "kept": "Retícula ligada: una sola geometría gobierna cada bloque.",
+      "hero": "https://impeccable.style/worlds/cards/paper-folds-pleats-deployable-miura-orbit-sheet-hero.webp"
+    },
+    {
+      "id": "challenger-alphabet-storm",
+      "label": "Tormenta de Letras",
+      "verdict": "declined",
+      "lineage": "mundo surrealista de tormenta alfabética",
+      "palette": [
+        "#ffffff",
+        "#0d0d0d",
+        "#c0c0c0",
+        "#8f8f8f"
+      ],
+      "materials": [
+        "grotesca monumental",
+        "partículas",
+        "lluvia gris"
+      ],
+      "case": "Fusiona mal: texto que se transforma en clima mientras alguien necesita un veredicto legible en quince segundos con una mano ocupada es exactamente lo contrario del encargo.",
+      "kept": "El tipo como materia, a escala monumental.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-alphabet-storm-hero.webp"
+    },
+    {
+      "id": "challenger-yeye-sleeve",
+      "label": "Funda Yé-yé",
+      "verdict": "declined",
+      "lineage": "funda de disco pop francés",
+      "palette": [
+        "#f26430",
+        "#39b6ac",
+        "#ffffff",
+        "#2b2b2b"
+      ],
+      "materials": [
+        "fondo plano saturado",
+        "logotipo redondeado",
+        "retrato al cuadrado"
+      ],
+      "case": "Fusiona mal: su topología es un conjunto cerrado de cuatro tracks y acá hay 7.397 productos abiertos; y un fondo plano saturado por ítem inundaría de color la pantalla justo donde el color es el dato.",
+      "kept": "El fondo total: un color se queda con el frame entero, sin titubear.",
+      "hero": "https://impeccable.style/worlds/cards/posters-covers-sleeves-yeye-pop-sleeve-hero.webp"
+    }
+  ],
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría publica, ejecutado impecablemente: buscador con sidebar de filtros, tarjetas blancas redondeadas y acento verde.",
+    "palette": [
+      "#ffffff",
+      "#111827",
+      "#16a34a",
+      "#6b7280"
+    ],
+    "materials": [
+      "grid limpio",
+      "Inter",
+      "sombra suave"
+    ],
+    "viewport": "La disposición que el visitante ya espera, a máximo nivel de oficio.",
+    "risk": "Indistinguible de la competencia por diseño."
+  },
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "steer": true
+}

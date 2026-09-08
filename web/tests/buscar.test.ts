@@ -8,7 +8,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buscar, normalizar, rehidratar, type Fila } from '../lib/buscar.ts';
+import {
+  buscar,
+  completitud,
+  normalizar,
+  rehidratar,
+  type Fila,
+} from '../lib/buscar.ts';
 import { ingredienteDisparador, partirResaltando } from '../lib/resaltar.ts';
 import type { Estado, IndiceCrudo } from '../lib/tipos.ts';
 
@@ -78,7 +84,10 @@ test('rehidratar le vuelve a pegar el prefijo a la foto', () => {
 
 // --- búsqueda -------------------------------------------------------------
 
-test('sin texto devuelve todo ordenado por nombre', () => {
+test('sin texto ordena por evidencia disponible, no por nombre', () => {
+  // Antes esto era orden alfabético y la portada abria con las filas mas rotas
+  // del catalogo: productos llamados «1» o «1001843», que son ruido de las
+  // fuentes. Ahora manda `completitud` y el alfabeto solo desempata.
   const r = buscar(indice(), {
     texto: '',
     estados: TODOS,
@@ -87,11 +96,39 @@ test('sin texto devuelve todo ordenado por nombre', () => {
     soloConIngredientes: false,
   });
   assert.deepEqual(soloNombres(r), [
-    'Alfajor de chocolate',
-    'Leche de almendras',
-    'Leche entera',
-    'Lechuga criolla',
+    'Leche de almendras', // 5: nombre, ingredientes, foto y cadena
+    'Alfajor de chocolate', // 3: nombre, foto y cadenas
+    'Leche entera', // 3: nombre e ingredientes; empata y pierde por alfabeto
+    'Lechuga criolla', // 1: solo el nombre
   ]);
+});
+
+test('completitud mide evidencia y es ciega al veredicto', () => {
+  const [almendras, entera, alfajor, lechuga] = indice();
+
+  assert.equal(completitud(almendras), 5);
+  assert.equal(completitud(entera), 3);
+  assert.equal(completitud(alfajor), 3);
+  assert.equal(completitud(lechuga), 1);
+
+  // Lo que se premia es tener con qué respaldar el dato, no que el dato sea
+  // buena noticia: un «no apto» con foto y cadenas rankea igual que un
+  // «vegetariano» con ingredientes. Si esto se rompe, la primera pantalla deja
+  // de mostrar la distribución real de veredictos.
+  assert.equal(alfajor.estado, 'no_apto');
+  assert.equal(entera.estado, 'vegetariano');
+  assert.equal(completitud(alfajor), completitud(entera));
+
+  // Un nombre casi sin letras es un código que se coló como nombre.
+  assert.equal(
+    completitud({
+      nombre: '1001843',
+      tieneIngredientes: false,
+      imagen: undefined,
+      cadenas: [],
+    }),
+    0,
+  );
 });
 
 test('busca por prefijo de palabra, no por subcadena', () => {
@@ -207,7 +244,7 @@ test('los filtros se combinan y son excluyentes entre sí', () => {
   );
   assert.deepEqual(
     soloNombres(buscar(filas, { ...base, soloConfirmados: true })),
-    ['Alfajor de chocolate', 'Leche de almendras'],
+    ['Leche de almendras', 'Alfajor de chocolate'],
   );
   assert.deepEqual(
     soloNombres(buscar(filas, { ...base, soloConIngredientes: true })),

@@ -19,19 +19,19 @@ export default function PaginaCategorias() {
 
   return (
     <div className="contenedor">
-      <div className="hero">
+      <div className="titular">
         <h1>Categorías</h1>
-        <p className="hero__bajada">
+        <p className="titular__bajada">
           {numero(m.total)} productos repartidos en {orden.length} rubros.
         </p>
       </div>
 
-      <ul className="indice-categorias">
+      <ul className="indice">
         {orden.map((c) => (
           <li key={c.slug}>
             <Link href={`/categoria/${c.slug}/`}>
-              <span>{c.nombre}</span>
-              <span>{numero(c.total)}</span>
+              <span className="indice__nombre">{c.nombre}</span>
+              <span className="indice__total">{numero(c.total)}</span>
             </Link>
           </li>
         ))}
