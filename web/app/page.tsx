@@ -81,16 +81,33 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="contenedor">
-        <div className="titular">
+      {/* La foto es una pared de góndola de frente. Va en gris a proposito: la
+          ley de paleta del sitio dice que un color solo existe si codifica un
+          veredicto, y una foto a color metería verdes y rojos que no significan
+          nada, compitiendo justo con el dato. En gris la foto es material, no
+          señal. Además sus líneas de estante son las mismas horizontales que
+          separan las tiras de abajo. */}
+      <header className="portada">
+        <img
+          className="portada__foto"
+          src="/gondola-2000.webp"
+          srcSet="/gondola-1000.webp 1000w, /gondola-2000.webp 2000w"
+          sizes="100vw"
+          width={2000}
+          height={1125}
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+        />
+        <div className="contenedor portada__cuerpo">
           <h1>¿Este producto es apto vegano?</h1>
-          <p className="titular__bajada">
+          <p className="portada__bajada">
             {numero(m.total)} productos argentinos clasificados. Y sobre todo:{' '}
             <strong>de dónde sacamos cada veredicto</strong>, producto por
             producto.
           </p>
         </div>
-      </div>
+      </header>
 
       <Buscador
         categorias={m.categorias}

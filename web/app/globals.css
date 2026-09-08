@@ -695,6 +695,63 @@ select {
   color: var(--ink);
 }
 
+/* --- lo que está filtrando --------------------------------------------
+
+   Estos chips NO se esconden al condensar el riel, y esa es toda su razón de
+   ser: el tamiz sí se esconde, así que sin ellos alguien puede estar mirando
+   92 filas de 7.397 sin nada en pantalla que se lo diga. Cada uno se saca con
+   un clic, que es más preciso que "limpiar todo".
+   ---------------------------------------------------------------------- */
+
+.puestos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e2);
+  padding-bottom: var(--e3);
+}
+
+.puestos__rotulo {
+  color: var(--ink-3);
+  font-size: 0.6875rem;
+  font-stretch: 87.5%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.puestos__chip {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: var(--e2);
+  padding: var(--e1) var(--e2) var(--e1) var(--e3);
+  border: 1px solid var(--filete-fuerte);
+  background: var(--stock);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    background 120ms linear,
+    color 120ms linear;
+}
+
+.puestos__chip:hover {
+  background: var(--ink);
+  color: var(--stock);
+}
+
+/* La tecla de pista es más ancha que la de «/», así que respira un poco más.
+   Se esconde al condensar: ahí el campo ya es chico y la fila está llena. */
+.riel__tecla--enter {
+  padding: 0.15rem 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.riel--condensado .riel__tecla--enter {
+  display: none;
+}
+
 /* =========================================================================
    la corrida
 
@@ -907,6 +964,33 @@ select {
   color: var(--ink-2);
 }
 
+/* La salida del vacío no puede ser un enlace chiquito: es la única acción de
+   la pantalla, y el bloque entero existe para ofrecerla. Va como bloque de
+   tinta plana, que es como este mundo dice "esto es lo que hay que apretar". */
+.rescate {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  margin-top: var(--e4);
+  padding: 0 var(--e4);
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--stock);
+  font: inherit;
+  font-stretch: 87.5%;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 120ms linear,
+    color 120ms linear;
+}
+
+.rescate:hover {
+  background: var(--stock);
+  color: var(--ink);
+}
+
 .cargando {
   padding: var(--e5) 0;
   border-bottom: 1px solid var(--filete);
@@ -921,6 +1005,90 @@ select {
 .titular {
   padding: var(--e6) 0 var(--e5);
 }
+
+/* --- portada -----------------------------------------------------------
+
+   La única foto del sitio, y está puesta como se pone un cartel: a sangre,
+   sin radio, sin sombra, cortada abajo por el mismo filete fuerte que abre la
+   corrida. La foto va en gris porque el color está reservado al veredicto.
+
+   El velo no es decoración: es lo que garantiza que el texto calado llegue a
+   AA sin depender de qué píxel de la foto le toque atrás. El píxel más claro
+   de la foto vale 219, así que hace falta alfa 0,48 para asegurar 4,5:1 con
+   blanco: el velo arranca en 0,50 y baja hasta 0,92, de modo que el piso se
+   cumple en toda la banda y no solo donde hoy cae el texto. El segundo
+   degradado, el horizontal, empareja el bloque iluminado que la foto tiene a
+   la derecha. Medido sobre el archivo y sobre el render, no calculado a ojo.
+   ----------------------------------------------------------------------- */
+
+.portada {
+  position: relative;
+  isolation: isolate;
+  background: var(--ink);
+  border-bottom: 1px solid var(--filete-fuerte);
+}
+
+.portada__foto {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* La franja luminosa de la foto es la de arriba; encuadrando ahí, el texto
+     cae sobre la parte que ya es casi negra. */
+  object-position: center 22%;
+}
+
+.portada::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      to right,
+      rgba(10, 10, 10, 0.18) 0%,
+      rgba(10, 10, 10, 0) 45%,
+      rgba(10, 10, 10, 0.28) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(10, 10, 10, 0.5) 0%,
+      rgba(10, 10, 10, 0.66) 25%,
+      rgba(10, 10, 10, 0.92) 100%
+    );
+}
+
+.portada__cuerpo {
+  padding-top: clamp(3.5rem, 9vw, 6rem);
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.portada h1 {
+  max-width: 18ch;
+  color: #ffffff;
+  font-stretch: 75%;
+  /* Más grande que el titular de las otras paginas: aca compite con una foto,
+     no con papel en blanco. */
+  font-size: clamp(2.125rem, 1.2rem + 3.9vw, 4.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.portada__bajada {
+  max-width: 54ch;
+  margin-top: var(--e4);
+  color: #e4e4e2;
+  font-size: 1.0625rem;
+}
+
+.portada__bajada strong {
+  color: #ffffff;
+}
+
 
 .titular h1 {
   font-stretch: 75%;

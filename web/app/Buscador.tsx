@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IconoCruz, IconoLupa } from '@/components/Iconos';
@@ -31,6 +32,20 @@ interface Estado0 {
 }
 
 const TODOS = () => new Set<Estado>(ORDEN_ESTADOS);
+
+/** El estado de la pantalla, traducido a lo que entiende `buscar()`. Existe
+ *  para poder preguntar "y si sacara este filtro, cuantos quedarian" sin
+ *  repetir el objeto en cada llamada. */
+function filtrosDe(e: Estado0) {
+  return {
+    texto: e.texto,
+    estados: e.estados,
+    categoria: e.categoria,
+    soloConfirmados: e.soloConfirmados,
+    soloConIngredientes: e.soloConIngredientes,
+    soloAnmat: e.soloAnmat,
+  };
+}
 
 function leerUrl(busqueda: string, categorias: Categoria[]): Estado0 {
   const p = new URLSearchParams(busqueda);
@@ -108,6 +123,7 @@ export function Buscador({
   }));
 
   const campo = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   // Estado inicial desde la URL, antes de cualquier otra cosa.
   useEffect(() => {
@@ -176,15 +192,13 @@ export function Buscador({
 
   const resultados = useMemo(() => {
     if (!filas) return [];
-    return buscar(filas, {
-      texto: st.texto,
-      estados: st.estados,
-      categoria: st.categoria,
-      soloConfirmados: st.soloConfirmados,
-      soloConIngredientes: st.soloConIngredientes,
-      soloAnmat: st.soloAnmat,
-    });
+    return buscar(filas, filtrosDe(st));
   }, [filas, st]);
+
+  /** El primero de la lista: lo que abre Enter. Solo cuenta si hay algo
+   *  escrito, porque sin consulta "el primero" no es respuesta a nada. */
+  const primero =
+    st.texto.trim() && resultados.length > 0 ? resultados[0] : null;
 
   // Recuento por veredicto sobre lo que pasa TODOS los filtros menos el de
   // veredicto: la leyenda tiene que decir cuántos hay de cada uno, no cuántos
@@ -192,14 +206,7 @@ export function Buscador({
   const conteos = useMemo(() => {
     const c = new Map<Estado, number>(ORDEN_ESTADOS.map((e) => [e, 0]));
     if (!filas) return c;
-    for (const f of buscar(filas, {
-      texto: st.texto,
-      estados: TODOS(),
-      categoria: st.categoria,
-      soloConfirmados: st.soloConfirmados,
-      soloConIngredientes: st.soloConIngredientes,
-      soloAnmat: st.soloAnmat,
-    })) {
+    for (const f of buscar(filas, { ...filtrosDe(st), estados: TODOS() })) {
       c.set(f.estado, (c.get(f.estado) ?? 0) + 1);
     }
     return c;
@@ -225,6 +232,75 @@ export function Buscador({
       return { ...s, estados: proximos, tandas: 1 };
     });
   }, []);
+
+  /** Los filtros puestos, cada uno con cómo sacarlo.
+   *
+   *  Existen por dos razones. Una: al hacer scroll el riel se condensa y el
+   *  tamiz desaparece, así que sin esto alguien puede estar mirando 92 de
+   *  7.397 productos sin ninguna señal en pantalla de que hay un filtro
+   *  puesto. Dos: cuando la búsqueda da cero, sirven para decir cuál es el
+   *  que está dejando todo afuera en vez de un "sin resultados" mudo.
+   *
+   *  El texto no está en la lista a propósito: el campo del riel ya lo
+   *  muestra y ya tiene su propia cruz para borrarlo. */
+  const activos = useMemo(() => {
+    const a: {
+      clave: string;
+      etiqueta: string;
+      sin: Partial<Estado0>;
+    }[] = [];
+    if (st.categoria) {
+      a.push({ clave: 'cat', etiqueta: st.categoria, sin: { categoria: null } });
+    }
+    if (st.soloConIngredientes) {
+      a.push({
+        clave: 'ing',
+        etiqueta: 'Con lista de ingredientes',
+        sin: { soloConIngredientes: false },
+      });
+    }
+    if (st.soloConfirmados) {
+      a.push({
+        clave: 'gon',
+        etiqueta: 'En góndola hoy',
+        sin: { soloConfirmados: false },
+      });
+    }
+    if (st.soloAnmat) {
+      a.push({
+        clave: 'anmat',
+        etiqueta: 'Certificado por ANMAT',
+        sin: { soloAnmat: false },
+      });
+    }
+    if (st.estados.size !== ORDEN_ESTADOS.length) {
+      const puestos = ORDEN_ESTADOS.filter((e) => st.estados.has(e));
+      a.push({
+        clave: 'v',
+        etiqueta: puestos.length
+          ? puestos.map((e) => VEREDICTOS[e].etiqueta).join(' + ')
+          : 'Ningún veredicto',
+        sin: { estados: TODOS() },
+      });
+    }
+    return a;
+  }, [st]);
+
+  /** Cuando no hay resultados: cuál de los filtros puestos, sacado solo él,
+   *  devuelve más productos. Son unas pocas pasadas más sobre el catálogo y
+   *  solo se calculan en el caso vacio, que es raro. */
+  const rescate = useMemo(() => {
+    if (!filas || resultados.length > 0 || activos.length === 0) return null;
+    let mejor: { etiqueta: string; sin: Partial<Estado0>; n: number } | null =
+      null;
+    for (const f of activos) {
+      const n = buscar(filas, filtrosDe({ ...st, ...f.sin })).length;
+      if (n > 0 && (!mejor || n > mejor.n)) {
+        mejor = { etiqueta: f.etiqueta, sin: f.sin, n };
+      }
+    }
+    return mejor;
+  }, [filas, resultados.length, activos, st]);
 
   const hayFiltro =
     st.texto.trim() !== '' ||
@@ -276,7 +352,31 @@ export function Buscador({
               autoCorrect="off"
               spellCheck={false}
               enterKeyHint="search"
+              onKeyDown={(e) => {
+                // Enter abre el primero de la lista. Vale para cualquier
+                // búsqueda, pero el caso que lo justifica es el código de
+                // barras: si alguien lo tipeó entero, hay un solo resultado
+                // posible y pedirle además un clic es hacerle perder el
+                // tiempo parado en la góndola.
+                if (e.key === 'Enter' && primero) {
+                  e.preventDefault();
+                  router.push(`/p/${primero.slug}/`);
+                }
+              }}
             />
+
+            {primero && (
+              <span
+                className="riel__tecla riel__tecla--enter"
+                title="Enter abre el primer resultado"
+              >
+                Enter
+                <span className="solo-lectores">
+                  {' '}
+                  abre el primer resultado: {primero.nombre}
+                </span>
+              </span>
+            )}
 
             {st.texto ? (
               <button
@@ -378,6 +478,24 @@ export function Buscador({
               Certificado por ANMAT
             </label>
           </div>
+
+          {activos.length > 0 && (
+            <div className="puestos">
+              <span className="puestos__rotulo">Filtrando por</span>
+              {activos.map((f) => (
+                <button
+                  key={f.clave}
+                  type="button"
+                  className="puestos__chip"
+                  aria-label={`Quitar el filtro ${f.etiqueta}`}
+                  onClick={() => cambiar(f.sin)}
+                >
+                  <span>{f.etiqueta}</span>
+                  <IconoCruz tam={11} />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -413,10 +531,27 @@ export function Buscador({
         {filas !== null && resultados.length === 0 && (
           <div className="aviso-bloque">
             <h2>Sin resultados</h2>
-            <p>
-              Probá con menos palabras, o revisá si algún filtro está dejando
-              afuera lo que buscás.
-            </p>
+            {rescate ? (
+              <>
+                <p>
+                  El filtro <strong>{rescate.etiqueta}</strong> es el que está
+                  dejando todo afuera.
+                </p>
+                <button
+                  type="button"
+                  className="rescate"
+                  onClick={() => cambiar(rescate.sin)}
+                >
+                  Sacarlo y ver {numero(rescate.n)}{' '}
+                  {rescate.n === 1 ? 'producto' : 'productos'}
+                </button>
+              </>
+            ) : (
+              <p>
+                Probá con menos palabras, o revisá si algún filtro está dejando
+                afuera lo que buscás.
+              </p>
+            )}
           </div>
         )}
 
