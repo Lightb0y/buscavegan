@@ -1,15 +1,15 @@
 {
-  "actualizado": "2026-09-07",
+  "actualizado": "2026-09-08",
   "total": 7397,
   "por_estado": {
-    "apto": 2776,
+    "apto": 2790,
     "vegetariano": 1624,
     "no_apto": 1778,
-    "revisar": 1219
+    "revisar": 1205
   },
   "por_fuente": {
     "ingredientes": 3251,
-    "sin_datos": 1210,
+    "sin_datos": 1196,
     "ingredientes_super": 999,
     "heuristica": 793,
     "sello_super": 682,
@@ -17,7 +17,8 @@
     "off_label": 121,
     "certificacion_oficial": 91,
     "duplicado": 79,
-    "off_analysis": 25
+    "off_analysis": 25,
+    "curaduria_humana": 14
   },
   "categorias": [
     {
