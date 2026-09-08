@@ -26,6 +26,7 @@ interface Estado0 {
   categoria: string | null;
   soloConfirmados: boolean;
   soloConIngredientes: boolean;
+  soloAnmat: boolean;
   tandas: number;
 }
 
@@ -50,6 +51,7 @@ function leerUrl(busqueda: string, categorias: Categoria[]): Estado0 {
     categoria: cat ?? null,
     soloConfirmados: p.get('gon') === '1',
     soloConIngredientes: p.get('ing') === '1',
+    soloAnmat: p.get('anmat') === '1',
     tandas: Number.isInteger(n) && n > 1 ? Math.min(n, 200) : 1,
   };
 }
@@ -66,6 +68,7 @@ function escribirUrl(e: Estado0, categorias: Categoria[]) {
   }
   if (e.soloConIngredientes) p.set('ing', '1');
   if (e.soloConfirmados) p.set('gon', '1');
+  if (e.soloAnmat) p.set('anmat', '1');
   if (e.tandas > 1) p.set('n', String(e.tandas));
 
   const q = p.toString();
@@ -100,6 +103,7 @@ export function Buscador({
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
     tandas: 1,
   }));
 
@@ -178,6 +182,7 @@ export function Buscador({
       categoria: st.categoria,
       soloConfirmados: st.soloConfirmados,
       soloConIngredientes: st.soloConIngredientes,
+      soloAnmat: st.soloAnmat,
     });
   }, [filas, st]);
 
@@ -193,11 +198,19 @@ export function Buscador({
       categoria: st.categoria,
       soloConfirmados: st.soloConfirmados,
       soloConIngredientes: st.soloConIngredientes,
+      soloAnmat: st.soloAnmat,
     })) {
       c.set(f.estado, (c.get(f.estado) ?? 0) + 1);
     }
     return c;
-  }, [filas, st.texto, st.categoria, st.soloConfirmados, st.soloConIngredientes]);
+  }, [
+    filas,
+    st.texto,
+    st.categoria,
+    st.soloConfirmados,
+    st.soloConIngredientes,
+    st.soloAnmat,
+  ]);
 
   const cambiar = useCallback((parcial: Partial<Estado0>) => {
     // Cualquier cambio en lo que se busca vuelve la lista al principio.
@@ -218,6 +231,7 @@ export function Buscador({
     st.categoria !== null ||
     st.soloConfirmados ||
     st.soloConIngredientes ||
+    st.soloAnmat ||
     st.estados.size !== ORDEN_ESTADOS.length;
 
   const limpiarTodo = () => {
@@ -227,6 +241,7 @@ export function Buscador({
       categoria: null,
       soloConfirmados: false,
       soloConIngredientes: false,
+      soloAnmat: false,
       tandas: 1,
     });
     campo.current?.focus();
@@ -348,6 +363,19 @@ export function Buscador({
                 onChange={(e) => cambiar({ soloConfirmados: e.target.checked })}
               />
               En góndola hoy
+            </label>
+
+            {/* La evidencia más fuerte que existe en el catálogo: no es lo que
+                declara el fabricante ni lo que publica el supermercado, es el
+                registro del Estado. Son pocos productos —92 sobre 7.397— y
+                justamente por eso vale poder aislarlos. */}
+            <label className="tamiz__opcion">
+              <input
+                type="checkbox"
+                checked={st.soloAnmat}
+                onChange={(e) => cambiar({ soloAnmat: e.target.checked })}
+              />
+              Certificado por ANMAT
             </label>
           </div>
         </div>

@@ -11,6 +11,7 @@ import { test } from 'node:test';
 import {
   buscar,
   completitud,
+  FUENTE_ANMAT,
   normalizar,
   rehidratar,
   type Fila,
@@ -26,13 +27,20 @@ function indice(): Fila[] {
     estados: ['apto', 'vegetariano', 'no_apto', 'revisar'],
     marcas: ['Ades', 'Arcor', 'La Serenísima'],
     categorias: ['Bebidas vegetales', 'Lácteos'],
-    fuentes: ['ingredientes', 'heuristica'],
+    fuentes: ['ingredientes', 'heuristica', 'certificacion_oficial'],
     cadenas: ['disco', 'carrefour'],
     p: [
       ['111', 'leche-de-almendras-111', 'Leche de almendras', 0, 0, 0, 0, 1, 1, 'Sin ingredientes animales', '779/000/000/1111/front_es.4.200.jpg'],
       ['222', 'leche-entera-222', 'Leche entera', 2, 1, 1, 0, 0, 1, 'Contiene leche: es vegetariano pero no vegano', ''],
       ['333', 'alfajor-333', 'Alfajor de chocolate', 1, 1, 2, 0, 3, 0, 'Contiene gelatina, de origen animal', '779/000/000/3333/front_es.1.200.jpg'],
       ['444', 'lechuga-444', 'Lechuga criolla', -1, -1, 0, 1, 0, 0, '', ''],
+      // Los dos con sello de ANMAT. El segundo es el caso que obliga a que el
+      // filtro NO sea tambien un filtro de veredicto: tiene el sello, pero su
+      // lista de ingredientes lo contradice y por eso quedo en «a revisar».
+      // Quien filtra por ANMAT tiene que verlo igual, o el filtro esconderia
+      // justo el producto sobre el que hay que desconfiar.
+      ['555', 'medallones-555', 'Medallones de quinoa', -1, -1, 0, 2, 0, 0, 'Registro oficial de ANMAT con atributo vegano', ''],
+      ['666', 'dulce-666', 'Dulce de leche vegano', -1, -1, 3, 2, 0, 1, 'Certificado por ANMAT, pero su propia lista de ingredientes dice lo contrario: contiene leche', ''],
     ],
   };
   return rehidratar(crudo);
@@ -94,12 +102,15 @@ test('sin texto ordena por evidencia disponible, no por nombre', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   assert.deepEqual(soloNombres(r), [
     'Leche de almendras', // 5: nombre, ingredientes, foto y cadena
     'Alfajor de chocolate', // 3: nombre, foto y cadenas
-    'Leche entera', // 3: nombre e ingredientes; empata y pierde por alfabeto
+    'Dulce de leche vegano', // 3: nombre e ingredientes
+    'Leche entera', // 3: idem; los tres empatan y ordena el alfabeto
     'Lechuga criolla', // 1: solo el nombre
+    'Medallones de quinoa', // 1: idem
   ]);
 });
 
@@ -138,12 +149,19 @@ test('busca por prefijo de palabra, no por subcadena', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   // "Lechuga" NO matchea "leche": el prefijo se compara contra la palabra
   // entera, si no buscar "leche" traería media verdulería.
-  // Y entre los dos que sí matchean gana el nombre más corto: quien escribe
-  // "leche" a secas casi siempre busca la leche, no una variante larga.
-  assert.deepEqual(soloNombres(r), ['Leche entera', 'Leche de almendras']);
+  // Y entre los que sí matchean, primero los que EMPIEZAN con la palabra y
+  // recién después el que solo la contiene; entre los dos primeros gana el
+  // nombre más corto, porque quien escribe "leche" a secas casi siempre busca
+  // la leche y no una variante larga.
+  assert.deepEqual(soloNombres(r), [
+    'Leche entera',
+    'Leche de almendras',
+    'Dulce de leche vegano',
+  ]);
 });
 
 test('los tokens pueden estar salteados en el nombre', () => {
@@ -153,6 +171,7 @@ test('los tokens pueden estar salteados en el nombre', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   assert.deepEqual(soloNombres(r), ['Leche de almendras']);
 });
@@ -164,6 +183,7 @@ test('encuentra por marca aunque no esté en el nombre', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   assert.deepEqual(soloNombres(r), ['Leche entera']);
 });
@@ -175,6 +195,7 @@ test('la marca acentuada se encuentra sin acento', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   assert.equal(r.length, 1);
 });
@@ -190,6 +211,7 @@ test('el match en el nombre gana al match en la marca', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   assert.equal(r[0].nombre, 'Leche entera');
 });
@@ -201,6 +223,7 @@ test('un código de barras es identidad: match exacto y sin filtros', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   // '333' tiene 3 dígitos, no llega al mínimo de 8: se busca como texto.
   assert.deepEqual(r, []);
@@ -220,6 +243,7 @@ test('un código de barras es identidad: match exacto y sin filtros', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   assert.equal(r2.length, 1);
 });
@@ -232,11 +256,12 @@ test('los filtros se combinan y son excluyentes entre sí', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   };
 
   assert.deepEqual(
     soloNombres(buscar(filas, { ...base, estados: new Set<Estado>(['apto']) })),
-    ['Leche de almendras', 'Lechuga criolla'],
+    ['Leche de almendras', 'Lechuga criolla', 'Medallones de quinoa'],
   );
   assert.deepEqual(
     soloNombres(buscar(filas, { ...base, categoria: 'Lácteos' })),
@@ -248,7 +273,53 @@ test('los filtros se combinan y son excluyentes entre sí', () => {
   );
   assert.deepEqual(
     soloNombres(buscar(filas, { ...base, soloConIngredientes: true })),
-    ['Leche de almendras', 'Leche entera'],
+    ['Leche de almendras', 'Dulce de leche vegano', 'Leche entera'],
+  );
+});
+
+test('el filtro de ANMAT deja solo lo que está en el registro del Estado', () => {
+  const filas = indice();
+  const base = {
+    texto: '',
+    estados: TODOS,
+    categoria: null,
+    soloConfirmados: false,
+    soloConIngredientes: false,
+    soloAnmat: false,
+  };
+
+  const r = buscar(filas, { ...base, soloAnmat: true });
+  assert.deepEqual(soloNombres(r), [
+    'Dulce de leche vegano',
+    'Medallones de quinoa',
+  ]);
+  for (const f of r) assert.equal(f.fuente, FUENTE_ANMAT);
+
+  // No confundir con las otras dos capas de certificación: el sello del
+  // supermercado y la etiqueta que declara el fabricante quedan afuera, igual
+  // que la lectura de ingredientes y la heurística.
+  assert.equal(
+    filas.filter((f) => f.fuente !== FUENTE_ANMAT).length,
+    filas.length - 2,
+  );
+
+  // Lo que no hace: filtrar por veredicto. El dulce de leche tiene el sello y
+  // aun así está «a revisar» porque su lista de ingredientes lo contradice.
+  // Si algún día este filtro se pusiera a mostrar solo los aptos, escondería
+  // exactamente el producto sobre el que hay que desconfiar.
+  const contradicho = r.find((f) => f.nombre === 'Dulce de leche vegano');
+  assert.equal(contradicho?.estado, 'revisar');
+
+  // Y se combina con los demás filtros en vez de reemplazarlos.
+  assert.deepEqual(
+    soloNombres(
+      buscar(filas, {
+        ...base,
+        soloAnmat: true,
+        estados: new Set<Estado>(['apto']),
+      }),
+    ),
+    ['Medallones de quinoa'],
   );
 });
 
@@ -259,6 +330,7 @@ test('una búsqueda sin resultados devuelve lista vacía, no todo', () => {
     categoria: null,
     soloConfirmados: false,
     soloConIngredientes: false,
+    soloAnmat: false,
   });
   assert.deepEqual(r, []);
 });

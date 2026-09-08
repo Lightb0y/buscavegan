@@ -32,6 +32,7 @@ export interface Filtros {
   categoria: string | null;
   soloConfirmados: boolean;
   soloConIngredientes: boolean;
+  soloAnmat: boolean;
 }
 
 export const FILTROS_INICIALES: Filtros = {
@@ -40,6 +41,7 @@ export const FILTROS_INICIALES: Filtros = {
   categoria: null,
   soloConfirmados: false,
   soloConIngredientes: false,
+  soloAnmat: false,
 };
 
 /** Minúsculas y sin acentos: quien busca "almibar" tiene que encontrar
@@ -82,6 +84,13 @@ export function rehidratar(crudo: IndiceCrudo): Fila[] {
     },
   );
 }
+
+/** La fuente que marca "figura en el registro de ANMAT con atributo vegano".
+ *  El nombre lo escribe `ingest_anmat.py` y viaja tal cual en el índice: si
+ *  cambia allá, hay que cambiarlo acá. Es la única de las tres capas de
+ *  certificación que es un registro del Estado; `off_label` es la declaración
+ *  del fabricante y `sello_super` es lo que publica el supermercado. */
+export const FUENTE_ANMAT = 'certificacion_oficial';
 
 const SOLO_DIGITOS = /^\d{8,14}$/;
 
@@ -142,8 +151,14 @@ export function completitud(f: {
 }
 
 export function buscar(filas: Fila[], filtros: Filtros): Fila[] {
-  const { texto, estados, categoria, soloConfirmados, soloConIngredientes } =
-    filtros;
+  const {
+    texto,
+    estados,
+    categoria,
+    soloConfirmados,
+    soloConIngredientes,
+    soloAnmat,
+  } = filtros;
 
   const q = normalizar(texto.trim());
   const porEan = SOLO_DIGITOS.test(q);
@@ -153,7 +168,8 @@ export function buscar(filas: Fila[], filtros: Filtros): Fila[] {
     estados.has(f.estado) &&
     (categoria === null || f.categoria === categoria) &&
     (!soloConfirmados || f.cadenas.length > 0) &&
-    (!soloConIngredientes || f.tieneIngredientes);
+    (!soloConIngredientes || f.tieneIngredientes) &&
+    (!soloAnmat || f.fuente === FUENTE_ANMAT);
 
   // Un código de barras es una identidad, no una búsqueda: match exacto y
   // sin filtros, porque si alguien escaneó el producto quiere ver ESE.
