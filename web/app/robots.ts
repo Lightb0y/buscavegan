@@ -8,7 +8,9 @@ export const dynamic = 'force-static';
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: '*', allow: '/' },
+    // El panel de curaduría no es contenido: es una herramienta interna, y no
+    // tiene por qué aparecer en ningún buscador.
+    rules: { userAgent: '*', allow: '/', disallow: '/panel/' },
     sitemap: `${SITIO.url}/sitemap.xml`,
   };
 }

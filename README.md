@@ -270,6 +270,10 @@ python sprint0.py
 python revision.py --exportar               # CSV ordenado por impacto
 python revision.py --importar data/revision_pendiente.csv
 
+#    El CSV también lo puede armar el panel del sitio (/panel/), buscando el
+#    producto y eligiéndole el veredicto. Baja el archivo con estas mismas
+#    columnas y entra por el mismo --importar.
+
 # 8. Levantar la app interna de revisión
 streamlit run app.py
 

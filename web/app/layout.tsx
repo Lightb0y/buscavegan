@@ -83,6 +83,9 @@ export default function RootLayout({
                 <Link href="/">Buscar</Link>
                 <Link href="/categorias/">Categorías</Link>
                 <Link href="/como-funciona/">Cómo funciona</Link>
+                <Link href="/panel/" className="navegacion__panel">
+                  Panel
+                </Link>
               </nav>
             </div>
           </header>

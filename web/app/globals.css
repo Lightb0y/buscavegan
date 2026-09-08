@@ -1408,6 +1408,397 @@ select {
   color: var(--ink-2);
 }
 
+/* =========================================================================
+   panel de curaduría
+
+   Herramienta interna, no contenido: mismo mundo —tinta plana, radio cero,
+   filetes de 1px— pero sin nada de la retórica de la portada. Lo único que
+   lleva color siguen siendo los cuatro veredictos, que acá además son el
+   control: elegir un veredicto ES pintar el bloque de ese veredicto.
+   ========================================================================= */
+
+/* El enlace del panel no es contenido como los otros tres, y se nota: mono,
+   más chico, separado por un filete. */
+.navegacion__panel {
+  margin-left: var(--e1);
+  padding-left: var(--e3);
+  border-left: 1px solid var(--filete);
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+/* --- la puerta --------------------------------------------------------- */
+
+.puerta {
+  max-width: 26rem;
+  padding: var(--e7) 0;
+}
+
+.puerta h1 {
+  font-stretch: 75%;
+  font-size: 1.75rem;
+  text-transform: uppercase;
+}
+
+.puerta__bajada {
+  margin-top: var(--e2);
+  color: var(--ink-2);
+}
+
+.puerta__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e4);
+  margin-top: var(--e5);
+  padding-top: var(--e5);
+  border-top: 1px solid var(--filete-fuerte);
+}
+
+.puerta__error {
+  margin-top: var(--e4);
+  padding: var(--e3);
+  border-top: 2px solid var(--v-no-apto-campo);
+  background: var(--stock-hundido);
+  color: var(--ink);
+  font-size: 0.9375rem;
+}
+
+/* --- campos y botones del panel ---------------------------------------- */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+.campo--linea {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--e2);
+}
+
+.campo__rotulo {
+  color: var(--ink-3);
+  font-size: 0.6875rem;
+  font-stretch: 87.5%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.campo__caja {
+  min-height: 2.5rem;
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--filete-fuerte);
+  background: var(--stock);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9375rem;
+}
+
+.campo__caja::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+}
+
+.boton {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--e4);
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--stock);
+  font: inherit;
+  font-stretch: 87.5%;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 120ms linear,
+    color 120ms linear;
+}
+
+.boton:hover:not(:disabled) {
+  background: var(--stock);
+  color: var(--ink);
+}
+
+.boton:disabled,
+.enlace-boton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- riel de búsqueda del panel ---------------------------------------- */
+
+.panel-riel {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--stock);
+  border-bottom: 2px solid var(--filete-fuerte);
+}
+
+.panel-riel__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  padding: var(--e4) 0;
+}
+
+.panel-riel__lupa {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.panel-riel__campo {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-stretch: 75%;
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.panel-riel__campo::placeholder {
+  font-stretch: 87.5%;
+  font-size: 0.6em;
+  font-weight: 400;
+  text-transform: none;
+  color: var(--ink-3);
+  opacity: 1;
+}
+
+.panel-riel__campo:focus-visible {
+  outline: none;
+}
+
+.panel-riel:has(.panel-riel__campo:focus-visible) {
+  box-shadow: inset 0 0 0 2px var(--foco);
+}
+
+.panel-riel__limpiar {
+  display: inline-flex;
+  flex: none;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.panel-riel__limpiar:hover {
+  color: var(--ink);
+}
+
+/* --- barra de estado --------------------------------------------------- */
+
+.panel-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e4) 0;
+  border-bottom: 1px solid var(--filete);
+}
+
+.panel-barra__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e3);
+}
+
+.chip-panel {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  padding: 0 var(--e3);
+  border: 1px solid var(--filete-fuerte);
+  background: var(--stock);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.chip-panel:disabled {
+  border-color: var(--filete);
+  color: var(--ink-3);
+  cursor: not-allowed;
+}
+
+.chip-panel--puesto {
+  background: var(--ink);
+  color: var(--stock);
+}
+
+.panel-aviso {
+  margin-top: var(--e4);
+  padding: var(--e3);
+  border-top: 2px solid var(--v-vegetariano-campo);
+  background: var(--stock-hundido);
+  font-size: 0.9375rem;
+}
+
+/* --- la lista de curaduría --------------------------------------------- */
+
+.curaduria {
+  margin-top: var(--e5);
+  border-top: 1px solid var(--filete);
+}
+
+.curaduria__fila {
+  padding: var(--e4) 0;
+  border-bottom: 1px solid var(--filete);
+}
+
+/* Una fila con corrección pendiente se marca con tinta, no con color: el
+   color sigue siendo del veredicto y de nadie más. */
+.curaduria__fila--tocada {
+  border-left: 2px solid var(--ink);
+  padding-left: var(--e3);
+}
+
+.curaduria__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e2) var(--e4);
+}
+
+.curaduria__nombre {
+  font-stretch: 75%;
+  font-size: 1.0625rem;
+  text-transform: uppercase;
+}
+
+.curaduria__meta {
+  margin-top: var(--e1);
+  color: var(--ink-3);
+  font-size: 0.8125rem;
+}
+
+.curaduria__ean {
+  font-family: var(--f-mono);
+}
+
+.curaduria__cambio {
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+}
+
+.curaduria__motivo {
+  max-width: 70ch;
+  margin-top: var(--e2);
+  padding-top: var(--e2);
+  border-top: 1px solid var(--filete);
+  color: var(--ink-2);
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+}
+
+.curaduria__opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin-top: var(--e3);
+}
+
+/* El control ES el veredicto: apagado se dibuja en su tinta sobre stock,
+   elegido se llena con su campo. Nunca hay color que no sea un estado. */
+.opcion-v {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: var(--e2);
+  padding: 0 var(--e3);
+  border: 1px solid var(--tinta-v);
+  background: var(--stock);
+  color: var(--tinta-v);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    background 120ms linear,
+    color 120ms linear;
+}
+
+.opcion-v:hover {
+  background: var(--stock-hundido);
+}
+
+.opcion-v--activa {
+  border-color: var(--campo);
+  background: var(--campo);
+  color: var(--sobre);
+  font-weight: 700;
+}
+
+.opcion-v--activa:hover {
+  background: var(--campo);
+}
+
+/* «actual» marca cuál es el veredicto que ya tiene el pipeline, para que se
+   vea de qué se está corrigiendo. */
+.opcion-v__actual {
+  font-family: var(--f-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* --- qué hacer con el archivo ------------------------------------------ */
+
+.panel-instrucciones {
+  max-width: 70ch;
+  margin: var(--e7) 0 var(--e6);
+  padding-top: var(--e4);
+  border-top: 1px solid var(--filete-fuerte);
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.panel-instrucciones h2 {
+  color: var(--ink);
+  font-stretch: 75%;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.panel-instrucciones p {
+  margin-top: var(--e3);
+}
+
+.panel-instrucciones code {
+  font-family: var(--f-mono);
+  font-size: 0.875em;
+}
+
+.panel-comando {
+  overflow-x: auto;
+  margin-top: var(--e3);
+  padding: var(--e3);
+  border: 1px solid var(--filete);
+  background: var(--stock-hundido);
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: 0.8125rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
