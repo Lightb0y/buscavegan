@@ -35,6 +35,15 @@ REGISTRO = [
     # dejaría a este producto sin los tokens por los que realmente matchea.
     _registro("Granix", "Alimento texturizado a base de harina de maíz y de "
               "avena, sabor barbacoa - Veggie snacks con zapallo", "02-999111"),
+    # El caso Día: un fiambre untable de verdad ("queso untable salame")
+    # contra un registro que es otra cosa por completo, un untable vegetal.
+    # "queso" ya queda afuera por ser sabor; sin tratar "untable" como una
+    # palabra que no aporta identidad, era el único token que sostenía el
+    # cruce.
+    _registro("Dia", "Producto vegetal a base de aceite de coco, proteina de "
+              "arveja y feculas, sabor queso blanco, untable, fortificado "
+              "con vitamina B12, Libre de Gluten. Veggie - untable clasico",
+              "EX-2024-18372821- -GDEBA-DIYPAMDAGP"),
 ]
 INDICE = ingest_anmat.indexar(REGISTRO)
 
@@ -105,8 +114,22 @@ def test_sigue_cruzando_por_el_nombre_comercial_posterior_al_sabor():
 
 
 def test_el_sabor_suma_al_score_si_hay_composicion_en_comun():
-    # "queso" y "untable" son composición; que además coincida el sabor no
-    # molesta. Lo que se prohíbe es que el sabor sea lo ÚNICO compartido.
+    # "queso" es composición en este registro (no hay "sabor queso" en el
+    # producto de Felices Las Vacas); que además coincida "untable" no
+    # molesta, aunque "untable" solo ya no alcanzaría para sostener el cruce.
     m = ingest_anmat.match_anmat(
         "Queso untable sabor natural", "Felices Las Vacas", INDICE)
     assert m and m["rnpa"] == "02-123456"
+
+
+# --- "untable" describe forma, no composición: no sostiene un cruce sola ---
+
+def test_no_cruza_cuando_lo_unico_en_comun_es_ser_untable():
+    # El caso Día: "Queso untable salame" es un fiambre de verdad, en la
+    # sección de frescos del supermercado. El registro de ANMAT que matcheaba
+    # es un untable vegetal con sabor a queso blanco, de otra composición por
+    # completo. "queso" ya se descarta por ser sabor (`tokens_de_sabor`); sin
+    # tratar "untable" como palabra sin identidad, ese token solo alcanzaba
+    # 0.67 de solapamiento y certificaba como vegano un producto que no lo es.
+    assert ingest_anmat.match_anmat(
+        "Queso untable salame", "Dia", INDICE) is None

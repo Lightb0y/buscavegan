@@ -40,10 +40,19 @@ GVIZ_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/gviz/tq"
 FUENTE_CERTIFICACION = "certificacion_oficial"
 
 # Palabras que no aportan a la identidad del producto al comparar nombres.
+#
+# "untable" es el caso que obligó a sumar la categoría: describe la
+# consistencia del producto (se puede untar), no de qué está hecho, y sin
+# esto alcanzaba para certificar como vegano un "Queso untable salame" de Día
+# —un fiambre untable de verdad— contra un registro de ANMAT que es otra
+# cosa: "Producto vegetal a base de aceite de coco... sabor queso blanco...
+# Veggie - untable clásico". Ahí "queso" ya quedaba afuera por ser sabor
+# (`tokens_de_sabor`), y "untable" era el único token que sostenía el cruce.
 STOPWORDS = {
     "de", "del", "la", "el", "los", "las", "con", "sin", "y", "a", "al", "en",
     "para", "por", "sabor", "gr", "grs", "g", "kg", "ml", "cc", "lt", "l",
     "x", "un", "una", "libre", "gluten", "tacc", "apto", "producto",
+    "untable",
 }
 
 
