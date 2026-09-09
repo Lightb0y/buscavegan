@@ -1,15 +1,15 @@
 {
-  "actualizado": "2026-09-08",
-  "total": 7397,
+  "actualizado": "2026-09-09",
+  "total": 7381,
   "por_estado": {
     "apto": 2790,
-    "vegetariano": 1624,
-    "no_apto": 1778,
-    "revisar": 1205
+    "vegetariano": 1623,
+    "no_apto": 1776,
+    "revisar": 1192
   },
   "por_fuente": {
-    "ingredientes": 3251,
-    "sin_datos": 1196,
+    "ingredientes": 3248,
+    "sin_datos": 1183,
     "ingredientes_super": 999,
     "heuristica": 793,
     "sello_super": 682,
@@ -94,7 +94,7 @@
     {
       "nombre": "Otros",
       "slug": "otros",
-      "total": 2978
+      "total": 2962
     },
     {
       "nombre": "Panificados",
@@ -132,8 +132,8 @@
       "total": 87
     }
   ],
-  "con_evidencia": 5248,
-  "con_ingredientes": 5728,
+  "con_evidencia": 5245,
+  "con_ingredientes": 5715,
   "confirmados": 5581,
   "fuente_legible": {
     "certificacion_oficial": "Certificado en el registro oficial de ANMAT",

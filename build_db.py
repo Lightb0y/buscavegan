@@ -37,6 +37,7 @@ import classify_ingredients as ci
 import classify_rules as cr
 import config
 import db
+import exclusiones
 import ingest_anmat
 import relevancia
 import revision
@@ -212,6 +213,27 @@ def _purgar_fichas_fantasma(conn) -> int:
         conn.executemany("DELETE FROM revision_pendiente WHERE ean = ?", fantasmas)
         conn.commit()
     return len(fantasmas)
+
+
+def _purgar_exclusiones(conn) -> int:
+    """Saca de la búsqueda las fichas de la lista de exclusión manual.
+
+    Son cosméticos, medicamentos y artículos de limpieza que se colaron desde
+    el pool de códigos que OFF comparte con Open Beauty Facts, con marca o
+    categoría suficiente para pasar el filtro de fichas fantasma. Ver
+    `exclusiones` para la lista y el criterio.
+
+    Como el resto de los filtros, no toca `catalogo` ni `off_cache`: si algún
+    día se decide que un EAN corresponde, se saca de la lista y vuelve en el
+    próximo refresco.
+    """
+    presentes = [(r["ean"],) for r in conn.execute("SELECT ean FROM productos")
+                 if r["ean"] in exclusiones.EXCLUIDOS]
+    if presentes:
+        conn.executemany("DELETE FROM productos WHERE ean = ?", presentes)
+        conn.executemany("DELETE FROM revision_pendiente WHERE ean = ?", presentes)
+        conn.commit()
+    return len(presentes)
 
 
 def _propagar_duplicados(conn) -> int:
@@ -396,6 +418,13 @@ def build(conn, verbose: bool = True) -> dict:
         print(f"  {fantasmas} fichas fantasma excluidas (sin categoría, sin "
               f"ingredientes, sin góndola y sin veredicto fundado)")
 
+    # Lista de exclusión manual: cosméticos, remedios y limpieza que pasaron
+    # los filtros automáticos porque traían marca o categoría. Ver exclusiones.
+    excluidos_manual = _purgar_exclusiones(conn)
+    if verbose and excluidos_manual:
+        print(f"  {excluidos_manual} fichas sacadas por la lista de exclusión "
+              f"manual (no son alimentos)")
+
     estados = Counter(
         r["estado"] for r in conn.execute("SELECT estado FROM productos"))
     fuentes = Counter(
@@ -413,7 +442,8 @@ def build(conn, verbose: bool = True) -> dict:
               f"para Argentina ({dict(excluidos)})")
     return {"total": total, "estados": dict(estados), "fuentes": dict(fuentes),
             "correcciones": corregidos, "duplicados_ajustados": duplicados,
-            "excluidos": dict(excluidos), "confirmados_supermercado": confirmados}
+            "excluidos": dict(excluidos), "excluidos_manual": excluidos_manual,
+            "confirmados_supermercado": confirmados}
 
 
 def main(argv=None) -> int:
