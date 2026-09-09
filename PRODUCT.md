@@ -73,7 +73,7 @@ reemplazarlo libremente.
 - 7.397 productos clasificados; 71,8% con evidencia real sobre el producto
   (certificación, ingredientes leídos, sello), no una estimación por nombre.
 - Léxico de clasificación auditado a mano contra el Código Alimentario
-  Argentino y las fuentes de datos (ver `CORRECCIONES.md`).
+  Argentino y las fuentes de datos.
 - No hay imágenes de marca propias; las fotos de producto vienen de Open Food
   Facts cuando existen (~82% de cobertura) y no siempre están.
 - No fabricar testimonios, reseñas, precios ni cifras de uso: el proyecto es

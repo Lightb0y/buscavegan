@@ -30,3 +30,10 @@ models/*.joblib
 # preguntas. Se regeneran en cada corrida y no describen al proyecto.
 .impeccable/review/
 .impeccable/questions/
+
+# Notas internas: quedan en la máquina, no en el repo público.
+CORRECCIONES.md
+EXPLICACION.md
+FODA.md
+NOTAS.MD
+MODIF MANUALES.md

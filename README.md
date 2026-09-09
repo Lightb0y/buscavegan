@@ -183,8 +183,7 @@ El léxico de ingredientes se auditó cruzándolo contra dos fuentes que mandan
 sobre nuestra opinión: la **taxonomía oficial de Open Food Facts** (de donde
 salen los ingredientes) y el **Código Alimentario Argentino**. Aparecieron 22
 errores reales, corregidos y fijados con tests en
-[tests/test_falsos_positivos.py](tests/test_falsos_positivos.py). El detalle
-en lenguaje llano está en [CORRECCIONES.md](CORRECCIONES.md).
+[tests/test_falsos_positivos.py](tests/test_falsos_positivos.py).
 
 Los tres hallazgos que más movieron la aguja:
 
