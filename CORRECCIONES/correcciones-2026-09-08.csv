@@ -1,0 +1,15 @@
+﻿ean,nombre,marca,categoria,estado_actual,motivo_actual,ingredientes,estado_corregido,revisor
+7791118000503,Malta,El pocillo,Otros,revisar,"Sin ingredientes animales, pero hay 1 de origen no declarado: vitamina D: la D3 suele venir de lanolina",,apto,valen
+7792180139351,Paseo Salvado,,Otros,revisar,Sin datos suficientes para clasificar por nombre,,apto,valen
+7790070337016,Lasagna 100% trigo candeal seleccionado,Matarazzo,Bebidas sin alcohol,revisar,"Sin ingredientes animales, pero hay 1 de origen no declarado: vitamina D: la D3 suele venir de lanolina",,apto,valen
+7790070337023,Lasagna,Matarazzo,Otros,revisar,Sin datos suficientes para clasificar por nombre,,apto,valen
+7790150470305,Condimento para arroz,,Otros,revisar,Solo se reconoció el 50% de los ingredientes: no alcanza para afirmar que sea vegano,,apto,valen
+7622210812711,Clight Manzana Deliciosa,,Bebidas sin alcohol,revisar,Sin datos suficientes para clasificar por nombre,,apto,valen
+7622201703141,Clight naranja dulce,Mondelez,Bebidas alcohólicas,revisar,"Sin ingredientes animales, pero hay 2 de origen no declarado: vitamina D: la D3 suele venir de lanolina",,apto,valen
+7622201703110,Clight naranja,Mondelez,Bebidas sin alcohol,revisar,Sin datos suficientes para clasificar por nombre,,apto,valen
+7622201807528,Clight,Mondelez,Bebidas sin alcohol,revisar,"Sin ingredientes animales, pero hay 2 de origen no declarado: vitamina D: la D3 suele venir de lanolina",,apto,valen
+03785210,clight,clight,Bebidas sin alcohol,revisar,Sin datos suficientes para clasificar por nombre,,apto,valen
+7792180139320,Cañuelas Harina 000,Canuelas,Bebidas sin alcohol,revisar,Sin datos suficientes para clasificar por nombre,,apto,valen
+7891000345399,Caldo de Verdudas,Maggi,Bebidas sin alcohol,revisar,"Sin ingredientes animales claros, pero hay 1 de origen no declarado: inosinato/guanilato: suelen obtenerse de pescado o carne",,apto,valen
+7790045826583,Aritos frutales,Granix,Bebidas sin alcohol,revisar,Solo se reconoció el 40% de los ingredientes: no alcanza para afirmar que sea vegano,,apto,valen
+7790580503109,Arcor Dulce De Batata,Arcor,Bebidas sin alcohol,revisar,Solo se reconoció el 38% de los ingredientes: no alcanza para afirmar que sea vegano,,apto,Joshy

@@ -78,6 +78,19 @@ VTEX_TIMEOUT = _env_float("VTEX_TIMEOUT", 20.0)
 VTEX_PAGE_SIZE = 50       # tope real de la API por consulta
 VTEX_VENTANA_MAXIMA = 2500  # tope real de resultados totales por consulta
 
+# Cuántas fichas de ingredientes se consultan por refresco. La cosecha entera
+# es reanudable, así que el refresco semanal se lleva un pedazo acotado en vez
+# de intentar todo y morir por timeout: 1.500 fichas a 0,2 s son ~5 minutos.
+# Subir esto solo tiene sentido si el job tiene tiempo de sobra.
+FICHAS_POR_CORRIDA = _env_int("FICHAS_POR_CORRIDA", 1500)
+
+# --- Curaduría humana ------------------------------------------------------
+# Los CSV que salen del panel y se curan a mano viven versionados acá. El
+# refresco los reimporta en cada corrida: es lo que hace que una corrección
+# sobreviva aunque la base se pierda entera y haya que rearmarla de cero.
+CORRECCIONES_DIR = Path(
+    _env("BUSCAVEGAN_CORRECCIONES_DIR", str(BASE_DIR / "CORRECCIONES")))
+
 # --- Sprint 0 --------------------------------------------------------------
 SAMPLE_SIZE = _env_int("BUSCAVEGAN_SAMPLE_SIZE", 500)
 MATCH_RATE_ML_OK = 0.25   # por encima: el training set alcanza para Capa 3

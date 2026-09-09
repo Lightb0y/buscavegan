@@ -181,7 +181,8 @@ export default async function PaginaProducto({ params }: Props) {
                   <strong>leé siempre la etiqueta</strong>: acá analizamos
                   origen animal, no trazas ni alérgenos.
                 </>
-              )}
+              )}{' '}
+              <Link href="/legal/">Qué garantiza y qué no este sitio</Link>.
             </p>
           </div>
 

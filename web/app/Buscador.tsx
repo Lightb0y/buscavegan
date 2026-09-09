@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IconoCruz, IconoLupa } from '@/components/Iconos';
 import { Tira, type DatosTira } from '@/components/Tira';
 import { buscar, rehidratar, type Fila } from '@/lib/buscar';
+import { busquedaSinResultados } from '@/lib/medir';
 import type { Categoria, Estado, IndiceCrudo } from '@/lib/tipos';
 import { numero, ORDEN_ESTADOS, VEREDICTOS } from '@/lib/veredicto';
 
@@ -301,6 +302,26 @@ export function Buscador({
     }
     return mejor;
   }, [filas, resultados.length, activos, st]);
+
+  /** Anotar qué se buscó y no estaba: es la lista de qué falta cargar,
+   *  escrita por quien lo fue a buscar.
+   *
+   *  Dos condiciones para que cuente. El índice tiene que haber terminado de
+   *  bajar (`filas !== null`), porque si no todo parece vacío durante un
+   *  instante. Y `rescate` tiene que ser nulo: si hay un filtro que, sacado,
+   *  devuelve productos, entonces el catálogo sí tiene lo que la persona
+   *  buscaba y el vacío lo puso ella. Anotar eso ensuciaría justo el dato que
+   *  interesa.
+   *
+   *  El retraso es para que "leche de coco" no se anote además como "l", "le",
+   *  "lec"... Se mide lo que la persona terminó de escribir, no el camino. */
+  const termino = st.texto.trim();
+  useEffect(() => {
+    if (filas === null || resultados.length > 0 || rescate !== null) return;
+    if (!termino) return;
+    const id = window.setTimeout(() => busquedaSinResultados(termino), 1200);
+    return () => window.clearTimeout(id);
+  }, [filas, resultados.length, rescate, termino]);
 
   const hayFiltro =
     st.texto.trim() !== '' ||

@@ -266,8 +266,9 @@ python classify_ml.py --entrenar --explicar --aplicar
 # 6. Ver la cobertura conseguida
 python sprint0.py
 
-# 7. Capa 4: curar a mano lo que quedó pendiente
-python revision.py --exportar               # CSV ordenado por impacto
+# 7. Capa 4: curar a mano. Dos colas, y la segunda es la que más urge.
+python revision.py --exportar               # los `revisar`, ordenados por impacto
+python revision.py --exportar --riesgo      # los `apto` que solo se apoyan en el nombre
 python revision.py --importar data/revision_pendiente.csv
 
 #    El CSV también lo puede armar el panel del sitio (/panel/), buscando el
@@ -284,9 +285,35 @@ python export_web.py
 Todo el pipeline de una sola vez:
 
 ```bash
-python refresh.py              # refresco normal (API rápida)
-python refresh.py --completo   # incluye el dump entero de OFF
+python refresh.py              # refresco normal (API rápida + un pedazo de fichas)
+python refresh.py --completo   # además: dump entero de OFF y catálogo de góndola
+python refresh.py --fichas 0   # sin pedir fichas en esta corrida
+python refresh.py --sin-gondola  # sin tocar a los supermercados
 ```
+
+### Las dos colas de curaduría
+
+`--exportar` saca los `revisar`: lo que el sistema no pudo decidir. Es la cola
+larga, y la que se ve en el sitio.
+
+`--exportar --riesgo` saca la otra, que es más corta y más cara de dejar sin
+mirar: los productos que hoy se muestran como **apto** apoyados únicamente en
+su nombre comercial —la heurística o el modelo—, sin que nadie haya leído la
+etiqueta. Son 385. Un `revisar` que en realidad era `apto` solo esconde un
+producto bueno; un `apto` que en realidad era otra cosa es exactamente el error
+que la regla de seguridad existe para evitar. Si hay una tarde para curar, va
+en esta cola.
+
+### Por qué las correcciones se versionan
+
+La tabla `correcciones` vive en la base, y la base es derivada: no se versiona,
+y en CI se restaura de un cache que puede vencer. Si una decisión humana
+viviera solo ahí, una corrida sin cache la borraría sin que nadie se entere.
+
+Por eso los CSV curados se guardan en [CORRECCIONES/](CORRECCIONES/) y
+`refresh.py` los reimporta en **cada** corrida. Reimportar es idempotente, así
+que el archivo se puede leer cien veces sin efecto. La base se puede tirar
+entera y rearmar: esos archivos son la copia de la que se rearma.
 
 ## Las dos caras del proyecto
 
@@ -307,7 +334,17 @@ hay uno listo en [.github/workflows/refresh.yml](.github/workflows/refresh.yml),
 con refresco semanal por API y completo el día 1 de cada mes.
 Lo caro es traer datos, no clasificar: el refresco normal usa la API rápida y
 tarda un par de minutos, mientras que `--completo` baja el dump entero y
-conviene semanal o mensual. Las respuestas de OFF se cachean en SQLite con un
+conviene semanal o mensual.
+
+El dato de góndola entra en dos velocidades, porque son dos cosas distintas y
+no cuestan lo mismo. **El catálogo** (qué EAN se vende hoy en cada cadena)
+obliga a recorrer el árbol de categorías entero de las cinco cadenas: es caro,
+cambia despacio, y va solo en `--completo`. **Las fichas** (la lista de
+ingredientes del envase) se piden de a un EAN y el proceso es reanudable, así
+que van en cada corrida con un presupuesto acotado —`FICHAS_POR_CORRIDA`, por
+defecto 1.500— que se lleva un pedazo de la cola y deja el resto para la
+próxima. Si una cadena se cae, el paso avisa y el refresco sigue con la última
+cosecha buena. Las respuestas de OFF se cachean en SQLite con un
 TTL de 60 días (`OFF_CACHE_TTL_DAYS`), así que los refrescos posteriores solo
 consultan por productos nuevos o vencidos. Todo se configura en
 [config.py](config.py) o por variables de entorno.
@@ -318,7 +355,7 @@ consultan por productos nuevos o vencidos. Todo se configura en
 python -m pytest tests -q
 ```
 
-302 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
+343 tests, incluidos los 11 casos obligatorios de [SPEC.md](SPEC.md) §7, los que
 verifican que la regla de seguridad no se pueda violar por ninguna capa, y los
 falsos positivos concretos que fueron apareciendo al revisar a mano la salida
 real del pipeline (por ejemplo "Yogurisimo Banana", que llegó a clasificarse

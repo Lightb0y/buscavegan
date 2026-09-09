@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITIO.url}/`, lastModified: fecha, priority: 1 },
     { url: `${SITIO.url}/categorias/`, lastModified: fecha, priority: 0.6 },
     { url: `${SITIO.url}/como-funciona/`, lastModified: fecha, priority: 0.6 },
+    { url: `${SITIO.url}/legal/`, lastModified: fecha, priority: 0.3 },
   ];
 
   const categorias: MetadataRoute.Sitemap = m.categorias.map((c) => ({

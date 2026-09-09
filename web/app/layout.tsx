@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Chivo_Mono } from 'next/font/google';
 import Link from 'next/link';
@@ -121,10 +122,17 @@ export default function RootLayout({
                   Fuentes: Open Food Facts, el registro de ANMAT y las fichas
                   publicadas por Carrefour, Vea, Día, Jumbo y Disco.
                 </p>
+                <p>
+                  <Link href="/legal/">Aviso legal y límites de este sitio</Link>
+                </p>
               </div>
             </div>
           </footer>
         </div>
+
+        {/* Sin cookies y sin identificar a nadie: cuántas visitas hay y qué se
+            busca sin encontrar. Ver lib/medir.ts. */}
+        <Analytics />
       </body>
     </html>
   );

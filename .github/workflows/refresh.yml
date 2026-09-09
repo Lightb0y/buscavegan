@@ -2,8 +2,15 @@ name: Refrescar base
 
 # El catálogo de Open Food Facts se mueve a diario, así que la base se rearma
 # sola. Dos cadencias, por el costo de cada una:
-#   - semanal: refresco por API (un par de minutos)
-#   - mensual: refresco completo bajando el dump de OFF (1,3 GB)
+#   - semanal: refresco por API, más un pedazo de la cola de fichas de
+#     supermercado (unos minutos)
+#   - mensual: refresco completo, que además baja el dump de OFF (1,3 GB) y
+#     recorre de nuevo el árbol de categorías de las cinco cadenas
+#
+# Las fichas de los supermercados son la evidencia más fuerte que tiene el
+# proyecto y antes se cosechaban a mano, una sola vez. Ahora entran acá: cada
+# corrida se lleva un pedazo acotado de la cola (`FICHAS_POR_CORRIDA`) y deja
+# el resto para la siguiente.
 on:
   schedule:
     - cron: "0 6 * * 1"    # lunes 06:00 UTC — refresco por API
@@ -27,7 +34,10 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # La corrida mensual hace tres cosas caras seguidas: el dump de OFF, el
+    # árbol entero de las cinco cadenas y la cola de fichas. 90 minutos le
+    # quedaban justos.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 

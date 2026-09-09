@@ -10,4 +10,8 @@ export const SITIO = {
   url: (
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://buscavegan.vercel.app'
   ).replace(/\/$/, ''),
+  /** Por acá entran los reportes de error, que son la vía más barata de
+   *  corregir la base. Está en un solo lugar para poder mudarlo a una casilla
+   *  del proyecto sin buscarlo por el código. */
+  contacto: process.env.NEXT_PUBLIC_CONTACTO ?? 'josiassegovia29@gmail.com',
 } as const;
