@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter, defaultdict
+from typing import Iterator
 
 import categorias
 import classify_ingredients as ci
@@ -349,12 +350,22 @@ def _mapa_de_marcas(conn) -> dict[str, str]:
     return marcas.construir_mapa(de_off, de_gondola)
 
 
-def build(conn, verbose: bool = True) -> dict:
-    db.init_db(conn)
-    anmat_idx = ingest_anmat.indexar(ingest_anmat.cargar(conn))
-    if verbose and not anmat_idx:
-        print("Aviso: el registro de ANMAT esta vacio. Corre ingest_anmat.py "
-              "para habilitar la Capa 0.")
+def filas_a_clasificar(conn) -> Iterator[dict]:
+    """Cada producto candidato, con las señales que usa `decidir` resueltas.
+
+    Es la única definición de *qué* se clasifica y *con qué*: la usan `build`
+    y el reporte de cobertura de `sprint0`. Antes cada uno armaba su consulta,
+    y el reporte medía otra población —el catálogo de OFF solo, sin las fichas
+    del supermercado ni la marca unificada—, así que sus números no eran los
+    del sitio. Con la cosecha grande la diferencia pasó a ser de miles.
+
+    Todo lo que se lee de la base se lee acá, al llamarla, y lo que devuelve
+    es un iterador sobre memoria: `build` puede vaciar `productos` mientras lo
+    recorre.
+
+    No aplica el filtro de `relevancia`: cada quien decide qué hacer con lo
+    que no corresponde (`build` lo cuenta por motivo).
+    """
     # Dos orígenes, un solo recorrido.
     #
     # El primero es el de siempre: el catálogo argentino de OFF.
@@ -365,7 +376,11 @@ def build(conn, verbose: bool = True) -> dict:
     # solo miraba `catalogo`.
     #
     # Entran **únicamente los que la ficha respalda** —lista de ingredientes o
-    # sello de certificación—, nunca por el solo hecho de estar en una góndola.
+    # sello vegano—, nunca por el solo hecho de estar en una góndola. Y el
+    # sello tiene que ser `vegan`: casi todos los que publican las cadenas son
+    # de alérgenos (`gluten_free`, `seafood_free`, `kosher`...) y no dicen nada
+    # sobre si el producto es apto; uno de esos sin lista de ingredientes deja
+    # al producto igual que sin ficha.
     # Un producto del que solo se sabe el nombre se clasificaría adivinando y
     # terminaría en `revisar` o en `heuristica`: sumar decenas de miles así
     # haría más grande el catálogo y peor el sitio, que es justo lo contrario
@@ -374,7 +389,7 @@ def build(conn, verbose: bool = True) -> dict:
     #
     # El nombre y la marca se toman de la misma cadena que dio la ficha, para
     # que la etiqueta leída y el nombre mostrado sean del mismo producto.
-    filas = conn.execute(
+    crudas = conn.execute(
         "SELECT c.ean, c.nombre, c.marca, c.precio_ref, o.payload"
         " FROM catalogo c LEFT JOIN off_cache o"
         " ON o.ean = c.ean AND o.found = 1"
@@ -387,7 +402,7 @@ def build(conn, verbose: bool = True) -> dict:
         " WHERE c.ean IS NULL"
         "   AND v.nombre IS NOT NULL AND TRIM(v.nombre) <> ''"
         "   AND (COALESCE(f.ingredientes, '') <> ''"
-        "        OR COALESCE(f.sellos, '') <> '')"
+        "        OR ',' || COALESCE(f.sellos, '') || ',' LIKE '%,vegan,%')"
     ).fetchall()
 
     # Fichas de los supermercados: la lista de ingredientes de miles de
@@ -401,6 +416,37 @@ def build(conn, verbose: bool = True) -> dict:
 
     marca_gondola, gondola_rubro = _datos_de_gondola(conn)
     mapa_marcas = _mapa_de_marcas(conn)
+
+    def _resolver() -> Iterator[dict]:
+        for f in crudas:
+            off = json.loads(f["payload"]) if f["payload"] else {}
+            yield {
+                "ean": f["ean"],
+                "nombre": f["nombre"],
+                # La marca, unificada. Si OFF no la trae, la pone la góndola,
+                # que la publica para todos sus productos; después se
+                # normaliza igual que cualquier otra, porque las cadenas
+                # escriben en mayúsculas.
+                "marca": marcas.normalizar(
+                    f["marca"] or marca_gondola.get(f["ean"]), mapa_marcas),
+                "categoria": categorias.normalizar(
+                    off.get("categories_tags"), f["nombre"],
+                    gondola_rubro.get(f["ean"])),
+                "precio_ref": f["precio_ref"],
+                "off": off,
+                "ficha": fichas.get(f["ean"], {}),
+            }
+
+    return _resolver()
+
+
+def build(conn, verbose: bool = True) -> dict:
+    db.init_db(conn)
+    anmat_idx = ingest_anmat.indexar(ingest_anmat.cargar(conn))
+    if verbose and not anmat_idx:
+        print("Aviso: el registro de ANMAT esta vacio. Corre ingest_anmat.py "
+              "para habilitar la Capa 0.")
+    filas = filas_a_clasificar(conn)
 
     conn.execute("DELETE FROM productos")
     conn.execute("DELETE FROM revision_pendiente")
@@ -424,18 +470,8 @@ def build(conn, verbose: bool = True) -> dict:
             excluidos[clave] += 1
             continue
 
-        off = json.loads(f["payload"]) if f["payload"] else {}
-        ficha = fichas.get(f["ean"], {})
-
-        # La marca, unificada. Si OFF no la trae, la pone la góndola, que la
-        # publica para todos sus productos; después se normaliza igual que
-        # cualquier otra, porque las cadenas escriben en mayúsculas.
-        marca = marcas.normalizar(
-            f["marca"] or marca_gondola.get(f["ean"]), mapa_marcas)
-
-        categoria = categorias.normalizar(
-            off.get("categories_tags"), f["nombre"],
-            gondola_rubro.get(f["ean"]))
+        off, ficha, marca, categoria = (
+            f["off"], f["ficha"], f["marca"], f["categoria"])
         d = decidir(f["nombre"], marca, categoria, off, anmat_idx, ficha)
 
         # La app muestra los ingredientes: si OFF no los tiene, se guardan los

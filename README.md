@@ -143,7 +143,7 @@ producto va a `revisar`: la regla de seguridad pesa más que una etiqueta.
 
 **Un producto que solo existe en la góndola** —de los 96.247 códigos que las
 cadenas publican y OFF nunca vio— entra al catálogo si, y solo si, su ficha lo
-respalda con una lista de ingredientes o un sello. Estar en una góndola no
+respalda con una lista de ingredientes o un sello vegano. Estar en una góndola no
 alcanza: de un producto del que solo se sabe el nombre, el veredicto sería una
 adivinanza, y sumar decenas de miles de adivinanzas haría el catálogo más
 grande y el sitio peor.

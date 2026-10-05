@@ -104,6 +104,56 @@ def test_las_verduras_y_frutos_secos_de_verdad_si_entran(nombre):
     assert cat.por_nombre(nombre) == "Frutas y verduras"
 
 
+# --- Con el alcohol pasa lo mismo, en los dos sentidos ----------------------
+
+@pytest.mark.parametrize("nombre", [
+    # Nombres reales de góndola: el sustantivo va primero, el sabor después.
+    "Licor de chocolate Tres Plumas 700 cc",
+    "Vino tinto Chocolate Dadá 750 ml",
+    "Licor Cusenier café al cognac 700 cc",
+    "Gin Kamlar sabor yerba mate 500 cc",
+    "  Licor Polini crema al cappuccino en botella 520 ml",
+])
+def test_una_bebida_alcoholica_con_sabor_sigue_siendo_alcohol(nombre):
+    assert cat.por_nombre(nombre) == "Bebidas alcohólicas"
+
+
+@pytest.mark.parametrize("nombre,esperado", [
+    # El mismo patrón con otros sustantivos: la palabra de adelante manda.
+    ("Vinagre de Vino Casalta 1300 Ml", "Salsas y condimentos"),
+    ("Vinagre Omega De Vino Con Albahaca X 500 Cc.", "Salsas y condimentos"),
+    ("Aceto Balsamico Marolio 500ml", "Salsas y condimentos"),
+    ("Salsa De Tomate Maxima Te Conviene 340 Gr", "Salsas y condimentos"),
+    ("Salsa de mostaza y miel Dos Anclas 375 g.", "Salsas y condimentos"),
+    ("Dulce de leche ron Doña Magdalena frasco 400 g.", "Lácteos"),
+    ("Dulce de Leche Clásico 245 Grs Milkaut", "Lácteos"),
+])
+def test_el_sustantivo_de_adelante_define_el_rubro(nombre, esperado):
+    assert cat.por_nombre(nombre) == esperado
+
+
+def test_un_dulce_de_leche_vegano_no_es_lacteo():
+    assert cat.por_nombre("Dulce de leche vegano de coco") != "Lácteos"
+
+
+def test_dona_magdalena_es_una_marca_no_una_magdalena():
+    assert cat.por_nombre("Dulce Doña Magdalena a base de coco") != (
+        "Galletitas y bizcochos")
+    assert cat.por_nombre("Magdalena Pozo sabor limón 200 g.") == (
+        "Galletitas y bizcochos")
+
+
+@pytest.mark.parametrize("nombre", [
+    # Acá el alcohol es la marca o el sabor, no el producto.
+    "Galletitas Vermouth sabor queso 70 g.",
+    "Dulce de leche ron La Serenísima 400 g.",
+    "Mejillones La Caleta al vino blanco",
+    "Ginger ale Schweppes",
+])
+def test_el_alcohol_en_el_medio_del_nombre_no_define_el_rubro(nombre):
+    assert cat.por_nombre(nombre) != "Bebidas alcohólicas"
+
+
 # --- Ningún plant-based puede terminar en un rubro de origen animal -------
 
 @pytest.mark.parametrize("nombre", [

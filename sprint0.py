@@ -28,21 +28,31 @@ import json
 import random
 from collections import Counter
 
-import categorias
 import config
 import db
 import ingest_anmat
+import relevancia
 
 TAGS_RESUELVEN = {"en:vegan", "en:non-vegan", "en:vegetarian", "en:non-vegetarian"}
 
 
 def cargar_muestra(conn, n: int | None, seed: int = 42) -> list[dict]:
-    filas = conn.execute(
-        "SELECT c.ean, c.nombre, c.marca, o.payload FROM catalogo c"
-        " LEFT JOIN off_cache o ON o.ean = c.ean AND o.found = 1").fetchall()
-    datos = [{"ean": f["ean"], "nombre": f["nombre"], "marca": f["marca"],
-              "off": json.loads(f["payload"]) if f["payload"] else {}}
-             for f in filas]
+    """Los mismos productos que clasifica `build_db`, con las mismas señales.
+
+    Antes esta consulta era propia: solo el catálogo de OFF, sin las fichas
+    del supermercado, sin la marca unificada y sin el filtro de relevancia. El
+    reporte medía entonces otra población que la publicada, y con la cosecha
+    grande —decenas de miles de productos que solo existen en la góndola— la
+    diferencia dejó de ser un detalle. Ahora la definición es una sola
+    (`build_db.filas_a_clasificar`) y lo que no llega al sitio tampoco cuenta
+    acá.
+    """
+    # Import local: build_db es quien orquesta las capas, y traerlo arriba
+    # crearía un ciclo cuando build_db quiera reportar con este módulo.
+    import build_db
+
+    datos = [d for d in build_db.filas_a_clasificar(conn)
+             if relevancia.es_relevante(d["nombre"], d["ean"])]
     if n and n < len(datos):
         random.Random(seed).shuffle(datos)
         datos = datos[:n]
@@ -53,11 +63,10 @@ def medir(conn, datos: list[dict]) -> dict:
     total = len(datos) or 1
     anmat_idx = ingest_anmat.indexar(ingest_anmat.cargar(conn))
 
-    # Import local: build_db es quien orquesta las capas, y traerlo arriba
-    # crearía un ciclo cuando build_db quiera reportar con este módulo.
     import build_db
 
     con_texto = con_tags = con_analysis = con_label = certificados = 0
+    con_ficha = con_sello = 0
     estados: Counter[str] = Counter()
     fuentes: Counter[str] = Counter()
 
@@ -71,22 +80,26 @@ def medir(conn, datos: list[dict]) -> dict:
             con_analysis += 1
         if "en:vegan" in (off.get("labels_tags") or []):
             con_label += 1
+        if (d["ficha"].get("ingredientes") or "").strip():
+            con_ficha += 1
+        if "vegan" in (d["ficha"].get("sellos") or "").split(","):
+            con_sello += 1
         if anmat_idx and ingest_anmat.match_anmat(d["nombre"], d["marca"],
                                                   anmat_idx):
             certificados += 1
 
-        # Mismo criterio que `build_db`: si no, el reporte de cobertura
-        # mide un pipeline distinto del que corre de verdad.
-        categoria = categorias.normalizar(off.get("categories_tags"),
-                                          d["nombre"])
-        dec = build_db.decidir(d["nombre"], d["marca"], categoria, off, anmat_idx)
+        dec = build_db.decidir(d["nombre"], d["marca"], d["categoria"], off,
+                               anmat_idx, d["ficha"])
         estados[dec.estado] += 1
         fuentes[dec.fuente] += 1
 
+    # Ingredientes de cualquiera de las dos fuentes: la etiqueta es la misma,
+    # leída por OFF o por el supermercado.
     con_ingredientes = sum(
         1 for d in datos
         if (d["off"].get("ingredients_text") or "").strip()
-        or d["off"].get("ingredients_tags"))
+        or d["off"].get("ingredients_tags")
+        or (d["ficha"].get("ingredientes") or "").strip())
 
     def pct(x: int) -> float:
         return round(100 * x / total, 2)
@@ -100,6 +113,8 @@ def medir(conn, datos: list[dict]) -> dict:
         "con_taxonomia": con_tags,
         "con_analysis_off_resuelto": con_analysis,
         "con_label_vegan": con_label,
+        "con_ingredientes_super": con_ficha,
+        "con_sello_vegano_super": con_sello,
         "certificados_anmat": certificados,
         "resueltos": resueltos,
         "tasa_resolucion_pct": pct(resueltos),
@@ -172,12 +187,14 @@ def main(argv=None) -> int:
 
     n = rep["muestra"]
     print(f"\n=== SPRINT 0 — {n} productos argentinos ===\n")
-    print(f"  Con ingredientes (texto o taxonomía) {rep['con_ingredientes']:6}"
+    print(f"  Con ingredientes (OFF o súper)       {rep['con_ingredientes']:6}"
           f"  ({rep['cobertura_ingredientes_pct']:5}%)")
-    print(f"    · texto de ingredientes            {rep['con_texto_ingredientes']:6}")
+    print(f"    · texto de OFF                     {rep['con_texto_ingredientes']:6}")
     print(f"    · taxonomía de OFF                 {rep['con_taxonomia']:6}")
+    print(f"    · ficha del supermercado           {rep['con_ingredientes_super']:6}")
     print(f"  Con análisis de OFF resuelto         {rep['con_analysis_off_resuelto']:6}")
     print(f"  Declarados vegan por el fabricante   {rep['con_label_vegan']:6}")
+    print(f"  Con sello vegano del supermercado    {rep['con_sello_vegano_super']:6}")
     print(f"  Certificados por ANMAT (Capa 0)      {rep['certificados_anmat']:6}")
     print(f"\n  Clasificados                         {rep['resueltos']:6}"
           f"  ({rep['tasa_resolucion_pct']:5}%)")

@@ -177,6 +177,34 @@ def test_una_ficha_con_sello_vegano_tambien_lo_mete(tmp_path):
     conn.close()
 
 
+def test_un_sello_que_no_es_vegano_no_alcanza_para_entrar(tmp_path):
+    """Casi todos los sellos de las cadenas son de alérgenos: "sin TACC" sin
+    lista de ingredientes no dice nada sobre si el producto es apto."""
+    conn = _conn(tmp_path)
+    _en_gondola(conn, EAN_GONDOLA, "Galletitas Sin Tacc")
+    _con_ficha(conn, EAN_GONDOLA, sellos="gluten_free,kosher")
+    conn.commit()
+
+    build_db.build(conn, verbose=False)
+    assert conn.execute(
+        "SELECT COUNT(*) FROM productos WHERE ean=?", (EAN_GONDOLA,)
+    ).fetchone()[0] == 0
+    conn.close()
+
+
+def test_el_sello_vegano_entra_aunque_venga_con_otros(tmp_path):
+    conn = _conn(tmp_path)
+    _en_gondola(conn, EAN_GONDOLA, "Barra Vegana")
+    _con_ficha(conn, EAN_GONDOLA, sellos="gluten_free,vegan,vegetarian")
+    conn.commit()
+
+    build_db.build(conn, verbose=False)
+    assert conn.execute(
+        "SELECT fuente_decision FROM productos WHERE ean=?", (EAN_GONDOLA,)
+    ).fetchone()[0] == build_db.FUENTE_SELLO_SUPER
+    conn.close()
+
+
 def test_sin_evidencia_el_producto_de_gondola_no_entra(tmp_path):
     """El límite que evita que la cosecha infle el catálogo con nombres.
 

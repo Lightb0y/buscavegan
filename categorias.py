@@ -120,6 +120,31 @@ REGLAS_NOMBRE: list[tuple[str, str]] = [
      r"bebida\s+(?:vegetal|de\s+almendra|de\s+soja|de\s+arroz|de\s+avena|de\s+coco)|"
      r"leche\s+vegetal|alimento\s+a\s+base\s+de\s+soja"),
 
+    # --- El sustantivo del producto va primero ---------------------------
+    #
+    # En la góndola el nombre arranca por lo que el producto **es** y sigue
+    # por el sabor, la marca o el uso: "Licor de chocolate Tres Plumas",
+    # "Vinagre de vino Casalta", "Dulce de leche ron". Las reglas de abajo
+    # buscan la palabra en cualquier lugar y gana la primera de la lista, así
+    # que una palabra del medio le ganaba al sustantivo de adelante. Medido
+    # sobre los nombres de góndola: ~120 licores, vinos y gins repartidos
+    # entre Golosinas e Infusiones por decir "chocolate" o "café", y el
+    # vinagre de vino y las salsas al vino en "Bebidas alcohólicas".
+    #
+    # Estas reglas van ancladas al principio a propósito, y solo con
+    # sustantivos que no admiten otra lectura como primera palabra. En
+    # cualquier otro lugar del nombre la palabra casi siempre es el sabor o la
+    # marca —"Galletitas Vermouth" (una marca), "Mejillones al vino blanco"—, y
+    # eso lo siguen resolviendo las reglas generales. Por eso tampoco está
+    # "vermouth": como primera palabra puede ser la marca de galletitas.
+    ("Bebidas alcohólicas",
+     r"^(?:licor|vino|gin|vodka|whisky|whiskey|ron|fernet|aperitivo|"
+     r"espumante|champagne|sidra|cerveza|tequila)\b"),
+    ("Salsas y condimentos", r"^(?:vinagre|aceto|salsa)\b"),
+    # Un dulce de leche vegano no llega acá: el rubro es de origen animal y
+    # `por_nombre` lo saltea si el nombre es plant-based.
+    ("Lácteos", r"^dulce\s+de\s+leche\b"),
+
     # Los análogos plant-based necesitan un rubro propio y temprano. Saltear
     # la regla de carne (ver `_ANIMAL`) evita que una milanesa de soja quede
     # en "Carnes y fiambres", pero no alcanza: sin esta regla, "Milanesas de
@@ -136,10 +161,12 @@ REGLAS_NOMBRE: list[tuple[str, str]] = [
      r"huevo[s]?\s+de\s+pascua|conejo\s+de\s+chocolate"),
 
     # Galletitas antes que Golosinas: "Cofler block galletitas" es galletita.
+    # "Doña Magdalena" es una marca de dulces, no una magdalena: el texto
+    # llega sin tildes, de ahí el "dona".
     ("Galletitas y bizcochos",
      r"galletit|galleta|bizcoch|cracker|vainillas|chocolinas|coquitas|"
      r"hogarenas|mellizas|criollitas|polvorita|tostada|grisin|bay\s*biscuit|"
-     r"sonrisas|merengada|pepas|scons|magdalena|budin|bizcochuelo|"
+     r"sonrisas|merengada|pepas|scons|(?<!dona )magdalena|budin|bizcochuelo|"
      r"pan\s+dulce|budines|obleas?"),
 
     ("Golosinas y chocolates",
@@ -299,7 +326,7 @@ def por_nombre(nombre: str | None) -> str | None:
     """El rubro que se deduce del nombre comercial, o None."""
     if not nombre:
         return None
-    texto = _sin_tildes(str(nombre)).lower()
+    texto = _sin_tildes(str(nombre)).lower().strip()
     plant_based = bool(_PLANT_BASED_RE.search(texto))
     for rubro, patron in _REGLAS_NOMBRE_COMPILADAS:
         if not patron.search(texto):
