@@ -24,7 +24,10 @@ El dato de góndola son dos cosas distintas y no cuestan lo mismo:
 - **Las fichas** (la lista de ingredientes del envase, que es la mejor
   evidencia que tiene el proyecto) se piden de a un EAN y el proceso es
   reanudable. Va en cada corrida, con un presupuesto acotado: se lleva un
-  pedazo de la cola y deja el resto para la próxima.
+  pedazo de la cola y deja el resto para la próxima. Lo pedido se versiona en
+  `COSECHA/` y el workflow lo commitea, así que la cola sigue donde quedó
+  aunque el cache de CI venza, y una cosecha grande hecha en otra máquina
+  llega acá con un `git pull`.
 
 Antes esto no corría acá: la cosecha de supermercados se había hecho a mano una
 vez, así que casi una cuarta parte de los veredictos del sitio salía de datos
@@ -114,6 +117,16 @@ def refresh(completo: bool = False, con_modelo: bool = True,
                       f"Se usa lo que haya en la base.")
 
         t = _paso(f"4/{TOTAL_PASOS} · Fichas de ingredientes (Vea, Jumbo, Disco)")
+        # La copia versionada entra siempre, aun sin tocar la red: es local, no
+        # cuesta nada, y es lo que trae lo cosechado en otra máquina o en una
+        # corrida cuyo cache ya venció. Sin esto la cola volvería a pedir lo
+        # que ya se pidió. Va fuera del try a propósito: si el archivo está
+        # roto, el refresco tiene que fallar antes de exportar encima de él.
+        imp = ingest_fichas.importar(conn)
+        resumen["fichas_versionadas"] = imp
+        print(f"  {imp['leidas']} fichas en {config.COSECHA_PATH.parent.name}/"
+              f"{config.COSECHA_PATH.name}; {imp['nuevas']} nuevas para esta "
+              f"base, {imp['actualizadas']} actualizadas")
         if not con_gondola:
             print("  Omitido (--sin-gondola)")
         elif fichas <= 0:
@@ -132,6 +145,10 @@ def refresh(completo: bool = False, con_modelo: bool = True,
                 resumen["fichas_error"] = str(exc)
                 print(f"  Aviso: no se pudieron pedir fichas ({exc}). "
                       f"Se usa lo que haya en la base.")
+        # Lo de esta corrida pasa a la copia versionada; el workflow la
+        # commitea junto con los datos del sitio.
+        n = ingest_fichas.exportar(conn)
+        print(f"  {n} fichas en la copia versionada")
 
         t = _paso(f"5/{TOTAL_PASOS} · Correcciones humanas versionadas")
         st = revision.importar_directorio(conn)

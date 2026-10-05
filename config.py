@@ -84,6 +84,13 @@ VTEX_VENTANA_MAXIMA = 2500  # tope real de resultados totales por consulta
 # Subir esto solo tiene sentido si el job tiene tiempo de sobra.
 FICHAS_POR_CORRIDA = _env_int("FICHAS_POR_CORRIDA", 1500)
 
+# Copia versionada de todas las fichas pedidas, vacías incluidas. La base es
+# derivada —en CI vive en un cache que puede vencer— y la cosecha completa son
+# horas de consultas: si viviera solo en la base, perderla sería rehacerla, y
+# lo cosechado en una máquina nunca llegaría al refresco de otra.
+COSECHA_PATH = Path(
+    _env("BUSCAVEGAN_COSECHA", str(BASE_DIR / "COSECHA" / "fichas.ndjson")))
+
 # --- Curaduría humana ------------------------------------------------------
 # Los CSV que salen del panel y se curan a mano viven versionados acá. El
 # refresco los reimporta en cada corrida: es lo que hace que una corrección

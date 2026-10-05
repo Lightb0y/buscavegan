@@ -75,7 +75,10 @@ def medir(conn, datos: list[dict]) -> dict:
                                                   anmat_idx):
             certificados += 1
 
-        categoria = categorias.normalizar(off.get("categories_tags"))
+        # Mismo criterio que `build_db`: si no, el reporte de cobertura
+        # mide un pipeline distinto del que corre de verdad.
+        categoria = categorias.normalizar(off.get("categories_tags"),
+                                          d["nombre"])
         dec = build_db.decidir(d["nombre"], d["marca"], categoria, off, anmat_idx)
         estados[dec.estado] += 1
         fuentes[dec.fuente] += 1

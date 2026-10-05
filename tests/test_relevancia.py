@@ -60,3 +60,66 @@ def test_eans_demasiado_cortos_se_excluyen(ean):
 def test_sin_ean_no_excluye_por_eso():
     # El chequeo de EAN es adicional al de nombre, no obligatorio por sí solo.
     assert rel.es_relevante("Producto normal", None)
+
+
+# --- Lo que no es un alimento ---------------------------------------------
+
+@pytest.mark.parametrize("nombre", [
+    "shampoo", "Agua micelar", "Gel exfoliante facial micelar",
+    "fructis hair food coco reparación", "hair food manteca de cacao",
+    "Bálsamo hidratante labial frutas rojas", "Crema colorante capilar",
+    "Bath and body body lotion", "toallitas húmedas", "pañuelos papel",
+    "Desinfectante", "Detergente Ala concentrado", "Rexona Antibacterial",
+    "cigarrillos rubios", "SÉRUM RELLENADOR OJOS",
+    "jabón de glicerina", "esmalte para uñas", "protector solar",
+    "pasta dental", "papel higiénico",
+])
+def test_la_cosmetica_y_la_limpieza_se_excluyen(nombre):
+    assert rel.es_no_alimento(nombre)
+    assert not rel.es_relevante(nombre, EAN_OK)
+
+
+@pytest.mark.parametrize("nombre", [
+    # El caso que obligó a poner el borde de palabra a la derecha: sin él,
+    # "colonia" matchea dentro de "Colonial" y se lleva cuatro dulces de
+    # leche y un chocolate.
+    "Dulce de Leche Estilo Colonial",
+    "Chocolate colonial",
+    "Colonial Style Milk Caramel",
+    # Las tres palabras que salieron de la lista porque nombran comida: el
+    # salame tipo colonia, la miel en panal y una marca de aderezos. Juntas
+    # se llevaban 176 alimentos del catálogo de góndola.
+    "Salame tipo Colonia",
+    "Queso Colonia",
+    "Miel en panal",
+    "Galletitas Okebón Panal",
+    "Ketchup Dermaty",
+    # Palabras que son comida bastante más seguido que cosmética.
+    "Crema de leche La Serenísima",
+    "Leche entera",
+    "Manteca sin sal",
+    "Queso crema",
+    "Aceite de oliva extra virgen",
+    "Pasta de maní",
+    "Agua mineral sin gas",
+    "Sal fina",
+    "Leche de almendras",
+    "Yogur natural",
+    "Miel pura de abejas",
+    "Pan lactal",
+    "Manteca de cacao",
+    "Barra de cereal",
+])
+def test_ningun_alimento_se_confunde_con_un_no_alimento(nombre):
+    assert not rel.es_no_alimento(nombre), nombre
+    assert rel.es_relevante(nombre, EAN_OK)
+
+
+def test_sin_nombre_no_se_excluye_por_este_criterio():
+    assert not rel.es_no_alimento(None)
+    assert not rel.es_no_alimento("")
+
+
+def test_el_motivo_dice_por_que():
+    motivo = rel.motivo_exclusion("shampoo", EAN_OK)
+    assert motivo is not None and "no es un alimento" in motivo

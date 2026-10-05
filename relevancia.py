@@ -24,6 +24,7 @@ alfabetos latinos y perfectamente plausibles en una góndola argentina.
 from __future__ import annotations
 
 import re
+import unicodedata
 
 # Bloques Unicode que no se usan como alfabeto principal en el comercio
 # argentino. No incluye nada latino (con o sin acentos): español, portugués,
@@ -54,6 +55,92 @@ _NO_LATINO_RE = re.compile(
 # caja registradora real.
 _LARGOS_EAN_VALIDOS = {8, 12, 13, 14}
 
+# --- Lo que no es un alimento ----------------------------------------------
+#
+# OFF comparte el pool de códigos con Open Beauty Facts, así que un shampoo o
+# una crema de manos entran a la base igual que un yogur. `exclusiones.py`
+# saca a mano los que se fueron encontrando, pero eso no escala: la cosecha
+# grande de fichas multiplica el catálogo por diez y con él la cantidad de
+# cosmética colada.
+#
+# Hasta ahora esos productos quedaban en "Otros", donde molestaban poco. Desde
+# que el rubro se deduce también del nombre, molestan bastante más: "Agua
+# micelar" se iba a "Bebidas sin alcohol" y "hair food manteca de cacao" a
+# "Lácteos". Un cosmético disfrazado de alimento clasificado es peor que un
+# cosmético sin clasificar.
+#
+# El criterio se mantiene angosto, igual que el resto del módulo: solo
+# palabras que **nunca** nombran un alimento. Nada de "crema", "leche" o
+# "manteca" sueltas, que son comida bastante más seguido que cosmética.
+#
+# Los dos bordes de palabra no son decorativos: sin el de la derecha,
+# "colonia" matchea dentro de "Estilo **Colonial**" y se lleva puestos cuatro
+# dulces de leche y un chocolate.
+#
+# Y aun con los dos bordes puestos, tres palabras tuvieron que salir de la
+# lista porque nombran comida bastante seguido:
+#
+#   colonia   → "Salame tipo Colonia", "Queso Colonia", "Chorizo Colonia
+#               Alemana", "Miel La Colonia". El tipo de embutido se llama así.
+#   panal     → "Galletitas Okebón Panal", "Miel en panal".
+#   derm...   → "Ketchup Dermaty", "Salsa Golf Dermaty".
+#
+# Juntas se llevaban **176 alimentos reales** del catálogo de góndola. El
+# perfume y el pañal se detectan igual: por "agua de colonia" y por el plural
+# "pañales", que no chocan con nada.
+#
+# Esto se descubrió corriendo el filtro contra las 262.035 filas de
+# `vtex_catalogo` —la población que trae la cosecha— y no contra los 7.381
+# productos ya publicados, donde no aparecía ninguno de los tres. Medir contra
+# el catálogo que se está por importar, no contra el que ya se tiene.
+_NO_ALIMENTO_RE = re.compile(
+    r"\b(?:"
+    # Higiene y cuidado personal
+    r"shampoo|shampu|acondicionador|anticaspa|capilar|hair|tintura|"
+    r"jabon|jabones|desodorante|antitranspirante|perfume|fragancia|"
+    r"talco|afeitar|afeitadora|depilatoria|preservativo|"
+    # Cosmética
+    r"maquillaje|labial|rimel|rubor|delineador|micelar|exfoliante|serum|"
+    r"facial|corporal|bronceador|esmalte|"
+    # Higiene del hogar y descartables
+    r"panales|tampon|lavandina|detergente|lavavajilla|limpiavidrios|"
+    r"suavizante|limpiador|desinfectante|insecticida|repelente|quitamanchas|"
+    r"lustramuebles|"
+    # Salud
+    r"dentifrico|ibuprofeno|paracetamol|aspirina|antibacterial|"
+    # Otros rubros que no son alimento
+    r"cigarrillo|cigarrillos|tabaco|pilas|encendedor"
+    r")\b",
+    re.IGNORECASE,
+)
+
+# Frases de dos palabras donde el cosmético se delata por el conjunto: cada
+# palabra sola es ambigua o es comida ("leche corporal", "pasta dental").
+_NO_ALIMENTO_FRASES = (
+    "toallitas humedas", "toallita humeda", "papel higienico",
+    "rollo de cocina", "panuelos de papel", "panuelos papel",
+    "pasta dental", "cepillo de dientes", "enjuague bucal",
+    "body lotion", "gel de ducha", "alcohol en gel", "crema de manos",
+    "crema para peinar", "leche corporal", "leche de limpieza",
+    "protector solar", "protector diario", "agua micelar",
+    "agua de colonia", "panal descartable", "crema dermatologica",
+)
+
+
+def _sin_tildes(texto: str) -> str:
+    descompuesto = unicodedata.normalize("NFKD", texto)
+    return "".join(c for c in descompuesto if not unicodedata.combining(c))
+
+
+def es_no_alimento(nombre: str | None) -> bool:
+    """True si el nombre dice, sin ambigüedad, que esto no se come."""
+    if not nombre:
+        return False
+    texto = _sin_tildes(str(nombre)).lower()
+    if _NO_ALIMENTO_RE.search(texto):
+        return True
+    return any(frase in texto for frase in _NO_ALIMENTO_FRASES)
+
 
 def motivo_exclusion(nombre: str | None, ean: str | None) -> str | None:
     """None si el producto es relevante; si no, una razón legible."""
@@ -62,6 +149,8 @@ def motivo_exclusion(nombre: str | None, ean: str | None) -> str | None:
                 "argentino (posible país mal etiquetado en origen)")
     if ean and len(ean) not in _LARGOS_EAN_VALIDOS:
         return f"el código '{ean}' no tiene una longitud de EAN/UPC real"
+    if es_no_alimento(nombre):
+        return "el nombre corresponde a un producto que no es un alimento"
     return None
 
 

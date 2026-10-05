@@ -81,7 +81,9 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data
+          # COSECHA/ es la copia versionada de las fichas pedidas: sin esto,
+          # lo cosechado viviría solo en el cache, que vence.
+          git add web/data COSECHA
           if git diff --cached --quiet; then
             echo "El catálogo no cambió: no hay nada que publicar."
           else

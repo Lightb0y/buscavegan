@@ -39,6 +39,7 @@ import config
 import db
 import exclusiones
 import ingest_anmat
+import marcas
 import relevancia
 import revision
 
@@ -305,16 +306,88 @@ def _propagar_duplicados(conn) -> int:
     return actualizados
 
 
+def _datos_de_gondola(conn) -> tuple[dict[str, str], dict[str, str]]:
+    """Marca y rubro de góndola por EAN, sacados del catálogo de las cadenas.
+
+    Devuelve dos índices:
+
+    - **marca**: la góndola la publica para el 100% de sus productos, contra
+      el 83% de OFF. Es lo que completa la marca de los 1.258 productos que no
+      la tienen (ver `marcas`).
+    - **góndola**: el rubro del supermercado, para los productos cuyo nombre
+      no alcanza a decir qué son. Un EAN puede estar en varias cadenas y cada
+      una lo pone en una góndola distinta, así que se guarda la **primera que
+      designa un rubro sin ambigüedad**: si Disco lo tiene en "Lácteos" y
+      Carrefour en "Almacén", vale el de Disco. Ver `categorias`.
+    """
+    marca: dict[str, str] = {}
+    gondola: dict[str, str] = {}
+    for r in conn.execute(
+            "SELECT ean, marca, categoria FROM vtex_catalogo"
+            " WHERE ean IS NOT NULL"):
+        ean = r["ean"]
+        if ean not in marca and (r["marca"] or "").strip():
+            marca[ean] = r["marca"].strip()
+        if ean not in gondola and categorias.por_gondola(r["categoria"]):
+            gondola[ean] = r["categoria"]
+    return marca, gondola
+
+
+def _mapa_de_marcas(conn) -> dict[str, str]:
+    """{grafía cruda -> grafía canónica} construido con el catálogo entero.
+
+    Se arma una sola vez por corrida y no producto por producto: elegir la
+    grafía buena es una decisión sobre **todas** las variantes de una marca a
+    la vez, y hace falta haberlas contado a todas antes de decidir.
+    """
+    de_off = [(r["marca"], r["n"]) for r in conn.execute(
+        "SELECT marca, COUNT(*) AS n FROM catalogo"
+        " WHERE marca IS NOT NULL AND TRIM(marca) <> '' GROUP BY marca")]
+    de_gondola = [(r["marca"], r["n"]) for r in conn.execute(
+        "SELECT marca, COUNT(*) AS n FROM vtex_catalogo"
+        " WHERE marca IS NOT NULL AND TRIM(marca) <> '' GROUP BY marca")]
+    return marcas.construir_mapa(de_off, de_gondola)
+
+
 def build(conn, verbose: bool = True) -> dict:
     db.init_db(conn)
     anmat_idx = ingest_anmat.indexar(ingest_anmat.cargar(conn))
     if verbose and not anmat_idx:
         print("Aviso: el registro de ANMAT esta vacio. Corre ingest_anmat.py "
               "para habilitar la Capa 0.")
+    # Dos orígenes, un solo recorrido.
+    #
+    # El primero es el de siempre: el catálogo argentino de OFF.
+    #
+    # El segundo es lo que trae la cosecha grande de fichas. Las cadenas
+    # publican 96.247 códigos que OFF nunca vio, y hasta ahora ninguno podía
+    # llegar al sitio aunque se le hubiera leído la etiqueta entera: `build`
+    # solo miraba `catalogo`.
+    #
+    # Entran **únicamente los que la ficha respalda** —lista de ingredientes o
+    # sello de certificación—, nunca por el solo hecho de estar en una góndola.
+    # Un producto del que solo se sabe el nombre se clasificaría adivinando y
+    # terminaría en `revisar` o en `heuristica`: sumar decenas de miles así
+    # haría más grande el catálogo y peor el sitio, que es justo lo contrario
+    # de lo que persigue la cosecha. Es el mismo criterio que ya aplica
+    # `relevancia.es_ficha_fantasma`: sin evidencia, no entra.
+    #
+    # El nombre y la marca se toman de la misma cadena que dio la ficha, para
+    # que la etiqueta leída y el nombre mostrado sean del mismo producto.
     filas = conn.execute(
         "SELECT c.ean, c.nombre, c.marca, c.precio_ref, o.payload"
         " FROM catalogo c LEFT JOIN off_cache o"
         " ON o.ean = c.ean AND o.found = 1"
+        " UNION ALL"
+        " SELECT v.ean, v.nombre, v.marca, v.precio AS precio_ref,"
+        "        NULL AS payload"
+        " FROM vtex_ficha f"
+        " JOIN vtex_catalogo v ON v.ean = f.ean AND v.cadena = f.cadena"
+        " LEFT JOIN catalogo c ON c.ean = f.ean"
+        " WHERE c.ean IS NULL"
+        "   AND v.nombre IS NOT NULL AND TRIM(v.nombre) <> ''"
+        "   AND (COALESCE(f.ingredientes, '') <> ''"
+        "        OR COALESCE(f.sellos, '') <> '')"
     ).fetchall()
 
     # Fichas de los supermercados: la lista de ingredientes de miles de
@@ -325,6 +398,9 @@ def build(conn, verbose: bool = True) -> dict:
         for r in conn.execute(
             "SELECT ean, cadena, ingredientes, trazas, sellos FROM vtex_ficha")
     }
+
+    marca_gondola, gondola_rubro = _datos_de_gondola(conn)
+    mapa_marcas = _mapa_de_marcas(conn)
 
     conn.execute("DELETE FROM productos")
     conn.execute("DELETE FROM revision_pendiente")
@@ -339,14 +415,28 @@ def build(conn, verbose: bool = True) -> dict:
         if motivo_excl:
             # No se borra de catalogo/off_cache: solo no llega a la tabla
             # final ni a la búsqueda. Si el criterio cambia, el dato sigue ahí.
-            clave = ("alfabeto" if "alfabeto" in motivo_excl else "ean_invalido")
+            if "alfabeto" in motivo_excl:
+                clave = "alfabeto"
+            elif "no es un alimento" in motivo_excl:
+                clave = "no_alimento"
+            else:
+                clave = "ean_invalido"
             excluidos[clave] += 1
             continue
 
         off = json.loads(f["payload"]) if f["payload"] else {}
         ficha = fichas.get(f["ean"], {})
-        categoria = categorias.normalizar(off.get("categories_tags"))
-        d = decidir(f["nombre"], f["marca"], categoria, off, anmat_idx, ficha)
+
+        # La marca, unificada. Si OFF no la trae, la pone la góndola, que la
+        # publica para todos sus productos; después se normaliza igual que
+        # cualquier otra, porque las cadenas escriben en mayúsculas.
+        marca = marcas.normalizar(
+            f["marca"] or marca_gondola.get(f["ean"]), mapa_marcas)
+
+        categoria = categorias.normalizar(
+            off.get("categories_tags"), f["nombre"],
+            gondola_rubro.get(f["ean"]))
+        d = decidir(f["nombre"], marca, categoria, off, anmat_idx, ficha)
 
         # La app muestra los ingredientes: si OFF no los tiene, se guardan los
         # del supermercado. La procedencia NO se mete acá adentro: el campo se
@@ -360,7 +450,7 @@ def build(conn, verbose: bool = True) -> dict:
             " estado, fuente_decision, confianza, ingredients_text, imagen_url,"
             " precio_ref, actualizado, motivo)"
             " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-            (f["ean"], f["nombre"], f["marca"], categoria, d.estado, d.fuente,
+            (f["ean"], f["nombre"], marca, categoria, d.estado, d.fuente,
              d.confianza, ingredientes,
              off.get("image_front_small_url"), f["precio_ref"], ahora, d.motivo),
         )
@@ -372,7 +462,7 @@ def build(conn, verbose: bool = True) -> dict:
                 "INSERT OR REPLACE INTO revision_pendiente"
                 " (ean, nombre, marca, motivo, confianza, creado)"
                 " VALUES (?,?,?,?,?,?)",
-                (f["ean"], f["nombre"], f["marca"], d.motivo, d.confianza, ahora),
+                (f["ean"], f["nombre"], marca, d.motivo, d.confianza, ahora),
             )
 
     conn.commit()

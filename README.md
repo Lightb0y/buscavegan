@@ -129,9 +129,99 @@ Carrefour y Día no exponen estos campos: se verificó producto por producto.
 recosechar el catálogo entero) y es reanudable: guarda también la ficha vacía,
 así una corrida cortada no vuelve a preguntar lo mismo.
 
+Esa memoria de "ya pregunté" distingue **la cadena contestó que no lo tiene**
+de **no se pudo preguntar**. Solo lo primero se guarda. Anotar "no tiene ficha"
+porque se cortó la red sería escribir una conclusión que nadie sacó, y en una
+corrida de horas contra 85.000 productos un corte de un minuto dejaría cientos
+marcados así para siempre, sin forma de distinguirlos después. Si la cadena
+deja de responder 25 veces seguidas, la corrida se corta sola: lo cosechado
+queda y la próxima sigue donde esta terminó.
+
 El sello vegano se acepta como `apto` **solo si la lista de ingredientes de esa
 misma ficha no lo contradice**. Si se contradicen, alguien se equivocó y el
 producto va a `revisar`: la regla de seguridad pesa más que una etiqueta.
+
+**Un producto que solo existe en la góndola** —de los 96.247 códigos que las
+cadenas publican y OFF nunca vio— entra al catálogo si, y solo si, su ficha lo
+respalda con una lista de ingredientes o un sello. Estar en una góndola no
+alcanza: de un producto del que solo se sabe el nombre, el veredicto sería una
+adivinanza, y sumar decenas de miles de adivinanzas haría el catálogo más
+grande y el sitio peor.
+
+Cuánto rinde depende casi por completo de **quién imprimió el código**. Medido
+sobre las primeras 27.206 fichas de la cosecha:
+
+| Código | Consultadas | Con ingredientes |
+|---|---|---|
+| De fabricante (prefijo 7, casi todos 779 = Argentina) | 8.931 | **37,1%** |
+| De circulación restringida (prefijo 2) | 18.366 | **0,1%** |
+
+Los de prefijo 2 los imprime el propio supermercado para lo que pesa o
+fracciona —fiambre al corte, verdura suelta—: no tienen fabricante, y casi
+nunca ficha. La cola los pedía primero solo porque estaba ordenada por EAN, y se
+llevaron dos tercios de las consultas. Ahora van al final. (Dos estimaciones
+anteriores, 72% y 18,4%, estaban sacadas de poblaciones que no eran la cola:
+la primera, de productos que OFF ya conocía; la segunda, de una muestra que
+mezclaba los dos tipos de código.)
+
+**Lo cosechado se versiona** en [COSECHA/fichas.ndjson](COSECHA/fichas.ndjson),
+vacías incluidas. La base es derivada —en CI vive en un cache que vence— y la
+cosecha completa son horas de consultas: si viviera solo ahí, perderla sería
+rehacerla, y lo cosechado en una máquina nunca llegaría al refresco de CI, que
+es el que publica el sitio. Cada corrida de `ingest_fichas.py` o de
+`refresh.py` arranca cargando ese archivo y termina reescribiéndolo, y el
+workflow lo commitea junto con los datos del sitio.
+
+## Marcas y categorías
+
+Dos arreglos que no cambian ningún veredicto pero sí lo que se encuentra y lo
+que se puede explorar.
+
+**Marcas** ([marcas.py](marcas.py)). El campo `brands` de OFF lo carga la
+comunidad a mano: 399 marcas se escribían de más de una forma y entre todas se
+llevaban 3.751 productos, la mitad del catálogo. "La Serenísima" tenía diez
+grafías, incluida una donde alguien guardó el `repr` de una lista de Python.
+Quien buscaba la marca con tilde veía la mitad de los resultados.
+
+Las variantes se agrupan ignorando mayúsculas, tildes y puntuación, y se elige
+una grafía para mostrar: ni todo mayúsculas ni todo minúsculas (eso además
+preserva "NotCo" y "SanCor", que una regla de capitalizar cada palabra
+rompería), y con tilde antes que sin tilde cuando la acentuada tiene respaldo
+real — un solo producto con "Alícante" contra 16 con "Alicante" es una errata,
+no la grafía correcta.
+
+El voto se hace sobre las grafías de OFF y no sobre las del supermercado: las
+cadenas publican casi todo en mayúsculas (3.015 "ARCOR") y ganarían por volumen
+sin aportar nada. Lo que sí aporta la góndola es la marca de los productos que
+no la tenían: la publica para el 100% de lo suyo, contra el 83% de OFF.
+
+Resultado: **2.461 marcas → 2.043**, y los productos sin marca **de 1.258 a
+396**.
+
+**Categorías** ([categorias.py](categorias.py)). El 40% del catálogo caía en
+"Otros" — la categoría más grande del sitio era la que no dice nada. El rubro
+salía de una sola fuente, los `categories_tags` de OFF, que para ese 40% están
+vacíos. Ahora sale de tres, en orden de precisión:
+
+1. Los tags de OFF, que es una taxonomía curada.
+2. **El nombre del producto**, que es lo que rescata la mayoría.
+3. El rubro de góndola del supermercado, como último recurso.
+
+El orden no es el obvio: **el nombre le gana a la góndola**. 110.703 productos
+están en "Almacén", que es el cajón de sastre de las cinco cadenas y no
+significa nada, mientras que el nombre dice "Galletitas 9 de Oro" o "Mayonesa"
+y con eso alcanza. Solo se mapean las góndolas que designan un rubro sin
+ambigüedad: "Bebidas" no distingue un vino de un agua y queda afuera.
+
+Resultado: **"Otros" pasó de 40,1% a 11,7%**.
+
+Dos reglas que la medición contra el catálogo real obligó a escribir:
+
+- **El nombre de una fruta casi nunca es el producto, es el sabor.** La primera
+  versión mandaba "Gatorade manzana" y "yogur frutilla" a "Frutas y verduras".
+- **Ningún plant-based puede caer en un rubro de origen animal.** Una milanesa
+  de soja no va a "Carnes y fiambres" ni una leche de almendras a "Lácteos":
+  en este sitio ese error se ve de lejos.
 
 ## Calidad de los datos: filtrado y deduplicación
 
@@ -164,6 +254,23 @@ Tres correcciones que corren dentro de `build_db.py`, no como pasos aparte:
   no era falta de datos, era que no correspondían a este catálogo. Se
   excluyen de la búsqueda pero no se borran de la base interna: si el
   criterio cambia, el dato sigue disponible.
+- **Lo que no es un alimento**
+  ([relevancia.es_no_alimento](relevancia.py)): OFF comparte el pool de códigos
+  con Open Beauty Facts, así que un shampoo entra a la base igual que un yogur.
+  Mientras todo eso caía en "Otros" molestaba poco; desde que el rubro se
+  deduce también del nombre, "Agua micelar" se iba a "Bebidas sin alcohol" y un
+  bálsamo labial figuraba como `apto`. Un cosmético disfrazado de alimento
+  clasificado es peor que un cosmético sin clasificar.
+
+  El criterio es angosto a propósito: solo palabras que **nunca** nombran un
+  alimento. Nada de "crema", "leche" o "manteca" sueltas, que son comida
+  bastante más seguido que cosmética; y tampoco marcas, porque Dove también es
+  una marca de chocolate. Corriendo el filtro contra el catálogo entero antes
+  de activarlo apareció el error que ninguna lectura del código iba a mostrar:
+  "colonia" matcheaba dentro de "Dulce de Leche Estilo **Colonial**" y se
+  llevaba puestos cuatro dulces de leche y un chocolate. Con los dos bordes de
+  palabra puestos, el filtro saca **70 fichas y ningún alimento**.
+
 - **Duplicados por EAN** ([build_db.\_propagar_duplicados](build_db.py)): OFF
   no fuerza un EAN único por producto, así que el mismo producto puede
   aparecer varias veces con códigos distintos — a veces con los ingredientes
@@ -253,8 +360,15 @@ python ingest_anmat.py
 python ingest_vtex.py
 
 # 3b. Ficha con la lista de ingredientes que publican Vea, Jumbo y Disco.
-#     Es reanudable: se puede cortar y seguir después.
+#     Es la cosecha grande: ~85.000 fichas, ~12 h a 0,49 s por consulta.
+#     Es reanudable de verdad — se puede cortar en cualquier momento y seguir
+#     después, y se corta sola si la cadena deja de responder. Arranca
+#     cargando COSECHA/fichas.ndjson y termina reescribiéndolo: commitealo.
 python ingest_fichas.py
+#     Para probar sin comprometerse a la corrida entera:
+python ingest_fichas.py --limite 200
+#     Para cargar en una base nueva lo ya cosechado, sin consultar a nadie:
+python ingest_fichas.py --solo-sincronizar
 
 # 4. Clasificar (Capas 0 a 2) y armar la base final con su índice de búsqueda
 python build_db.py
