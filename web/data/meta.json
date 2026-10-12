@@ -1,140 +1,150 @@
 {
-  "actualizado": "2026-10-05",
-  "total": 7133,
+  "actualizado": "2026-10-12",
+  "total": 7150,
   "por_estado": {
-    "apto": 2392,
-    "vegetariano": 1461,
-    "no_apto": 1794,
-    "revisar": 1486
+    "apto": 2628,
+    "vegetariano": 1558,
+    "no_apto": 1828,
+    "revisar": 1136
   },
   "por_fuente": {
-    "ingredientes": 2501,
-    "sin_datos": 1475,
-    "heuristica": 1052,
-    "ingredientes_super": 850,
-    "sello_super": 700,
-    "ml": 182,
+    "ingredientes": 2387,
+    "ingredientes_super": 1162,
+    "sin_datos": 1112,
+    "sello_super": 1076,
+    "heuristica": 906,
+    "ml": 114,
     "off_label": 108,
-    "off_analysis": 102,
-    "certificacion_oficial": 87,
-    "duplicado": 62,
+    "certificacion_oficial": 103,
+    "duplicado": 86,
+    "off_analysis": 82,
     "curaduria_humana": 14
   },
   "categorias": [
     {
       "nombre": "Aceites y grasas",
       "slug": "aceites-y-grasas",
-      "total": 3
+      "total": 38
+    },
+    {
+      "nombre": "Azúcar y endulzantes",
+      "slug": "azucar-y-endulzantes",
+      "total": 62
     },
     {
       "nombre": "Bebidas alcohólicas",
       "slug": "bebidas-alcoholicas",
-      "total": 119
+      "total": 130
     },
     {
       "nombre": "Bebidas sin alcohol",
       "slug": "bebidas-sin-alcohol",
-      "total": 965
+      "total": 1054
     },
     {
       "nombre": "Bebidas vegetales",
       "slug": "bebidas-vegetales",
-      "total": 265
+      "total": 271
     },
     {
       "nombre": "Carnes y fiambres",
       "slug": "carnes-y-fiambres",
-      "total": 136
+      "total": 240
     },
     {
       "nombre": "Cereales, pastas y legumbres",
       "slug": "cereales-pastas-y-legumbres",
-      "total": 11
+      "total": 330
     },
     {
       "nombre": "Comidas preparadas",
       "slug": "comidas-preparadas",
-      "total": 34
+      "total": 108
     },
     {
       "nombre": "Congelados",
       "slug": "congelados",
-      "total": 9
+      "total": 61
+    },
+    {
+      "nombre": "Conservas",
+      "slug": "conservas",
+      "total": 22
     },
     {
       "nombre": "Frutas y verduras",
       "slug": "frutas-y-verduras",
-      "total": 13
+      "total": 65
     },
     {
       "nombre": "Galletitas y bizcochos",
       "slug": "galletitas-y-bizcochos",
-      "total": 598
+      "total": 821
     },
     {
       "nombre": "Golosinas y chocolates",
       "slug": "golosinas-y-chocolates",
-      "total": 501
+      "total": 704
     },
     {
       "nombre": "Huevos",
       "slug": "huevos",
-      "total": 13
+      "total": 18
     },
     {
       "nombre": "Infusiones",
       "slug": "infusiones",
-      "total": 151
+      "total": 205
     },
     {
       "nombre": "Lácteos",
       "slug": "lacteos",
-      "total": 633
+      "total": 986
     },
     {
       "nombre": "Otros",
       "slug": "otros",
-      "total": 2930
+      "total": 794
     },
     {
       "nombre": "Panificados",
       "slug": "panificados",
-      "total": 147
+      "total": 249
     },
     {
       "nombre": "Pescados y mariscos",
       "slug": "pescados-y-mariscos",
-      "total": 54
+      "total": 90
     },
     {
       "nombre": "Postres y helados",
       "slug": "postres-y-helados",
-      "total": 55
+      "total": 95
     },
     {
       "nombre": "Salsas y condimentos",
       "slug": "salsas-y-condimentos",
-      "total": 198
+      "total": 331
     },
     {
       "nombre": "Snacks salados",
       "slug": "snacks-salados",
-      "total": 166
+      "total": 273
     },
     {
       "nombre": "Suplementos y dietéticos",
       "slug": "suplementos-y-dieteticos",
-      "total": 50
+      "total": 56
     },
     {
       "nombre": "Untables y mermeladas",
       "slug": "untables-y-mermeladas",
-      "total": 82
+      "total": 147
     }
   ],
-  "con_evidencia": 4410,
-  "con_ingredientes": 2465,
-  "confirmados": 5546,
+  "con_evidencia": 5004,
+  "con_ingredientes": 3490,
+  "confirmados": 5578,
   "fuente_legible": {
     "certificacion_oficial": "Certificado en el registro oficial de ANMAT",
     "off_label": "Declarado vegano por el fabricante",
