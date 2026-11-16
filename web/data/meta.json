@@ -1,17 +1,17 @@
 {
-  "actualizado": "2026-11-09",
-  "total": 8971,
+  "actualizado": "2026-11-16",
+  "total": 9067,
   "por_estado": {
-    "apto": 3386,
-    "vegetariano": 1965,
-    "no_apto": 2190,
-    "revisar": 1430
+    "apto": 3449,
+    "vegetariano": 1990,
+    "no_apto": 2193,
+    "revisar": 1435
   },
   "por_fuente": {
     "ingredientes": 2595,
-    "ingredientes_super": 1938,
-    "sello_super": 1429,
-    "sin_datos": 1399,
+    "ingredientes_super": 1988,
+    "sello_super": 1470,
+    "sin_datos": 1404,
     "heuristica": 1032,
     "ml": 162,
     "certificacion_oficial": 121,
@@ -24,7 +24,7 @@
     {
       "nombre": "Aceites y grasas",
       "slug": "aceites-y-grasas",
-      "total": 53
+      "total": 55
     },
     {
       "nombre": "Azúcar y endulzantes",
@@ -34,12 +34,12 @@
     {
       "nombre": "Bebidas alcohólicas",
       "slug": "bebidas-alcoholicas",
-      "total": 459
+      "total": 482
     },
     {
       "nombre": "Bebidas sin alcohol",
       "slug": "bebidas-sin-alcohol",
-      "total": 1204
+      "total": 1205
     },
     {
       "nombre": "Bebidas vegetales",
@@ -49,17 +49,17 @@
     {
       "nombre": "Carnes y fiambres",
       "slug": "carnes-y-fiambres",
-      "total": 292
+      "total": 294
     },
     {
       "nombre": "Cereales, pastas y legumbres",
       "slug": "cereales-pastas-y-legumbres",
-      "total": 460
+      "total": 461
     },
     {
       "nombre": "Comidas preparadas",
       "slug": "comidas-preparadas",
-      "total": 148
+      "total": 149
     },
     {
       "nombre": "Congelados",
@@ -69,7 +69,7 @@
     {
       "nombre": "Conservas",
       "slug": "conservas",
-      "total": 38
+      "total": 51
     },
     {
       "nombre": "Frutas y verduras",
@@ -84,27 +84,27 @@
     {
       "nombre": "Golosinas y chocolates",
       "slug": "golosinas-y-chocolates",
-      "total": 871
+      "total": 874
     },
     {
       "nombre": "Huevos",
       "slug": "huevos",
-      "total": 29
+      "total": 41
     },
     {
       "nombre": "Infusiones",
       "slug": "infusiones",
-      "total": 280
+      "total": 281
     },
     {
       "nombre": "Lácteos",
       "slug": "lacteos",
-      "total": 1272
+      "total": 1276
     },
     {
       "nombre": "Otros",
       "slug": "otros",
-      "total": 963
+      "total": 967
     },
     {
       "nombre": "Panificados",
@@ -124,7 +124,7 @@
     {
       "nombre": "Salsas y condimentos",
       "slug": "salsas-y-condimentos",
-      "total": 377
+      "total": 406
     },
     {
       "nombre": "Snacks salados",
@@ -142,9 +142,9 @@
       "total": 168
     }
   ],
-  "con_evidencia": 6364,
-  "con_ingredientes": 5116,
-  "confirmados": 6710,
+  "con_evidencia": 6455,
+  "con_ingredientes": 5212,
+  "confirmados": 6806,
   "fuente_legible": {
     "certificacion_oficial": "Certificado en el registro oficial de ANMAT",
     "off_label": "Declarado vegano por el fabricante",
